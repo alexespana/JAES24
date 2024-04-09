@@ -12,7 +12,7 @@ ENV FLASK_APP=app.py
 ENV FLASK_RUN_HOST=0.0.0.0
 
 # Install necessary dependencies
-RUN apk add --no-cache gcc musl-dev linux-headers
+RUN apk add --no-cache gcc g++ musl-dev linux-headers
 
 # Copy the requirements.txt file and install the dependencies
 COPY requirements.txt requirements.txt
