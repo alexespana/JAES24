@@ -3,11 +3,11 @@ This file contains utility functions that are used in the backend.
 
 Functions:
 is_repository_url(url: str) -> bool
-is_a_known_repository(url: str) -> bool
+get_owner(url: str) -> str
+get_repo_name(url: str) -> str
+replace_fields(url: str, owner: str, repo_name: str, pull_number: str, run_id: str) -> str
 """
 import re
-import pandas as pd
-from constants import STATIC_FOLDER, REPOSITORIES_CSV_FILE
 
 def is_repository_url(url):
     """
@@ -52,6 +52,6 @@ def get_repo_name(url):
     repo_name = url.split('/')[-1]
     return repo_name
 
-def replace_fields(url, owner=None, repo_name=None, pull_number=None, run_id=None):
+def replace_fields(url, owner='', repo_name='', pull_number='', run_id=''):
     url = url.replace('OWNER', owner).replace('REPO', repo_name).replace('PULL_NUMBER', pull_number).replace('RUN_ID', run_id)
     return url

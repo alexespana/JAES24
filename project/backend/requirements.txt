@@ -1,4 +1,4 @@
 flask
-gigawork
 pandas
 scikit-learn
+requests

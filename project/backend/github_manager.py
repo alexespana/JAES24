@@ -1,15 +1,14 @@
-from github import Github
-from utils import replace_fields
-from constants import *
-import requests
 import os
+import requests
+from utils import replace_fields
+from constants import GET_PRS, GET_PR, GET_PR_COMMITS, GET_PR_FILES, GET_BUILDS, GET_BUILD
 
 class GithubManager:
 
     def __init__(self):
         self.headers = {
             "Accept": "application/vnd.github+json",
-            "Authorization": f"Bearer {os.getenv("GITHUB_TOKEN")}",
+            "Authorization": f"Bearer {os.getenv('GITHUB_TOKEN')}",
             "X-GitHub-Api-Version": "2022-11-28"
         }   
 
