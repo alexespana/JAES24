@@ -20,3 +20,5 @@ GET_PR_FILES = 'https://api.github.com/repos/OWNER/REPO/pulls/PULL_NUMBER/files'
 GET_BUILDS = 'https://api.github.com/repos/OWNER/REPO/actions/runs'
 # Gets a specific workflow run
 GET_BUILD = 'https://api.github.com/repos/OWNER/REPO/actions/runs/RUN_ID'
+# Converter to obtain the time frequency in hours
+HOUR_CONVERTER = 3600

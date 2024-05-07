@@ -21,7 +21,7 @@ class GithubManager:
             return None
 
     def get_pull_request(self, owner, repo_name, pull_request_number):
-        url = replace_fields(GET_PR, owner=owner, repo_name=repo_name, pull_number=pull_request_number)
+        url = replace_fields(GET_PR, owner=owner, repo_name=repo_name, pull_number=str(pull_request_number))
         response = requests.get(url, headers=self.headers)
         if response.status_code == 200:
             return response.json()
@@ -29,7 +29,7 @@ class GithubManager:
             return None
 
     def get_pull_request_commits(self, owner, repo_name, pull_request_number):
-        url = replace_fields(GET_PR_COMMITS, owner=owner, repo_name=repo_name, pull_number=pull_request_number)
+        url = replace_fields(GET_PR_COMMITS, owner=owner, repo_name=repo_name, pull_number=str(pull_request_number))
         response = requests.get(url, headers=self.headers)
         if response.status_code == 200:
             return response.json()
@@ -37,7 +37,7 @@ class GithubManager:
             return None
 
     def get_pull_request_files(self, owner, repo_name, pull_request_number):
-        url = replace_fields(GET_PR_FILES, owner=owner, repo_name=repo_name, pull_number=pull_request_number)
+        url = replace_fields(GET_PR_FILES, owner=owner, repo_name=repo_name, pull_number=str(pull_request_number))
         response = requests.get(url, headers=self.headers)
         if response.status_code == 200:
             return response.json()
@@ -53,7 +53,7 @@ class GithubManager:
             return None
         
     def get_build(self, owner, repo_name, run_id):
-        url = replace_fields(GET_BUILD, owner=owner, repo_name=repo_name, run_id=run_id)
+        url = replace_fields(GET_BUILD, owner=owner, repo_name=repo_name, run_id=str(run_id))
         response = requests.get(url, headers=self.headers)
         if response.status_code == 200:
             return response.json()

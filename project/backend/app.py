@@ -4,6 +4,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeClassifier
 from utils import get_owner, get_repo_name, is_repository_url
 from github_manager import GithubManager
+from features_manager import get_time_frequency
 
 app = Flask(__name__)
 
@@ -51,8 +52,8 @@ def make_prediction():
 
         return('Repository is known')
 
-@app.route('/get_prs', methods=['GET'])
-def get_pull_requests():
+@app.route('/test_functions', methods=['GET'])
+def test_functions():
     if request.method == 'GET':
         repository_url = request.form['repository_url']
 
@@ -62,8 +63,8 @@ def get_pull_requests():
 
             # Make the request
             github_manager = GithubManager()
-            pull_requests = github_manager.get_pull_requests(owner, repo_name)
+            builds = github_manager.get_builds(owner, repo_name)
 
-            return pull_requests
+            return str(get_time_frequency(8946614031, builds))
         else:
             return 'Invalid GitHub URL'
