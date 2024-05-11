@@ -6,8 +6,37 @@ train the model and make predictions later on.
 import datetime
 from constants import HOUR_CONVERTER
 
-def get_performance_short(builds):
-    pass
+def get_performance_short(run_id, builds):
+    """
+    This function calculates the performance of a build by counting the number
+    of successful builds after the target build.
+
+    Args:
+    run_id (int): The run_id of the build to search for.
+    builds (dict): The dictionary containing the builds metadata.
+
+    Returns:
+    float: The performance of the build in percentage.
+    """
+    threshold = 5
+    successful_builds = 0
+    found_target_build = False
+    builds_after_target = []
+
+    for run in builds["workflow_runs"]:
+        if found_target_build:
+            builds_after_target.append(run)
+            if len(builds_after_target) <= threshold:
+                if run["conclusion"] == "success":
+                    successful_builds += 1
+            else:
+                break
+
+        if run["id"] == run_id:
+            found_target_build = True
+
+
+    return (successful_builds / min(len(builds_after_target), threshold)) * 100 
 
 def get_performance_long(builds):
     pass
