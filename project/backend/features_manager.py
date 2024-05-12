@@ -66,6 +66,16 @@ def get_performance_long(run_id, builds):
     return (successful_builds / max(builds_after_target, 1)) * 100 
 
 def get_time_frequency(run_id, builds):
+    """
+    Calculate the time frequency between the target build and the previous build.
+
+    Args:
+    run_id (int): The run_id of the build to search for.
+    builds (dict): The dictionary containing the builds metadata.
+
+    Returns:
+    float: The time frequency between the target build and the previous build (hours).
+    """
     previous_build_search = False
     created_target_build = None
     created_previous_build = None
@@ -128,12 +138,30 @@ def get_failure_distance(run_id, builds):
 
 
 def get_weekday(build):
+    """
+    Calculate the weekday of the build.
+
+    Args:
+    build (dict): The dictionary containing the build metadata.
+
+    Returns:
+    int: The weekday of the build [0,6].
+    """
     created_at = build['created_at']
     date = datetime.datetime.strptime(created_at, "%Y-%m-%dT%H:%M:%SZ")
 
     return date.weekday()
 
 def get_hour(build):
+    """
+    Calculate the hour of the build.
+
+    Args:
+    build (dict): The dictionary containing the build metadata.
+
+    Returns:
+    int: The hour of the build [0,23].
+    """
     created_at = build['created_at']
     date = datetime.datetime.strptime(created_at, "%Y-%m-%dT%H:%M:%SZ")
 
