@@ -38,8 +38,32 @@ def get_performance_short(run_id, builds):
 
     return (successful_builds / min(len(builds_after_target), threshold)) * 100 
 
-def get_performance_long(builds):
-    pass
+def get_performance_long(run_id, builds):
+    """
+    Calculate the performance long term of a repository by counting the number
+    of successful builds after the target build.
+
+    Args:
+    run_id (int): The run_id of the build to search for.
+    builds (dict): The dictionary containing the builds metadata.
+
+    Returns:
+    float: The performance of the build in percentage.
+    """
+    successful_builds = 0
+    found_target_build = False
+    builds_after_target = 0
+
+    for run in builds["workflow_runs"]:
+        if found_target_build:
+            builds_after_target += 1
+            if run["conclusion"] == "success":
+                successful_builds += 1
+           
+        if run["id"] == run_id:
+            found_target_build = True
+
+    return (successful_builds / max(builds_after_target, 1)) * 100 
 
 def get_time_frequency(run_id, builds):
     previous_build_search = False
