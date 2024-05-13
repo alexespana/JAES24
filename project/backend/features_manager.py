@@ -5,6 +5,8 @@ train the model and make predictions later on.
 """
 import datetime
 from constants import HOUR_CONVERTER
+from flask import jsonify
+from github_manager import GithubManager
 
 def get_performance_short(run_id, builds):
     """
@@ -94,11 +96,44 @@ def get_time_frequency(run_id, builds):
     previous_date = datetime.datetime.strptime(created_previous_build, "%Y-%m-%dT%H:%M:%SZ")
 
     return round((target_date - previous_date).total_seconds() / HOUR_CONVERTER)
-    
 
-    
 def get_num_commits(build):
-    pass
+    """
+    Calculate the number of commits in a build.
+
+    Args:
+    build (dict): The dictionary containing the build metadata.
+
+    Returns:
+    int: The number of commits in the build.
+    """
+    # Checks if the build is triggered by a pull request event
+    if 'pull_request' in build['event']:
+        # Get the owner and repository name
+        full_name = build['repository']['full_name']
+        owner, repo_name = full_name.split('/')
+        # Get the name of the PR which trigerred the build
+        display_title = build['display_title']
+        # Get the label (organization:ref-name) who triggered the build
+        label = build['head_repository']['owner']['login'] + ':' + build['head_branch']
+
+        # Get pull requests for this branch
+        github_manager = GithubManager()
+        pull_requests = github_manager.get_pull_requests(owner, repo_name, label)
+
+        # Search for the PR that triggered the build
+        for pr in pull_requests:
+            if pr['title'] == display_title:
+                pr_number = pr['number']
+                break
+
+        # Get the commits for this PR
+        commits = github_manager.get_pull_request_commits(owner, repo_name, pr_number)
+
+        return len(commits)
+    else:
+        # Extract the number of commits from the branch metadata
+        return jsonify({"error": "This build doesn't come from a pull request event :("}), 404
 
 def get_num_files_changed(build):
     pass
