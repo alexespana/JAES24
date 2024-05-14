@@ -97,17 +97,17 @@ def get_time_frequency(run_id, builds):
 
     return round((target_date - previous_date).total_seconds() / HOUR_CONVERTER)
 
-def get_num_commits(build):
+def get_build_pr_number(build):
     """
-    Calculate the number of commits in a build.
+    Extract the pull request number from a build.
 
     Args:
     build (dict): The dictionary containing the build metadata.
 
     Returns:
-    int: The number of commits in the build.
+    int: The pull request number.
     """
-    # Checks if the build is triggered by a pull request event
+    # Check if the build is triggered by a pull request event
     if 'pull_request' in build['event']:
         # Get the owner and repository name
         full_name = build['repository']['full_name']
@@ -127,13 +127,30 @@ def get_num_commits(build):
                 pr_number = pr['number']
                 break
 
-        # Get the commits for this PR
-        commits = github_manager.get_pull_request_commits(owner, repo_name, pr_number)
-
-        return len(commits)
+        return pr_number
     else:
         # Extract the number of commits from the branch metadata
         return jsonify({"error": "This build doesn't come from a pull request event :("}), 404
+
+def get_num_commits(build):
+    """
+    Calculate the number of commits in a build.
+
+    Args:
+    build (dict): The dictionary containing the build metadata.
+
+    Returns:
+    int: The number of commits in the build.
+    """
+    pr_number = get_build_pr_number(build)
+    full_name = build['repository']['full_name']
+    owner, repo_name = full_name.split('/')
+
+    # Get the commits for this PR
+    github_manager = GithubManager()
+    commits = github_manager.get_pull_request_commits(owner, repo_name, pr_number)
+
+    return len(commits)
 
 def get_num_files_changed(build):
     """
@@ -145,36 +162,39 @@ def get_num_files_changed(build):
     Returns:
     int: The number of files changed in the build.
     """
-    # Check if the build is triguered by a pull request event
-    if 'pull_request' in build['event']:
-        # Get the owner and repository name
-        full_name = build['repository']['full_name']
-        owner, repo_name = full_name.split('/')
-        # Get the name of the PR which trigerred the build
-        display_title = build['display_title']
-        # Get the label (organization:ref-name) who triggered the build
-        label = build['head_repository']['owner']['login'] + ':' + build['head_branch']
+    pr_number = get_build_pr_number(build)
+    full_name = build['repository']['full_name']
+    owner, repo_name = full_name.split('/')
 
-        # Get pull requests for this branch
-        github_manager = GithubManager()
-        pull_requests = github_manager.get_pull_requests(owner, repo_name, label)
+    # Get the files for this PR
+    github_manager = GithubManager()
+    files = github_manager.get_pull_request_files(owner, repo_name, pr_number)
 
-        # Search for the PR that triggered the build
-        for pr in pull_requests:
-            if pr['title'] == display_title:
-                pr_number = pr['number']
-                break
-
-        # Get the files for this PR
-        files = github_manager.get_pull_request_files(owner, repo_name, pr_number)
-
-        return len(files)
+    return len(files)
 
 def get_num_lines_changed(build):
-    pass
+    """
+    Calculate the number of lines changed in a build.
 
-def get_num_tests_lines_changed(build):
-    pass
+    Args:
+    build (dict): The dictionary containing the build metadata.
+
+    Returns:
+    int: The number of lines changed in the build.
+    """
+    pr_number = get_build_pr_number(build)
+    full_name = build['repository']['full_name']
+    owner, repo_name = full_name.split('/')
+
+    # Get the files for this PR
+    github_manager = GithubManager()
+    files = github_manager.get_pull_request_files(owner, repo_name, pr_number)
+
+    lines_changed = 0
+    for file in files:
+        lines_changed += file['changes']
+
+    return lines_changed
 
 def get_failure_distance(run_id, builds):
     """
