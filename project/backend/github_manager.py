@@ -118,12 +118,36 @@ class GithubManager:
                 return jsonify({"error": "Not found"}), 404
 
     def get_pull_request_files(self, owner, repo_name, pull_request_number):
+        """
+        This methods allows obtaining the files that were modified in a pull request.
+        Note: Responses include a maximum of 3000 files. The paginated response returns 30 files 
+        per page by default.
+
+        Args:
+        owner (str): The owner of the repository.
+        repo_name (str): The name of the repository.
+        pull_request_number (int): The number of the pull request.
+
+        Returns:
+        dict: The dictionary containing the files metadata.
+        """
+        files = []
         url = replace_fields(GET_PR_FILES, owner=owner, repo_name=repo_name, pull_number=str(pull_request_number))
-        response = requests.get(url, headers=self.headers)
-        if response.status_code == 200:
-            return response.json()
-        else:
-            return jsonify({"error": "Not found"}), 404
+
+        while url:
+            response = requests.get(url, headers=self.headers)
+            response.raise_for_status()
+
+            data = response.json()
+            files.extend(data)
+
+            # Check if there's a next page
+            if 'next' in response.links:
+                url = response.links['next']['url']
+            else:
+                url = None
+
+        return files    
 
     def get_builds(self, owner, repo_name, branch="main", number_of_builds=101):
         """

@@ -136,7 +136,39 @@ def get_num_commits(build):
         return jsonify({"error": "This build doesn't come from a pull request event :("}), 404
 
 def get_num_files_changed(build):
-    pass
+    """
+    Calculate the number of files changed in a build.
+
+    Args:
+    build (dict): The dictionary containing the build metadata.
+
+    Returns:
+    int: The number of files changed in the build.
+    """
+    # Check if the build is triguered by a pull request event
+    if 'pull_request' in build['event']:
+        # Get the owner and repository name
+        full_name = build['repository']['full_name']
+        owner, repo_name = full_name.split('/')
+        # Get the name of the PR which trigerred the build
+        display_title = build['display_title']
+        # Get the label (organization:ref-name) who triggered the build
+        label = build['head_repository']['owner']['login'] + ':' + build['head_branch']
+
+        # Get pull requests for this branch
+        github_manager = GithubManager()
+        pull_requests = github_manager.get_pull_requests(owner, repo_name, label)
+
+        # Search for the PR that triggered the build
+        for pr in pull_requests:
+            if pr['title'] == display_title:
+                pr_number = pr['number']
+                break
+
+        # Get the files for this PR
+        files = github_manager.get_pull_request_files(owner, repo_name, pr_number)
+
+        return len(files)
 
 def get_num_lines_changed(build):
     pass
