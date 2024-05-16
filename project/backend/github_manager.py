@@ -117,7 +117,7 @@ class GithubManager:
             else:
                 return jsonify({"error": "Not found"}), 404
 
-    def get_pull_request_files(self, owner, repo_name, pull_request_number):
+    def get_pull_request_files(self, owner, repo_name, pull_request_number, number_of_files=101):
         """
         This methods allows obtaining the files that were modified in a pull request.
         Note: Responses include a maximum of 3000 files. The paginated response returns 30 files 
@@ -131,23 +131,37 @@ class GithubManager:
         Returns:
         dict: The dictionary containing the files metadata.
         """
-        files = []
+        maximum_value = 100
         url = replace_fields(GET_PR_FILES, owner=owner, repo_name=repo_name, pull_number=str(pull_request_number))
+        params = {
+            "per_page": number_of_files,
+        }
 
-        while url:
-            response = requests.get(url, headers=self.headers)
-            response.raise_for_status()
+        if number_of_files > maximum_value:
+            results = []
 
-            data = response.json()
-            files.extend(data)
+            next_page = url
 
-            # Check if there's a next page
-            if 'next' in response.links:
-                url = response.links['next']['url']
+            while next_page:
+                response = requests.get(next_page, params=params, headers=self.headers)
+                response.raise_for_status()
+
+                data = response.json()
+                results.extend(data)
+
+                # Check if there's a next page
+                if 'next' in response.links:
+                    next_page = response.links['next']['url']
+                else:
+                    next_page = None
+
+            return results
+        else:
+            response = requests.get(url, params=params, headers=self.headers)
+            if response.status_code == 200:
+                return response.json()
             else:
-                url = None
-
-        return files    
+                return jsonify({"error": "Not found"}), 404
 
     def get_builds(self, owner, repo_name, branch="main", number_of_builds=101):
         """

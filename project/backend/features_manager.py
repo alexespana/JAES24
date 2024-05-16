@@ -38,7 +38,7 @@ def get_performance_short(run_id, builds):
             found_target_build = True
 
 
-    return (successful_builds / min(len(builds_after_target), threshold)) * 100 
+    return (successful_builds / max(len(builds_after_target), 1)) * 100 
 
 def get_performance_long(run_id, builds):
     """
@@ -92,6 +92,7 @@ def get_time_frequency(run_id, builds):
             created_target_build = run['created_at']
             previous_build_search = True
 
+    created_previous_build = created_previous_build if created_previous_build is not None else created_target_build
     target_date = datetime.datetime.strptime(created_target_build, "%Y-%m-%dT%H:%M:%SZ")
     previous_date = datetime.datetime.strptime(created_previous_build, "%Y-%m-%dT%H:%M:%SZ")
 
@@ -107,6 +108,7 @@ def get_build_pr_number(build):
     Returns:
     int: The pull request number.
     """
+    pr_number = None
     # Check if the build is triggered by a pull request event
     if 'pull_request' in build['event']:
         # Get the owner and repository name
@@ -127,10 +129,7 @@ def get_build_pr_number(build):
                 pr_number = pr['number']
                 break
 
-        return pr_number
-    else:
-        # Extract the number of commits from the branch metadata
-        return jsonify({"error": "This build doesn't come from a pull request event :("}), 404
+    return pr_number
 
 def get_num_commits(build):
     """
@@ -146,9 +145,12 @@ def get_num_commits(build):
     full_name = build['repository']['full_name']
     owner, repo_name = full_name.split('/')
 
+    if pr_number is None:
+        return 0
+
     # Get the commits for this PR
     github_manager = GithubManager()
-    commits = github_manager.get_pull_request_commits(owner, repo_name, pr_number)
+    commits = github_manager.get_pull_request_commits(owner, repo_name, pr_number, number_of_commits=100)
 
     return len(commits)
 
@@ -166,9 +168,12 @@ def get_num_files_changed(build):
     full_name = build['repository']['full_name']
     owner, repo_name = full_name.split('/')
 
+    if pr_number is None:
+        return 0
+
     # Get the files for this PR
     github_manager = GithubManager()
-    files = github_manager.get_pull_request_files(owner, repo_name, pr_number)
+    files = github_manager.get_pull_request_files(owner, repo_name, pr_number, number_of_files=100)
 
     return len(files)
 
@@ -186,9 +191,12 @@ def get_num_lines_changed(build):
     full_name = build['repository']['full_name']
     owner, repo_name = full_name.split('/')
 
+    if pr_number is None:
+        return 0
+
     # Get the files for this PR
     github_manager = GithubManager()
-    files = github_manager.get_pull_request_files(owner, repo_name, pr_number)
+    files = github_manager.get_pull_request_files(owner, repo_name, pr_number, number_of_files=100)
 
     lines_changed = 0
     for file in files:
@@ -253,3 +261,15 @@ def get_hour(build):
     date = datetime.datetime.strptime(created_at, "%Y-%m-%dT%H:%M:%SZ")
 
     return date.hour
+
+def get_outcome(build):
+    """
+    Extract the outcome of the build.
+
+    Args:
+    build (dict): The dictionary containing the build metadata.
+
+    Returns:
+    str: The outcome of the build.
+    """
+    return build['conclusion']
