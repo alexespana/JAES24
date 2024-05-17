@@ -6,10 +6,8 @@ services:
       - 5000:5000
     volumes:
       - ./backend:/code
-    environment:
-      - FLASK_APP=app.py
-      - FLASK_ENV=development
-      - FLASK_DEBUG=1
+    env_file:
+      - ./backend/.env
     depends_on:
       - db
 
@@ -19,8 +17,8 @@ services:
       - 80:80
     volumes:
       - ./frontend:/usr/src/app
-    environment:
-      - NODE_ENV=development
+    env_file:
+      - ./frontend/.env
     depends_on:
       - flask
 
@@ -29,9 +27,7 @@ services:
     restart: always
     volumes:
       - ./backend/data:/var/lib/postgresql/data
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: postgres
+    env_file:
+      - ./backend/.env
     ports:
       - 5432:5432
