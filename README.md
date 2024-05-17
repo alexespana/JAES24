@@ -23,3 +23,58 @@ In order to structure and guide the research process, research questions are est
 
 - PI-01: What characteristics of the commits and which prediction algorithm produce the best results in the automatic prediction of the continuous integration outcome?
 - PI-02: What form of presenting the results of automatic predictions of the continuous integration outcome is most valued by users?
+
+## Installation procedure :wrench:
+### Tune-up :gear:
+To run the project, you need to have Docker installed on your machine. You can download and install Docker Desktop from the following link: [Docker Desktop](https://www.docker.com/products/docker-desktop)
+
+After installing Docker, you must clone the repository to your machine using the following command:
+
+```bash
+git clone https://github.com/alexespana/TFM.git
+```
+
+Then, navigate to the project directory and execute the following command to create the necessary environment files:
+
+```bash
+cd TFM/project
+```
+
+```bash
+cp backend/.env.example backend/.env
+cp frontend/.env.example frontend/.env
+```
+This commands will create the environment files for the backend and frontend services. You can modify the values of the environment variables in these files to suit your needs.
+
+__NOTE__: To use the project, you need to have a GitHub account and create a personal access token. You can create a token by following the steps described in the [official documentation](https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token). After creating the token, you must add it to the `backend/.env` file in the `GITHUB_TOKEN` variable.
+
+
+### Installation :hammer:
+To install the project, you must execute the following commands:
+
+```bash
+chmod +x install.sh
+```
+
+```bash
+./install.sh install
+```
+
+This script will create the necessary Docker images and containers to run the project. It will also install the required dependencies and start the services. After the installation process is complete, you can access the web application by opening a web browser and navigating to the following URL:
+
+```bash
+http://localhost
+```
+
+#### Other commands:
+To reinstall the project, you can execute the following script:
+
+```bash
+sudo ./install.sh reinstall
+```
+
+To uninstall the project, you can execute the following script:
+
+```bash
+sudo ./install.sh uninstall
+```
