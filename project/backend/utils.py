@@ -9,7 +9,7 @@ replace_fields(url: str, owner: str, repo_name: str, pull_number: str, run_id: s
 """
 import re
 
-def is_repository_url(url):
+def is_repository_url(url: str) -> bool:
     """
     Check if the given URL is a GitHub repository URL.
 
@@ -26,7 +26,7 @@ def is_repository_url(url):
 
     return result
 
-def get_owner(url):
+def get_owner(url: str) -> str:
     """
     Get the owner of the repository from the repository URL.
 
@@ -39,7 +39,7 @@ def get_owner(url):
     owner = url.split('/')[-2]
     return owner
 
-def get_repo_name(url):
+def get_repo_name(url: str) -> str:
     """
     Get the name of the repository from the repository URL.
 
@@ -52,6 +52,6 @@ def get_repo_name(url):
     repo_name = url.split('/')[-1]
     return repo_name
 
-def replace_fields(url, owner='', repo_name='', pull_number='', run_id=''):
+def replace_fields(url, owner: str = '', repo_name: str = '', pull_number: int = '', run_id: int = '') -> str:
     url = url.replace('OWNER', owner).replace('REPO', repo_name).replace('PULL_NUMBER', pull_number).replace('RUN_ID', run_id)
     return url

@@ -8,7 +8,8 @@ from constants import HOUR_CONVERTER
 from flask import jsonify
 from github_manager import GithubManager
 
-def get_performance_short(run_id, builds):
+# Indicate type annotations
+def get_performance_short(run_id: int, builds: dict) -> float:
     """
     This function calculates the performance of a build by counting the number
     of successful builds after the target build.
@@ -40,7 +41,7 @@ def get_performance_short(run_id, builds):
 
     return (successful_builds / max(len(builds_after_target), 1)) * 100 
 
-def get_performance_long(run_id, builds):
+def get_performance_long(run_id: int, builds: dict) -> float:
     """
     Calculate the performance long term of a repository by counting the number
     of successful builds after the target build.
@@ -67,7 +68,7 @@ def get_performance_long(run_id, builds):
 
     return (successful_builds / max(builds_after_target, 1)) * 100 
 
-def get_time_frequency(run_id, builds):
+def get_time_frequency(run_id: int, builds: dict) -> int:
     """
     Calculate the time frequency between the target build and the previous build.
 
@@ -98,7 +99,7 @@ def get_time_frequency(run_id, builds):
 
     return round((target_date - previous_date).total_seconds() / HOUR_CONVERTER)
 
-def get_build_pr_number(build):
+def get_build_pr_number(build: dict) -> int:
     """
     Extract the pull request number from a build.
 
@@ -131,7 +132,7 @@ def get_build_pr_number(build):
 
     return pr_number
 
-def get_num_commits(build):
+def get_num_commits(build: dict) -> int:
     """
     Calculate the number of commits in a build.
 
@@ -154,7 +155,7 @@ def get_num_commits(build):
 
     return len(commits)
 
-def get_num_files_changed(build):
+def get_num_files_changed(build: dict) -> int:
     """
     Calculate the number of files changed in a build.
 
@@ -177,7 +178,7 @@ def get_num_files_changed(build):
 
     return len(files)
 
-def get_num_lines_changed(build):
+def get_num_lines_changed(build: dict) -> int:
     """
     Calculate the number of lines changed in a build.
 
@@ -204,7 +205,7 @@ def get_num_lines_changed(build):
 
     return lines_changed
 
-def get_failure_distance(run_id, builds):
+def get_failure_distance(run_id: int, builds: dict) -> int:
     """
     Search for the run_id build and count the number of successful builds
     until the first failed build.
@@ -232,7 +233,7 @@ def get_failure_distance(run_id, builds):
     return successful_builds
 
 
-def get_weekday(build):
+def get_weekday(build: dict) -> int:
     """
     Calculate the weekday of the build.
 
@@ -247,7 +248,7 @@ def get_weekday(build):
 
     return date.weekday()
 
-def get_hour(build):
+def get_hour(build: dict) -> int:
     """
     Calculate the hour of the build.
 
@@ -262,7 +263,7 @@ def get_hour(build):
 
     return date.hour
 
-def get_outcome(build):
+def get_outcome(build: dict) -> str:
     """
     Extract the outcome of the build.
 

@@ -13,7 +13,7 @@ class GithubManager:
             "X-GitHub-Api-Version": "2022-11-28"
         }   
 
-    def get_pull_requests(self, owner, repo_name, label=None, number_of_prs=101):
+    def get_pull_requests(self, owner: str, repo_name: str, label: str = None, number_of_prs: int = 101) -> dict:
         """
         This method allows obtaining up to the last 100 pull requests from a
         repository. If the number of pull requests exceeds the maximun value (100),
@@ -62,7 +62,7 @@ class GithubManager:
                 return jsonify({"error": "Not found"}), 404
 
 
-    def get_pull_request(self, owner, repo_name, pull_request_number):
+    def get_pull_request(self, owner: str, repo_name: str, pull_request_number: int) -> dict:
         url = replace_fields(GET_PR, owner=owner, repo_name=repo_name, pull_number=str(pull_request_number))
         response = requests.get(url, headers=self.headers)
         if response.status_code == 200:
@@ -70,7 +70,7 @@ class GithubManager:
         else:
             return jsonify({"error": "Not found"}), 404
 
-    def get_pull_request_commits(self, owner, repo_name, pull_request_number, number_of_commits=101):
+    def get_pull_request_commits(self, owner: str, repo_name: str, pull_request_number: int, number_of_commits: int = 101) -> dict:
         """"
         This method allows obtaining up to the last 100 commits from a pull request. If 
         the number of commits exceeds the maximun value (100), all pull request commits
@@ -117,7 +117,7 @@ class GithubManager:
             else:
                 return jsonify({"error": "Not found"}), 404
 
-    def get_pull_request_files(self, owner, repo_name, pull_request_number, number_of_files=101):
+    def get_pull_request_files(self, owner: str, repo_name: str, pull_request_number: int, number_of_files: int = 101) -> dict:
         """
         This methods allows obtaining the files that were modified in a pull request.
         Note: Responses include a maximum of 3000 files. The paginated response returns 30 files 
@@ -163,7 +163,7 @@ class GithubManager:
             else:
                 return jsonify({"error": "Not found"}), 404
 
-    def get_builds(self, owner, repo_name, branch="main", number_of_builds=101):
+    def get_builds(self, owner: str, repo_name: str, branch: str = "main", number_of_builds: int = 101) -> dict:
         """
         This method allows obtaining up to the last 100 workflow runs from a 
         repository. If the number of workflow runs exceeds the maximun
@@ -215,7 +215,7 @@ class GithubManager:
             else:
                 return jsonify({"error": "Not found"}), 404
 
-    def get_build(self, owner, repo_name, run_id):
+    def get_build(self, owner: str, repo_name: str, run_id: int) -> dict:
         url = replace_fields(GET_BUILD, owner=owner, repo_name=repo_name, run_id=str(run_id))
         response = requests.get(url, headers=self.headers)
         if response.status_code == 200:
