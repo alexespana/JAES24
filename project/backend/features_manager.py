@@ -7,6 +7,7 @@ import datetime
 from constants import HOUR_CONVERTER
 from flask import jsonify
 from github_manager import GithubManager
+from typing import Tuple
 
 # Indicate type annotations
 def get_performance_short(run_id: int, builds: dict) -> float:
@@ -178,15 +179,17 @@ def get_num_files_changed(build: dict) -> int:
 
     return len(files)
 
-def get_num_lines_changed(build: dict) -> int:
+def get_num_lines_changed(build: dict) -> Tuple[int, int, int]:
     """
-    Calculate the number of lines changed in a build.
+    Calculate the number of lines changed, added and removed in a build.
 
     Args:
     build (dict): The dictionary containing the build metadata.
 
     Returns:
     int: The number of lines changed in the build.
+    int: The number of lines added in the build.
+    int: The number of lines removed in the build.
     """
     pr_number = get_build_pr_number(build)
     full_name = build['repository']['full_name']
@@ -199,11 +202,13 @@ def get_num_lines_changed(build: dict) -> int:
     github_manager = GithubManager()
     files = github_manager.get_pull_request_files(owner, repo_name, pr_number, number_of_files=100)
 
-    lines_changed = 0
+    lines_added = 0
+    lines_removed = 0
     for file in files:
-        lines_changed += file['changes']
+        lines_added += file['additions']
+        lines_removed += file['deletions']
 
-    return lines_changed
+    return lines_added + lines_removed, lines_added, lines_removed
 
 def get_failure_distance(run_id: int, builds: dict) -> int:
     """
