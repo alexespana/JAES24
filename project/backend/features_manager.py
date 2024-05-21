@@ -156,15 +156,18 @@ def get_num_commits(build: dict) -> int:
 
     return len(commits)
 
-def get_num_files_changed(build: dict) -> int:
+def get_num_files_changed(build: dict) -> Tuple[int, int, int, int]:
     """
-    Calculate the number of files changed in a build.
+    Calculate the number of files changed, added, modified and removed in a build.
 
     Args:
     build (dict): The dictionary containing the build metadata.
 
     Returns:
     int: The number of files changed in the build.
+    int: The number of files added in the build.
+    int: The number of files modified in the build.
+    int: The number of files removed in the build.
     """
     pr_number = get_build_pr_number(build)
     full_name = build['repository']['full_name']
@@ -177,7 +180,18 @@ def get_num_files_changed(build: dict) -> int:
     github_manager = GithubManager()
     files = github_manager.get_pull_request_files(owner, repo_name, pr_number, number_of_files=100)
 
-    return len(files)
+    files_added = 0
+    files_modified = 0
+    files_removed = 0
+    for file in files:
+        if file['status'] == 'added':
+            files_added += 1
+        elif file['status'] == 'modified':
+            files_modified += 1
+        elif file['status'] == 'removed':
+            files_removed += 1
+
+    return len(files), files_added, files_modified, files_removed
 
 def get_num_lines_changed(build: dict) -> Tuple[int, int, int]:
     """

@@ -23,10 +23,13 @@ def predict():
         PL: performance long
         TF: time frequency
         NC: number of commits
-        NF: number of files
-        NL: number of lines changed
-        NA: number of lines added
-        NR: number of lines removed
+        FC: number of files changed
+        FA: number of files added
+        FM: number of files modified
+        FR: number of files removed
+        LC: number of lines changed
+        LA: number of lines added
+        LR: number of lines removed
         FD: failure distance
         WD: week day
         DH: day hour
@@ -45,7 +48,7 @@ def predict():
             github_manager = GithubManager()
             builds = github_manager.get_builds(owner=owner, repo_name=repo_name, branch=branch, number_of_builds=80)
 
-            df = pd.DataFrame(columns=['PS', 'PL', 'TF', 'NC', 'NF', 'NL', 'NA', 'NR', 'FD', 'WD', 'DH', 'outcome'])
+            df = pd.DataFrame(columns=['PS', 'PL', 'TF', 'NC', 'FC', 'FA', 'FM', 'FR', 'LC', 'LA', 'LR', 'FD', 'WD', 'DH', 'outcome'])
 
             # Get the data to train the model
             for build in builds["workflow_runs"]:
@@ -56,15 +59,15 @@ def predict():
                 PL = get_performance_long(build_id, builds)
                 TF = get_time_frequency(build_id, builds)
                 NC = get_num_commits(build)
-                NF = get_num_files_changed(build)
-                NL, NA, NR = get_num_lines_changed(build)
+                FC, FA, FM, FR = get_num_files_changed(build)
+                LC, LA, LR = get_num_lines_changed(build)
                 FD = get_failure_distance(build_id, builds)
                 WD = get_weekday(build)
                 DH = get_hour(build)
                 outcome = get_outcome(build)
 
                 # Add CI build
-                df.loc[len(df.index)] = [PS, PL, TF, NC, NF, NL, NA, NR, FD, WD, DH, outcome]
+                df.loc[len(df.index)] = [PS, PL, TF, NC, FC, FA, FM, FR, LC, LA, LR, FD, WD, DH, outcome]
 
             pd.set_option('display.max_rows', None)
             pd.set_option('display.max_columns', None)
@@ -73,7 +76,7 @@ def predict():
 
             app.logger.info(df)
             # Features and target
-            X = df[['PS', 'PL', 'TF', 'NC', 'NF', 'NL', 'NA', 'NR', 'FD', 'WD', 'DH']]
+            X = df[['PS', 'PL', 'TF', 'NC', 'FC', 'FA', 'FM', 'FR', 'LC', 'LA', 'LR', 'FD', 'WD', 'DH']]
             y = df['outcome']
 
             # Split the data into training and test sets
