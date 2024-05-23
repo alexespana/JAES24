@@ -174,7 +174,7 @@ def get_num_files_changed(build: dict) -> Tuple[int, int, int, int]:
     owner, repo_name = full_name.split('/')
 
     if pr_number is None:
-        return 0
+        return 0, 0, 0, 0
 
     # Get the files for this PR
     github_manager = GithubManager()
@@ -193,7 +193,7 @@ def get_num_files_changed(build: dict) -> Tuple[int, int, int, int]:
 
     return len(files), files_added, files_modified, files_removed
 
-def get_num_lines_changed(build: dict) -> Tuple[int, int, int]:
+def get_num_lines_changed(build: dict) -> Tuple[int, int, int, int]:
     """
     Calculate the number of lines changed, added and removed in a build.
 
@@ -210,7 +210,7 @@ def get_num_lines_changed(build: dict) -> Tuple[int, int, int]:
     owner, repo_name = full_name.split('/')
 
     if pr_number is None:
-        return 0
+        return 0, 0, 0, 0
 
     # Get the files for this PR
     github_manager = GithubManager()
@@ -218,11 +218,16 @@ def get_num_lines_changed(build: dict) -> Tuple[int, int, int]:
 
     lines_added = 0
     lines_removed = 0
+    test_lines_changed = 0
     for file in files:
         lines_added += file['additions']
         lines_removed += file['deletions']
 
-    return lines_added + lines_removed, lines_added, lines_removed
+        file_name = file['filename'].lower()
+        if 'test' in file_name or 'spec' in file_name:
+            test_lines_changed = file['changes']
+
+    return lines_added + lines_removed, lines_added, lines_removed, test_lines_changed
 
 def get_failure_distance(run_id: int, builds: dict) -> int:
     """
