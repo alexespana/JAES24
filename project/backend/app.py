@@ -31,6 +31,7 @@ def predict():
         LA: number of lines added
         LR: number of lines removed
         LT: number of tests lines changed
+        UT: a number indicating whether tests have been written
         FD: failure distance
         WD: week day
         DH: day hour
@@ -47,9 +48,9 @@ def predict():
 
             # Get CI builds to train the model
             github_manager = GithubManager()
-            builds = github_manager.get_builds(owner=owner, repo_name=repo_name, branch=branch, number_of_builds=80)
+            builds = github_manager.get_builds(owner=owner, repo_name=repo_name, branch=branch, number_of_builds=10)
 
-            df = pd.DataFrame(columns=['PS', 'PL', 'TF', 'NC', 'FC', 'FA', 'FM', 'FR', 'LC', 'LA', 'LR', 'LT', 'FD', 'WD', 'DH', 'outcome'])
+            df = pd.DataFrame(columns=['PS', 'PL', 'TF', 'NC', 'FC', 'FA', 'FM', 'FR', 'LC', 'LA', 'LR', 'LT', 'UT' ,'FD', 'WD', 'DH', 'outcome'])
 
             # Get the data to train the model
             for build in builds["workflow_runs"]:
@@ -61,14 +62,14 @@ def predict():
                 TF = get_time_frequency(build_id, builds)
                 NC = get_num_commits(build)
                 FC, FA, FM, FR = get_num_files_changed(build)
-                LC, LA, LR, LT = get_num_lines_changed(build)
+                LC, LA, LR, LT, UT = get_num_lines_changed(build)
                 FD = get_failure_distance(build_id, builds)
                 WD = get_weekday(build)
                 DH = get_hour(build)
                 outcome = get_outcome(build)
 
                 # Add CI build
-                df.loc[len(df.index)] = [PS, PL, TF, NC, FC, FA, FM, FR, LC, LA, LR, LT, FD, WD, DH, outcome]
+                df.loc[len(df.index)] = [PS, PL, TF, NC, FC, FA, FM, FR, LC, LA, LR, LT, UT, FD, WD, DH, outcome]
 
             pd.set_option('display.max_rows', None)
             pd.set_option('display.max_columns', None)
@@ -77,7 +78,7 @@ def predict():
 
             app.logger.info(df)
             # Features and target
-            X = df[['PS', 'PL', 'TF', 'NC', 'FC', 'FA', 'FM', 'FR', 'LC', 'LA', 'LR', 'LT', 'FD', 'WD', 'DH']]
+            X = df[['PS', 'PL', 'TF', 'NC', 'FC', 'FA', 'FM', 'FR', 'LC', 'LA', 'LR', 'LT', 'UT', 'FD', 'WD', 'DH']]
             y = df['outcome']
 
             # Split the data into training and test sets

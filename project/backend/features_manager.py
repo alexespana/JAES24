@@ -4,6 +4,7 @@ from the Github Actions metadata. This information (features) is used to
 train the model and make predictions later on.
 """
 import datetime
+import re
 from constants import HOUR_CONVERTER
 from flask import jsonify
 from github_manager import GithubManager
@@ -193,7 +194,7 @@ def get_num_files_changed(build: dict) -> Tuple[int, int, int, int]:
 
     return len(files), files_added, files_modified, files_removed
 
-def get_num_lines_changed(build: dict) -> Tuple[int, int, int, int]:
+def get_num_lines_changed(build: dict) -> Tuple[int, int, int, int, int]:
     """
     Calculate the number of lines changed, added and removed in a build.
 
@@ -208,6 +209,11 @@ def get_num_lines_changed(build: dict) -> Tuple[int, int, int, int]:
     pr_number = get_build_pr_number(build)
     full_name = build['repository']['full_name']
     owner, repo_name = full_name.split('/')
+    lines_added = 0
+    lines_removed = 0
+    test_lines_changed = 0
+    source_code_modified = False
+    extensions = [".py", ".js", ".mjs", ".jsx", ".ts", ".tsx", ".java", ".cs", ".php", ".rb", ".swift", ".kt", ".kts", ".go", ".rs", ".scala", ".hs"]
 
     if pr_number is None:
         return 0, 0, 0, 0
@@ -216,9 +222,10 @@ def get_num_lines_changed(build: dict) -> Tuple[int, int, int, int]:
     github_manager = GithubManager()
     files = github_manager.get_pull_request_files(owner, repo_name, pr_number, number_of_files=100)
 
-    lines_added = 0
-    lines_removed = 0
-    test_lines_changed = 0
+    # 0: source code modified and no tests modified
+    # 1: source code modified and tests modified
+    # 2: no source code modified, not applicable
+    unit_tests = 2
     for file in files:
         lines_added += file['additions']
         lines_removed += file['deletions']
@@ -226,8 +233,19 @@ def get_num_lines_changed(build: dict) -> Tuple[int, int, int, int]:
         file_name = file['filename'].lower()
         if 'test' in file_name or 'spec' in file_name:
             test_lines_changed = file['changes']
+        else:
+            extensions_pattern = "|".join(re.escape(ext) for ext in extensions)
+            regex = re.compile(r"\b" + extensions_pattern + r"\b")
+            if regex.search(file_name):
+                source_code_modified = True
 
-    return lines_added + lines_removed, lines_added, lines_removed, test_lines_changed
+    if source_code_modified:
+        if test_lines_changed > 0:
+            unit_tests = 1
+        else:
+            unit_tests = 0
+
+    return lines_added + lines_removed, lines_added, lines_removed, test_lines_changed, unit_tests
 
 def get_failure_distance(run_id: int, builds: dict) -> int:
     """
