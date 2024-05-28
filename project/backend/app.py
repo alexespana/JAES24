@@ -1,5 +1,7 @@
 from flask import Flask, request
+import os
 import pandas as pd
+from models import db, RepositoryMetadata
 from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeClassifier
 from utils import get_owner, get_repo_name, is_repository_url
@@ -13,6 +15,13 @@ from features_manager import (
 )
 
 app = Flask(__name__)
+
+app.config["SQLALCHEMY_DATABASE_URI"] = 'postgresql://' + os.getenv('POSTGRES_USER') + ':' + os.getenv('POSTGRES_PASSWORD') + '@db:5432/' + os.getenv('POSTGRES_DB')
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+db.init_app(app)
+
+with app.app_context():
+    db.create_all()
 
 @app.route('/predict', methods=['POST'])
 def predict():
@@ -104,5 +113,32 @@ def predict():
             app.logger.info('Accuracy: ' + str(accurary.mean()))
 
             return 'Predictions made'
+        else:
+            return 'Invalid GitHub URL'
+
+@app.route('/repository_metadata/create', methods=['POST'])
+def save_builds():
+
+    if request.method == 'POST':
+        repository_url = request.form['repository_url']
+
+        if is_repository_url(repository_url):
+            repo_name = get_repo_name(repository_url)
+            branch = request.form['branch'].replace('/', '-')
+            features_file = repo_name + '_' + branch + '.csv'
+
+            repo_metadata = RepositoryMetadata(
+                repository = repo_name,
+                branch = branch,
+                features_file = features_file
+            )
+
+            db.session.add(repo_metadata)
+            db.session.commit()
+
+            # TBD
+            # Async call to fetch information from the specified repository and branch
+
+            return 'Repository metadata created'
         else:
             return 'Invalid GitHub URL'
