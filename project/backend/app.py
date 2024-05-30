@@ -1,6 +1,7 @@
-from flask import Flask, request
 import os
 import pandas as pd
+from flask import Flask, request
+from concurrent.futures import ThreadPoolExecutor
 from models import db, RepositoryMetadata
 from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeClassifier
@@ -11,10 +12,11 @@ from features_manager import (
     get_time_frequency, get_num_commits, 
     get_num_files_changed, get_num_lines_changed, 
     get_failure_distance, get_weekday, get_hour,
-    get_outcome,
+    get_outcome, get_features
 )
 
 app = Flask(__name__)
+executor = ThreadPoolExecutor(max_workers=4)
 
 app.config["SQLALCHEMY_DATABASE_URI"] = 'postgresql://' + os.getenv('POSTGRES_USER') + ':' + os.getenv('POSTGRES_PASSWORD') + '@db:5432/' + os.getenv('POSTGRES_DB')
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
@@ -136,8 +138,8 @@ def save_builds():
             db.session.add(repo_metadata)
             db.session.commit()
 
-            # TBD
-            # Async call to fetch information from the specified repository and branch
+            # Async call to fetch information from the specified repository and branch            
+            executor.submit(get_features,  repository_url, branch, features_file)
 
             return 'Repository metadata created'
         else:

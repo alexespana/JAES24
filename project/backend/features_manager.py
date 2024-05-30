@@ -3,12 +3,13 @@ This file contains utility functions that extract useful information
 from the Github Actions metadata. This information (features) is used to
 train the model and make predictions later on.
 """
-import datetime
 import re
-from constants import HOUR_CONVERTER
-from flask import jsonify
+import datetime
+import pandas as pd
+from constants import HOUR_CONVERTER, FEATURES_FOLDER
 from github_manager import GithubManager
 from typing import Tuple
+from utils import get_owner, get_repo_name
 
 # Indicate type annotations
 def get_performance_short(run_id: int, builds: dict) -> float:
@@ -216,7 +217,7 @@ def get_num_lines_changed(build: dict) -> Tuple[int, int, int, int, int]:
     extensions = [".py", ".js", ".mjs", ".jsx", ".ts", ".tsx", ".java", ".cs", ".php", ".rb", ".swift", ".kt", ".kts", ".go", ".rs", ".scala", ".hs"]
 
     if pr_number is None:
-        return 0, 0, 0, 0
+        return 0, 0, 0, 0, 0
 
     # Get the files for this PR
     github_manager = GithubManager()
@@ -316,3 +317,59 @@ def get_outcome(build: dict) -> str:
     str: The outcome of the build.
     """
     return build['conclusion']
+
+def get_features(repository_url: str, branch: str, csv_file: str) -> None:
+    """
+    Extract the following features for a specific repository and branch and save them in a csv file.
+    Features:
+        PS: performance short
+        PL: performance long
+        TF: time frequency
+        NC: number of commits
+        FC: number of files changed
+        FA: number of files added
+        FM: number of files modified
+        FR: number of files removed
+        LC: number of lines changed
+        LA: number of lines added
+        LR: number of lines removed
+        LT: number of tests lines changed
+        UT: a number indicating whether tests have been written
+        FD: failure distance
+        WD: week day
+        DH: day hour
+    Class:
+        outcome: success or failure
+
+    Args:
+    repository_url (str): The URL of the repository.
+    branch (str): The branch of the repository.
+    csv_file (str): The name of the csv file to save the features.
+    """
+    owner = get_owner(repository_url)
+    repo_name = get_repo_name(repository_url)
+
+    # Get CI builds to train the model
+    github_manager = GithubManager()
+    builds = github_manager.get_builds(owner=owner, repo_name=repo_name, branch=branch, number_of_builds=20)
+
+    df = pd.DataFrame(columns=['PS', 'PL', 'TF', 'NC', 'FC', 'FA', 'FM', 'FR', 'LC', 'LA', 'LR', 'LT', 'UT' ,'FD', 'WD', 'DH', 'outcome'])
+
+    # Get the data to train the model
+    for build in builds["workflow_runs"]:
+        build_id = build['id']
+        PS = get_performance_short(build_id, builds)
+        PL = get_performance_long(build_id, builds)
+        TF = get_time_frequency(build_id, builds)
+        NC = get_num_commits(build)
+        FC, FA, FM, FR = get_num_files_changed(build)
+        LC, LA, LR, LT, UT = get_num_lines_changed(build)
+        FD = get_failure_distance(build_id, builds)
+        WD = get_weekday(build)
+        DH = get_hour(build)
+        outcome = get_outcome(build)
+
+        # Add CI build
+        df.loc[len(df.index)] = [PS, PL, TF, NC, FC, FA, FM, FR, LC, LA, LR, LT, UT, FD, WD, DH, outcome]
+
+    df.to_csv(FEATURES_FOLDER + csv_file, index=False)

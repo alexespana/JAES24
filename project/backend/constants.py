@@ -1,11 +1,8 @@
 """
 This file contains all the constants used in the project.
 """
-STATIC_FOLDER = 'static/'
-REPOSITORIES_CSV_FILE = 'repositories.csv'
-
-CI_JUNIT = 'ci-junit.csv'
-REPOSITORY_URL = 'https://github.com/junit-team/junit4'
+FEATURES_FOLDER = 'features/'
+AIMODELS_FOLDER = 'AIModels/'
 
 # API urls   
 # Lists pull requests in a specified repository
