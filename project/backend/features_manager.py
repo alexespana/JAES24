@@ -351,7 +351,7 @@ def get_features(repository_url: str, branch: str, csv_file: str) -> None:
 
     # Get CI builds to train the model
     github_manager = GithubManager()
-    builds = github_manager.get_builds(owner=owner, repo_name=repo_name, branch=branch, number_of_builds=20)
+    builds = github_manager.get_builds(owner=owner, repo_name=repo_name, branch=branch)
 
     df = pd.DataFrame(columns=['PS', 'PL', 'TF', 'NC', 'FC', 'FA', 'FM', 'FR', 'LC', 'LA', 'LR', 'LT', 'UT' ,'FD', 'WD', 'DH', 'outcome'])
 
