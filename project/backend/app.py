@@ -1,18 +1,23 @@
-from flask import Flask, request
+import os
 import pandas as pd
+from flask import Flask, request
+from concurrent.futures import ThreadPoolExecutor
+from models import db, RepositoryMetadata
 from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeClassifier
-from utils import get_owner, get_repo_name, is_repository_url
+from utils import get_repo_name, is_repository_url, normalize_branch_name, is_csv_available
 from github_manager import GithubManager
-from features_manager import ( 
-    get_performance_short, get_performance_long, 
-    get_time_frequency, get_num_commits, 
-    get_num_files_changed, get_num_lines_changed, 
-    get_failure_distance, get_weekday, get_hour,
-    get_outcome,
-)
+from features_manager import  get_features
 
 app = Flask(__name__)
+executor = ThreadPoolExecutor(max_workers=4)
+
+app.config["SQLALCHEMY_DATABASE_URI"] = 'postgresql://' + os.getenv('POSTGRES_USER') + ':' + os.getenv('POSTGRES_PASSWORD') + '@db:5432/' + os.getenv('POSTGRES_DB')
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+db.init_app(app)
+
+with app.app_context():
+    db.create_all()
 
 @app.route('/predict', methods=['POST'])
 def predict():
@@ -23,8 +28,15 @@ def predict():
         PL: performance long
         TF: time frequency
         NC: number of commits
-        NF: number of files
-        NL: number of lines
+        FC: number of files changed
+        FA: number of files added
+        FM: number of files modified
+        FR: number of files removed
+        LC: number of lines changed
+        LA: number of lines added
+        LR: number of lines removed
+        LT: number of tests lines changed
+        UT: a number indicating whether tests have been written
         FD: failure distance
         WD: week day
         DH: day hour
@@ -32,38 +44,15 @@ def predict():
         outcome: success or failure
     """
     if request.method == 'POST':
-        repository_url = request.form['repository_url']
-        branch = request.form['branch']
-
-        if is_repository_url(repository_url):
-            owner = get_owner(repository_url)
-            repo_name = get_repo_name(repository_url)
-
-            # Get CI builds to train the model
-            github_manager = GithubManager()
-            builds = github_manager.get_builds(owner=owner, repo_name=repo_name, branch=branch, number_of_builds=80)
-
-            df = pd.DataFrame(columns=['PS', 'PL', 'TF', 'NC', 'NF', 'NL', 'FD', 'WD', 'DH', 'outcome'])
-
-            # Get the data to train the model
-            for build in builds["workflow_runs"]:
-                build_id = build['id']
-                app.logger.info(str(build_id))
-
-                PS = get_performance_short(build_id, builds)
-                PL = get_performance_long(build_id, builds)
-                TF = get_time_frequency(build_id, builds)
-                NC = get_num_commits(build)
-                NF = get_num_files_changed(build)
-                NL = get_num_lines_changed(build)
-                FD = get_failure_distance(build_id, builds)
-                WD = get_weekday(build)
-                DH = get_hour(build)
-                outcome = get_outcome(build)
-
-                # Add CI build
-                df.loc[len(df.index)] = [PS, PL, TF, NC, NF, NL, FD, WD, DH, outcome]
-
+            
+        data = request.json
+        repo_name = data['repository']
+        branch = data['branch']
+        
+        repository_metadata = RepositoryMetadata.query.filter_by(repository=repo_name, branch=branch).first()
+        if is_csv_available(repository_metadata.features_file):
+            df = pd.read_csv('features/' + repository_metadata.features_file)
+            
             pd.set_option('display.max_rows', None)
             pd.set_option('display.max_columns', None)
             pd.set_option('display.width', None)
@@ -71,7 +60,7 @@ def predict():
 
             app.logger.info(df)
             # Features and target
-            X = df[['PS', 'PL', 'TF', 'NC', 'NF', 'NL', 'FD', 'WD', 'DH']]
+            X = df[['PS', 'PL', 'TF', 'NC', 'FC', 'FA', 'FM', 'FR', 'LC', 'LA', 'LR', 'LT', 'UT', 'FD', 'WD', 'DH']]
             y = df['outcome']
 
             # Split the data into training and test sets
@@ -84,7 +73,7 @@ def predict():
             # Make some predictions
             predictions = model.predict(x_test)
 
-            app.logger.info('Predictions for: ' + repository_url)
+            app.logger.info('Predictions for: ' + repo_name + ' - ' + branch)
 
             # Add a column outcome with the predictions
             x_test['outcome'] = predictions
@@ -96,6 +85,33 @@ def predict():
             accurary = predictions == y_test
             app.logger.info('Accuracy: ' + str(accurary.mean()))
 
-            return 'Predictions made'
+            return "Predictions for: " + repo_name + " - " + branch + "\n" + str(x_test)
+        else:
+            return 'We are still gathering information from your repository. Please check back in a few minutes.'
+
+@app.route('/repository_metadata/create', methods=['POST'])
+def save_builds():
+
+    if request.method == 'POST':
+        repository_url = request.form['repository_url']
+
+        if is_repository_url(repository_url):
+            repo_name = get_repo_name(repository_url)
+            branch = request.form['branch']
+            features_file = repo_name + '_' + normalize_branch_name(branch) + '.csv'
+
+            repo_metadata = RepositoryMetadata(
+                repository = repo_name,
+                branch = branch,
+                features_file = features_file
+            )
+
+            db.session.add(repo_metadata)
+            db.session.commit()
+
+            # Async call to fetch information from the specified repository and branch            
+            executor.submit(get_features,  repository_url, branch, features_file)
+
+            return 'Repository metadata created'
         else:
             return 'Invalid GitHub URL'

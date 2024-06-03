@@ -1,5 +1,7 @@
 import os
 import requests
+import datetime
+from typing import Tuple
 from utils import replace_fields
 from constants import GET_PRS, GET_PR, GET_PR_COMMITS, GET_PR_FILES, GET_BUILDS, GET_BUILD
 from flask import jsonify
@@ -13,7 +15,7 @@ class GithubManager:
             "X-GitHub-Api-Version": "2022-11-28"
         }   
 
-    def get_pull_requests(self, owner, repo_name, label=None, number_of_prs=101):
+    def get_pull_requests(self, owner: str, repo_name: str, label: str = None, number_of_prs: int = 101) -> dict:
         """
         This method allows obtaining up to the last 100 pull requests from a
         repository. If the number of pull requests exceeds the maximun value (100),
@@ -62,7 +64,7 @@ class GithubManager:
                 return jsonify({"error": "Not found"}), 404
 
 
-    def get_pull_request(self, owner, repo_name, pull_request_number):
+    def get_pull_request(self, owner: str, repo_name: str, pull_request_number: int) -> dict:
         url = replace_fields(GET_PR, owner=owner, repo_name=repo_name, pull_number=str(pull_request_number))
         response = requests.get(url, headers=self.headers)
         if response.status_code == 200:
@@ -70,7 +72,7 @@ class GithubManager:
         else:
             return jsonify({"error": "Not found"}), 404
 
-    def get_pull_request_commits(self, owner, repo_name, pull_request_number, number_of_commits=101):
+    def get_pull_request_commits(self, owner: str, repo_name: str, pull_request_number: int, number_of_commits: int = 101) -> dict:
         """"
         This method allows obtaining up to the last 100 commits from a pull request. If 
         the number of commits exceeds the maximun value (100), all pull request commits
@@ -117,7 +119,7 @@ class GithubManager:
             else:
                 return jsonify({"error": "Not found"}), 404
 
-    def get_pull_request_files(self, owner, repo_name, pull_request_number, number_of_files=101):
+    def get_pull_request_files(self, owner: str, repo_name: str, pull_request_number: int, number_of_files: int = 101) -> list:
         """
         This methods allows obtaining the files that were modified in a pull request.
         Note: Responses include a maximum of 3000 files. The paginated response returns 30 files 
@@ -161,9 +163,9 @@ class GithubManager:
             if response.status_code == 200:
                 return response.json()
             else:
-                return jsonify({"error": "Not found"}), 404
+                return [jsonify({"error": "Not found"}), 404]
 
-    def get_builds(self, owner, repo_name, branch="main", number_of_builds=101):
+    def get_builds(self, owner: str, repo_name: str, branch: str = "main", number_of_builds: int = 101) -> dict:
         """
         This method allows obtaining up to the last 100 workflow runs from a 
         repository. If the number of workflow runs exceeds the maximun
@@ -178,36 +180,18 @@ class GithubManager:
         dict: The dictionary containing the workflow runs metadata.
         """
         maximum_value = 100
+        date = datetime.datetime.now()
+        current_date = date.strftime("%Y-%m-%d")
         url = replace_fields(GET_BUILDS, owner, repo_name)
+
         params = {
             "per_page": number_of_builds,
-            "branch": branch
+            "branch": branch,
+            "created": '<=' + current_date,
         }
 
         if number_of_builds > maximum_value:
-            results = {
-                "workflow_runs": []
-            }
-
-            next_page = url
-            
-            while next_page:
-                response = requests.get(next_page, params=params, headers=self.headers)
-                response.raise_for_status()
-
-                data = response.json()
-
-                if "workflow_runs" in data:
-                    results["total_count"] = data["total_count"]
-                    results["workflow_runs"].extend(data["workflow_runs"])
-
-                # Check if there's a next page
-                if 'next' in response.links:
-                    next_page = response.links['next']['url']
-                else:
-                    next_page = None
-
-            return results
+            return self._get_all_builds(url, params)
         else:
             response = requests.get(url, params=params, headers=self.headers)
             if response.status_code == 200:
@@ -215,7 +199,57 @@ class GithubManager:
             else:
                 return jsonify({"error": "Not found"}), 404
 
-    def get_build(self, owner, repo_name, run_id):
+    def _get_all_builds(self, url: str, params: dict) -> dict:
+        more_builds = True
+        next_page = url
+        last_created_at = None
+
+        results = {
+            "total_count": None,
+            "workflow_runs": []
+        }
+
+        while more_builds:
+            if last_created_at:
+                params["created"] = '<=' + last_created_at.split('T')[0]
+
+            results, more_builds, last_created_at = self._get_page_builds(next_page, params, results)
+
+        return results
+
+    def _get_page_builds(self, page: str, params: dict, results: dict) -> Tuple[dict, bool, str]:
+        count = 0
+        max_iterations = 10
+        more_builds = True
+        
+        while page:
+            response = requests.get(page, params=params, headers=self.headers)
+            response.raise_for_status()
+
+            data = response.json()
+
+            if "workflow_runs" in data:
+                if results["total_count"] is None:
+                    results["total_count"] = data["total_count"]
+
+                if data["workflow_runs"]: 
+                    last_created_at = data["workflow_runs"][-1]["created_at"]
+                    results["workflow_runs"].extend(data["workflow_runs"])
+
+
+            # Check if there's a next page
+            if 'next' in response.links:
+                page = response.links['next']['url']
+            else:
+                page = None
+                if count < max_iterations:
+                    more_builds = False
+
+            count += 1
+
+        return results, more_builds, last_created_at
+
+    def get_build(self, owner: str, repo_name: str, run_id: int) -> dict:
         url = replace_fields(GET_BUILD, owner=owner, repo_name=repo_name, run_id=str(run_id))
         response = requests.get(url, headers=self.headers)
         if response.status_code == 200:

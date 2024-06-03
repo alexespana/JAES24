@@ -25,4 +25,4 @@ EXPOSE 5000
 COPY . .
 
 # Set the command to run the Flask application
-CMD ["flask", "--app", "app.py", "run"]
+CMD ["sh", "-c", "python wait_for_db.py && flask --app app.py run"]
