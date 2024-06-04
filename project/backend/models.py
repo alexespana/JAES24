@@ -15,7 +15,7 @@ class RepositoryMetadata(db.Model):
     repository = db.Column(db.String(255), primary_key=True)
     branch = db.Column(db.String(255), primary_key=True)
     features_file = db.Column(db.String(255))
-    model_pickle = db.Column(db.String(255))
+    pickle_pattern = db.Column(db.String(255))
 
 class LookupModels(db.Model):
    __tablename__ = 'lookup_models'

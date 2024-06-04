@@ -1,12 +1,17 @@
 import os
 import pandas as pd
+import pickle
 from flask import Flask, request
 from concurrent.futures import ThreadPoolExecutor
-from models import db, RepositoryMetadata
+from models import db, RepositoryMetadata, init_db
 from sklearn.model_selection import train_test_split
-from sklearn.tree import DecisionTreeClassifier
-from utils import get_repo_name, is_repository_url, normalize_branch_name, is_csv_available
-from github_manager import GithubManager
+from utils import (
+    get_repo_name, is_repository_url,
+    normalize_branch_name, is_csv_available,
+    is_model_available, get_model_path,
+    get_model
+)
+from utils import get_repo_name, is_repository_url, normalize_branch_name, is_csv_available, is_model_available, get_model_path, get_model
 from features_manager import  get_features
 
 app = Flask(__name__)
@@ -17,7 +22,7 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 db.init_app(app)
 
 with app.app_context():
-    db.create_all()
+    init_db()
 
 @app.route('/predict', methods=['POST'])
 def predict():
@@ -48,11 +53,13 @@ def predict():
         data = request.json
         repo_name = data['repository']
         branch = data['branch']
+        classifier = data['classifier']
         
         repository_metadata = RepositoryMetadata.query.filter_by(repository=repo_name, branch=branch).first()
         if is_csv_available(repository_metadata.features_file):
             df = pd.read_csv('features/' + repository_metadata.features_file)
-            
+            model_path = get_model_path(repository_metadata.pickle_pattern, classifier)
+
             pd.set_option('display.max_rows', None)
             pd.set_option('display.max_columns', None)
             pd.set_option('display.width', None)
@@ -66,9 +73,19 @@ def predict():
             # Split the data into training and test sets
             x_train, x_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-            # Train the model - Decision Tree Classifier
-            model = DecisionTreeClassifier(random_state=42)
-            model.fit(x_train, y_train)
+
+            if is_model_available(repository_metadata.pickle_pattern, classifier):
+                with open(model_path, 'rb') as file:
+                    model = pickle.load(file)
+            else:
+                model = get_model(classifier)
+
+                # Train
+                model.fit(x_train, y_train)
+
+                # Save the model (pickle file)
+                with open(model_path, 'wb') as file:
+                    pickle.dump(model, file)
 
             # Make some predictions
             predictions = model.predict(x_test)
@@ -99,11 +116,13 @@ def save_builds():
             repo_name = get_repo_name(repository_url)
             branch = request.form['branch']
             features_file = repo_name + '_' + normalize_branch_name(branch) + '.csv'
+            pickle_pattern = repo_name + '_' + normalize_branch_name(branch)
 
             repo_metadata = RepositoryMetadata(
                 repository = repo_name,
                 branch = branch,
-                features_file = features_file
+                features_file = features_file,
+                pickle_pattern = pickle_pattern
             )
 
             db.session.add(repo_metadata)
