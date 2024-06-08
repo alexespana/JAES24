@@ -2,7 +2,7 @@ import os
 import requests
 import datetime
 from typing import Tuple
-from utils import replace_fields
+from utils import replace_fields, get_month_start_end
 from constants import GET_PRS, GET_PR, GET_PR_COMMITS, GET_PR_FILES, GET_BUILDS, GET_BUILD
 from flask import jsonify
 
@@ -217,6 +217,32 @@ class GithubManager:
 
         return results
 
+    def _get_all_month_builds(self, url: str, params: dict) -> dict:
+            more_builds = True
+            next_page = url
+            last_created_at = None
+            initial_range = params["created"]
+            start_date, _ = initial_range.split('..')
+
+            results = {
+                "total_count": None,
+                "workflow_runs": []
+            }
+
+            while more_builds:
+                if last_created_at:
+                    # Rest one millisecond to avoid duplicates
+                    last_created_at = datetime.datetime.strptime(last_created_at, "%Y-%m-%dT%H:%M:%SZ") - datetime.timedelta(seconds=1)
+                    # Log last created_at date
+                    params["created"] = start_date + '..' + last_created_at.strftime("%Y-%m-%dT%H:%M:%SZ")
+
+                results, more_builds, last_created_at = self._get_page_builds(next_page, params, results)
+
+            
+            results["total_count"] = len(results["workflow_runs"])
+
+            return results
+
     def _get_page_builds(self, page: str, params: dict, results: dict) -> Tuple[dict, bool, str]:
         count = 0
         max_iterations = 10
@@ -228,14 +254,9 @@ class GithubManager:
 
             data = response.json()
 
-            if "workflow_runs" in data:
-                if results["total_count"] is None:
-                    results["total_count"] = data["total_count"]
-
-                if data["workflow_runs"]: 
-                    last_created_at = data["workflow_runs"][-1]["created_at"]
-                    results["workflow_runs"].extend(data["workflow_runs"])
-
+            if "workflow_runs" in data and data["workflow_runs"]:
+                last_created_at = data["workflow_runs"][-1]["created_at"]
+                results["workflow_runs"].extend(data["workflow_runs"])
 
             # Check if there's a next page
             if 'next' in response.links:
@@ -256,3 +277,28 @@ class GithubManager:
             return response.json()
         else:
             return jsonify({"error": "Not found"}), 404
+
+    def get_month_builds(self, month: int, year: int, owner: str, repo_name: str, branch: str = "main") -> dict:
+        """
+        This method allows obtaining all builds from a repository in a specific month.
+
+        Args:
+        month (int): The month to search for builds.
+        year (int): The year to search for builds.
+        owner (str): The owner of the repository.
+        repo_name (str): The name of the repository.
+        branch (str): The branch to search for builds.
+
+        Returns:
+        dict: The dictionary containing the workflow runs metadata.
+        """
+        start_date, end_date = get_month_start_end(year, month)
+        url = replace_fields(GET_BUILDS, owner, repo_name)
+
+        params = {
+            "per_page": 100,
+            "branch": branch,
+            "created": start_date + '..' + end_date
+        }
+
+        return self._get_all_month_builds(url, params)

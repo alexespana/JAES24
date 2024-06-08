@@ -5,13 +5,8 @@ from flask import Flask, request
 from concurrent.futures import ThreadPoolExecutor
 from models import db, RepositoryMetadata, init_db
 from sklearn.model_selection import train_test_split
-from utils import (
-    get_repo_name, is_repository_url,
-    normalize_branch_name, is_csv_available,
-    is_model_available, get_model_path,
-    get_model
-)
-from utils import get_repo_name, is_repository_url, normalize_branch_name, is_csv_available, is_model_available, get_model_path, get_model
+from utils import get_repo_name, is_repository_url, normalize_branch_name, is_csv_available
+from model_manager import is_model_available, get_model_path
 from features_manager import  get_features
 
 app = Flask(__name__)
@@ -71,38 +66,30 @@ def predict():
             y = df['outcome']
 
             # Split the data into training and test sets
-            x_train, x_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-
+            _, x_test, _, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
             if is_model_available(repository_metadata.pickle_pattern, classifier):
                 with open(model_path, 'rb') as file:
                     model = pickle.load(file)
+
+                # Make some predictions
+                predictions = model.predict(x_test)
+
+                app.logger.info('Predictions for: ' + repo_name + ' - ' + branch)
+
+                # Add a column outcome with the predictions
+                x_test['outcome'] = predictions
+
+                # Show the predictions
+                app.logger.info("\n" + str(x_test))
+
+                # Calculate the accuracy comparing the predictions with the t_test
+                accurary = predictions == y_test
+                app.logger.info('Accuracy: ' + str(accurary.mean()))
+
+                return "Predictions for: " + repo_name + " - " + branch + "\n" + str(x_test)
             else:
-                model = get_model(classifier)
-
-                # Train
-                model.fit(x_train, y_train)
-
-                # Save the model (pickle file)
-                with open(model_path, 'wb') as file:
-                    pickle.dump(model, file)
-
-            # Make some predictions
-            predictions = model.predict(x_test)
-
-            app.logger.info('Predictions for: ' + repo_name + ' - ' + branch)
-
-            # Add a column outcome with the predictions
-            x_test['outcome'] = predictions
-
-            # Show the predictions
-            app.logger.info("\n" + str(x_test))
-
-            # Calculate the accuracy comparing the predictions with the t_test
-            accurary = predictions == y_test
-            app.logger.info('Accuracy: ' + str(accurary.mean()))
-
-            return "Predictions for: " + repo_name + " - " + branch + "\n" + str(x_test)
+                return 'The model has not been trained yet, please be patient.'
         else:
             return 'We are still gathering information from your repository. Please check back in a few minutes.'
 
@@ -118,19 +105,27 @@ def save_builds():
             features_file = repo_name + '_' + normalize_branch_name(branch) + '.csv'
             pickle_pattern = repo_name + '_' + normalize_branch_name(branch)
 
-            repo_metadata = RepositoryMetadata(
-                repository = repo_name,
-                branch = branch,
-                features_file = features_file,
-                pickle_pattern = pickle_pattern
-            )
+            # Search the repository in the database
+            repository_metadata = RepositoryMetadata.query.filter_by(repository=repo_name, branch=branch).first()
+            if repository_metadata:
+                return 'The repository and branch you have entered already exist.'
+            else:
+                repo_metadata = RepositoryMetadata(
+                    repository = repo_name,
+                    branch = branch,
+                    features_file = features_file,
+                    pickle_pattern = pickle_pattern
+                )
 
-            db.session.add(repo_metadata)
-            db.session.commit()
+                db.session.add(repo_metadata)
+                db.session.commit()
 
-            # Async call to fetch information from the specified repository and branch            
-            executor.submit(get_features,  repository_url, branch, features_file)
+                # Create a folder with the repository name and branch
+                os.makedirs('features/' + repo_name + '_' + normalize_branch_name(branch) + '/builds', exist_ok=True)
 
-            return 'Repository metadata created'
+                # Async call to fetch information from the specified repository and branch            
+                executor.submit(get_features,  repository_url, branch, features_file)
+
+                return 'Repository metadata created'
         else:
             return 'Invalid GitHub URL'

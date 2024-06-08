@@ -9,13 +9,9 @@ replace_fields(url: str, owner: str, repo_name: str, pull_number: str, run_id: s
 """
 import re
 import os
-from constants import FEATURES_FOLDER, AIMODELS_FOLDER
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.linear_model import LinearRegression
-from sklearn.svm import SVC
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.neural_network import MLPClassifier
+import calendar
+from typing import Tuple
+from constants import FEATURES_FOLDER
 
 def is_repository_url(url: str) -> bool:
     """
@@ -88,85 +84,18 @@ def is_csv_available(file_name: str) -> bool:
     """
     return os.path.isfile(FEATURES_FOLDER + file_name)
 
-def parse_classifier(classifier: str) -> str:
+def get_month_start_end(year: int, month: int) -> Tuple[str, str]:
     """
-    Parse the classifier name.
+    Get the start and end date of the month.
 
     Args:
-    classifier (str): The name of the classifier.
+    year (int): The year.
+    month (int): The month.
 
     Returns:
-    str: The parsed classifier name.
+    Tuple[str, str]: The start and end date of the month.
     """
-    model_type = ''
+    start_date = str(year) + '-' + str(month).zfill(2) + '-01'
+    end_date = str(year) + '-' + str(month).zfill(2) + '-' + str(calendar.monthrange(year, month)[1])
 
-    if classifier == 'Decision Tree':
-        model_type = 'dt'
-    elif classifier == 'Random Forest':
-        model_type = 'rf'
-    elif classifier == 'Linear Regression':
-        model_type = 'lr'
-    elif classifier == 'Support Vector Machine':
-        model_type = 'svm'
-    elif classifier == 'K-Nearest Neighbors':
-        model_type = 'knn'
-    elif classifier == 'Neural Network':
-        model_type = 'nn'
-
-    return model_type
-
-def get_model_path(model_name: str, classifier_type: str) -> str:
-    """
-    Get the path of the trained model.
-
-    Args:
-    model_name (str): The name of the model.
-
-    Returns:
-    str: The path of the trained model.
-    """
-    return AIMODELS_FOLDER + model_name + '_' + parse_classifier(classifier_type) + '.pkl'
-
-
-def is_model_available(model_name: str, classifier_type: str) -> bool:
-    """
-    Check if the trained model is available.
-
-    Args:
-    model_name (str): The name of the model.
-
-    Returns:
-    bool: True if the model is available, False otherwise.
-    """
-    return os.path.isfile(get_model_path(model_name, classifier_type))
-
-def get_model(classifier_type: str, seed: int = 42):
-    """
-    Get an instance of the requested classifier.
-
-    Args:
-    classifier_type (str): The type of the classifier.
-
-    Returns:
-    object: The instance of the classifier.
-    """
-    model = None
-
-    if classifier_type == 'Decision Tree':
-        model = DecisionTreeClassifier(random_state=seed)
-    elif classifier_type == 'Random Forest':
-        model = RandomForestClassifier(random_state=seed)
-    elif classifier_type == 'Linear Regression':
-        model = LinearRegression()
-    elif classifier_type == 'Support Vector Machine':
-        model = SVC(random_state=seed)
-    elif classifier_type == 'K-Nearest Neighbors':
-        model = KNeighborsClassifier()
-    elif classifier_type == 'Neural Network':
-        model = MLPClassifier(random_state=seed)
-    else:
-            raise ValueError(f"Model '{classifier_type}' is not recognized. Please choose "
-                             "from 'Decision Tree', 'Random Forest', 'Linear Regression', "
-                             "'Support Vector Machine', 'K-Nearest Neighbors', 'Neural Network'.")
-
-    return model
+    return start_date, end_date
