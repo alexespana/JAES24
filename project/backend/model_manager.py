@@ -21,7 +21,7 @@ def get_model_path(model_name: str, classifier_type: str) -> str:
     Returns:
     str: The path of the trained model.
     """
-    return AIMODELS_FOLDER + model_name + '_' + parse_classifier(classifier_type) + '.pkl'
+    return AIMODELS_FOLDER + model_name + '/' + model_name + '_' + parse_classifier(classifier_type) + '.pkl'
 
 def is_model_available(model_name: str, classifier_type: str) -> bool:
     """

@@ -11,7 +11,7 @@ import re
 import os
 import calendar
 from typing import Tuple
-from constants import FEATURES_FOLDER
+from constants import FEATURES_FOLDER, AIMODELS_FOLDER
 
 def is_repository_url(url: str) -> bool:
     """
@@ -99,3 +99,42 @@ def get_month_start_end(year: int, month: int) -> Tuple[str, str]:
     end_date = str(year) + '-' + str(month).zfill(2) + '-' + str(calendar.monthrange(year, month)[1])
 
     return start_date, end_date
+
+def get_builds_folder(repo_name: str, branch: str) -> str:
+    """
+    Get the folder path for the builds.
+
+    Args:
+    repo_name (str): The name of the repository.
+    branch (str): The name of the branch.
+
+    Returns:
+    str: The folder path for the builds.
+    """
+    return FEATURES_FOLDER + repo_name + '_' + normalize_branch_name(branch) + '/builds/'
+
+def get_aimodels_folder(repo_name: str, branch: str) -> str:
+    """
+    Get the folder path for the AI models.
+
+    Args:
+    repo_name (str): The name of the repository.
+    branch (str): The name of the branch.
+
+    Returns:
+    str: The folder path for the AI models.
+    """
+    return AIMODELS_FOLDER + repo_name + '_' + normalize_branch_name(branch) + '/'
+
+def get_features_folder(repo_name: str, branch: str) -> str:
+    """
+    Get the folder path for the CSV files.
+
+    Args:
+    repo_name (str): The name of the repository.
+    branch (str): The name of the branch.
+
+    Returns:
+    str: The folder path for the CSV files.
+    """
+    return FEATURES_FOLDER + repo_name + '_' + normalize_branch_name(branch) + '/'

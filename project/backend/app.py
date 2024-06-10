@@ -5,9 +5,13 @@ from flask import Flask, request
 from concurrent.futures import ThreadPoolExecutor
 from models import db, RepositoryMetadata, init_db
 from sklearn.model_selection import train_test_split
-from utils import get_repo_name, is_repository_url, normalize_branch_name, is_csv_available
+from utils import (
+    get_repo_name, is_repository_url, 
+    normalize_branch_name, is_csv_available, 
+    get_builds_folder, get_aimodels_folder
+)
 from model_manager import is_model_available, get_model_path
-from features_manager import  get_features
+from features_manager import  process_repository
 
 app = Flask(__name__)
 executor = ThreadPoolExecutor(max_workers=4)
@@ -121,10 +125,11 @@ def save_builds():
                 db.session.commit()
 
                 # Create a folder with the repository name and branch
-                os.makedirs('features/' + repo_name + '_' + normalize_branch_name(branch) + '/builds', exist_ok=True)
+                os.makedirs(get_builds_folder(repo_name, branch), exist_ok=True)
+                os.makedirs(get_aimodels_folder(repo_name, branch), exist_ok=True)
 
-                # Async call to fetch information from the specified repository and branch            
-                executor.submit(get_features,  repository_url, branch, features_file)
+                # Async call to fetch information from the specified repository and branch
+                executor.submit(process_repository, repository_url, branch, features_file, pickle_pattern)   
 
                 return 'Repository metadata created'
         else:

@@ -4,12 +4,20 @@ from the Github Actions metadata. This information (features) is used to
 train the model and make predictions later on.
 """
 import re
+import os
 import datetime
+import time
 import pandas as pd
-from constants import HOUR_CONVERTER, FEATURES_FOLDER
-from github_manager import GithubManager
+import json
 from typing import Tuple
-from utils import get_owner, get_repo_name
+from constants import HOUR_CONVERTER
+from concurrent.futures import ThreadPoolExecutor
+from github_manager import GithubManager
+from utils import get_owner, get_repo_name, get_builds_folder, get_features_folder
+from model_manager import train_all
+
+executor = ThreadPoolExecutor(max_workers=4)
+
 
 # Indicate type annotations
 def get_performance_short(run_id: int, builds: dict) -> float:
@@ -306,7 +314,7 @@ def get_hour(build: dict) -> int:
 
     return date.hour
 
-def get_outcome(build: dict) -> str:
+def get_outcome(build: dict) -> int:
     """
     Extract the outcome of the build.
 
@@ -316,60 +324,86 @@ def get_outcome(build: dict) -> str:
     Returns:
     str: The outcome of the build.
     """
-    return build['conclusion']
+    return 0 if build['conclusion'] == 'failure' else 1
 
-def get_features(repository_url: str, branch: str, csv_file: str) -> None:
+def get_builds_by_months(owner: str, repo_name: str, branch: str) -> None:
+
+    start_year = 2019
+    current_year = datetime.datetime.now().year
+
+    for year in range(start_year, current_year + 1):
+        for month in range(1, 13):
+            if year == current_year and month > datetime.datetime.now().month:
+                break
+
+            github_manager = GithubManager()
+            github_manager.save_month_builds(month, year, owner, repo_name, branch)
+
+def get_features(repo_name: str, branch: str, csv_file: str) -> None:
     """
-    Extract the following features for a specific repository and branch and save them in a csv file.
-    Features:
-        PS: performance short
-        PL: performance long
-        TF: time frequency
-        NC: number of commits
-        FC: number of files changed
-        FA: number of files added
-        FM: number of files modified
-        FR: number of files removed
-        LC: number of lines changed
-        LA: number of lines added
-        LR: number of lines removed
-        LT: number of tests lines changed
-        UT: a number indicating whether tests have been written
-        FD: failure distance
-        WD: week day
-        DH: day hour
-    Class:
-        outcome: success or failure
+    Extract all the features from the builds files located in the builds folder
+    and save them in a csv file.
 
     Args:
-    repository_url (str): The URL of the repository.
+    repo_name (str): The name of the repository.
     branch (str): The branch of the repository.
     csv_file (str): The name of the csv file to save the features.
-    """
-    owner = get_owner(repository_url)
-    repo_name = get_repo_name(repository_url)
 
-    # Get CI builds to train the model
-    github_manager = GithubManager()
-    builds = github_manager.get_builds(owner=owner, repo_name=repo_name, branch=branch)
+    Returns:
+    None
+    """
+    # Get all files from its build folder
+    builds_folder = get_builds_folder(repo_name, branch)
+    files = os.listdir(builds_folder)
 
     df = pd.DataFrame(columns=['PS', 'PL', 'TF', 'NC', 'FC', 'FA', 'FM', 'FR', 'LC', 'LA', 'LR', 'LT', 'UT' ,'FD', 'WD', 'DH', 'outcome'])
 
-    # Get the data to train the model
-    for build in builds["workflow_runs"]:
-        build_id = build['id']
-        PS = get_performance_short(build_id, builds)
-        PL = get_performance_long(build_id, builds)
-        TF = get_time_frequency(build_id, builds)
-        NC = get_num_commits(build)
-        FC, FA, FM, FR = get_num_files_changed(build)
-        LC, LA, LR, LT, UT = get_num_lines_changed(build)
-        FD = get_failure_distance(build_id, builds)
-        WD = get_weekday(build)
-        DH = get_hour(build)
-        outcome = get_outcome(build)
+    for file in files:
+        # Logear el nombre del archivo
+        
+        with open(builds_folder + file, 'r') as f:
+            builds = json.load(f)
 
-        # Add CI build
-        df.loc[len(df.index)] = [PS, PL, TF, NC, FC, FA, FM, FR, LC, LA, LR, LT, UT, FD, WD, DH, outcome]
+        # Extract the features
+        for build in builds["workflow_runs"]:
+            build_id = build['id']
+            PS = get_performance_short(build_id, builds)
+            PL = get_performance_long(build_id, builds)
+            TF = get_time_frequency(build_id, builds)
+            NC = get_num_commits(build)
+            FC, FA, FM, FR = get_num_files_changed(build)
+            LC, LA, LR, LT, UT = get_num_lines_changed(build)
+            FD = get_failure_distance(build_id, builds)
+            WD = get_weekday(build)
+            DH = get_hour(build)
+            outcome = get_outcome(build)
 
-    df.to_csv(FEATURES_FOLDER + csv_file, index=False)
+            # Add CI build
+            df.loc[len(df.index)] = [PS, PL, TF, NC, FC, FA, FM, FR, LC, LA, LR, LT, UT, FD, WD, DH, outcome]
+
+        # Save the features in a csv file or add them to an existing file
+        try:
+            with open(get_features_folder(repo_name, branch) + csv_file, 'x') as f:
+                df.to_csv(f, index=False)
+        except FileExistsError:
+            df.to_csv(get_features_folder(repo_name, branch) + csv_file, mode='a', header=False, index=False)
+
+        df = df.drop(df.index)
+
+def process_repository(repository_url: str, branch: str, features_file: str, pickle_pattern: str) -> None:
+    owner = get_owner(repository_url)
+    repo_name = get_repo_name(repository_url)
+    
+    # Get all the builds from repository from 2019 (GitHub Actions started in 2019) to 2024
+    executor.submit(get_builds_by_months, owner, repo_name, branch)
+
+    # Wait some time to collect a sufficient number of builds
+    time.sleep(900)     # 15 minutes
+
+    # Extract the features from the builds (located in the builds folder))
+    get_features(repo_name, branch, features_file)
+
+    # Train all models with the features extracted
+    x_train = pd.read_csv(get_features_folder(repo_name, branch) + features_file)
+    y_train = x_train.pop('outcome')
+    train_all(x_train, y_train, pickle_pattern)

@@ -1,8 +1,9 @@
 import os
 import requests
 import datetime
+import json
 from typing import Tuple
-from utils import replace_fields, get_month_start_end
+from utils import replace_fields, get_month_start_end, get_builds_folder
 from constants import GET_PRS, GET_PR, GET_PR_COMMITS, GET_PR_FILES, GET_BUILDS, GET_BUILD
 from flask import jsonify
 
@@ -247,7 +248,8 @@ class GithubManager:
         count = 0
         max_iterations = 10
         more_builds = True
-        
+        last_created_at = None
+
         while page:
             response = requests.get(page, params=params, headers=self.headers)
             response.raise_for_status()
@@ -278,7 +280,7 @@ class GithubManager:
         else:
             return jsonify({"error": "Not found"}), 404
 
-    def get_month_builds(self, month: int, year: int, owner: str, repo_name: str, branch: str = "main") -> dict:
+    def save_month_builds(self, month: int, year: int, owner: str, repo_name: str, branch: str = "main") -> None:
         """
         This method allows obtaining all builds from a repository in a specific month.
 
@@ -290,7 +292,7 @@ class GithubManager:
         branch (str): The branch to search for builds.
 
         Returns:
-        dict: The dictionary containing the workflow runs metadata.
+        None
         """
         start_date, end_date = get_month_start_end(year, month)
         url = replace_fields(GET_BUILDS, owner, repo_name)
@@ -301,4 +303,10 @@ class GithubManager:
             "created": start_date + '..' + end_date
         }
 
-        return self._get_all_month_builds(url, params)
+        builds = self._get_all_month_builds(url, params)
+        
+        # Check if there are builds to avoid saving files with no builds
+        if builds["total_count"] > 0:
+            # Save the builds in a file, (JSON)
+            with open(get_builds_folder(repo_name, branch) + start_date + '_' + end_date, "w") as f:
+                f.write(json.dumps(builds))
