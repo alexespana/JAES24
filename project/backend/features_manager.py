@@ -143,7 +143,7 @@ def get_build_pr_number(build: dict) -> int:
 
     return pr_number
 
-def get_num_commits(build: dict) -> int:
+def get_num_commits(build: dict, build_pr_number: int) -> int:
     """
     Calculate the number of commits in a build.
 
@@ -153,20 +153,19 @@ def get_num_commits(build: dict) -> int:
     Returns:
     int: The number of commits in the build.
     """
-    pr_number = get_build_pr_number(build)
     full_name = build['repository']['full_name']
     owner, repo_name = full_name.split('/')
 
-    if pr_number is None:
+    if build_pr_number is None:
         return 0
 
     # Get the commits for this PR
     github_manager = GithubManager()
-    commits = github_manager.get_pull_request_commits(owner, repo_name, pr_number, number_of_commits=100)
+    commits = github_manager.get_pull_request_commits(owner, repo_name, build_pr_number, number_of_commits=100)
 
     return len(commits)
 
-def get_num_files_changed(build: dict) -> Tuple[int, int, int, int]:
+def get_num_files_changed(build: dict, build_pr_number: int, pull_request_files: dict) -> Tuple[int, int, int, int]:
     """
     Calculate the number of files changed, added, modified and removed in a build.
 
@@ -179,21 +178,13 @@ def get_num_files_changed(build: dict) -> Tuple[int, int, int, int]:
     int: The number of files modified in the build.
     int: The number of files removed in the build.
     """
-    pr_number = get_build_pr_number(build)
-    full_name = build['repository']['full_name']
-    owner, repo_name = full_name.split('/')
-
-    if pr_number is None:
+    if build_pr_number is None:
         return 0, 0, 0, 0
-
-    # Get the files for this PR
-    github_manager = GithubManager()
-    files = github_manager.get_pull_request_files(owner, repo_name, pr_number, number_of_files=100)
 
     files_added = 0
     files_modified = 0
     files_removed = 0
-    for file in files:
+    for file in pull_request_files:
         if file['status'] == 'added':
             files_added += 1
         elif file['status'] == 'modified':
@@ -201,9 +192,9 @@ def get_num_files_changed(build: dict) -> Tuple[int, int, int, int]:
         elif file['status'] == 'removed':
             files_removed += 1
 
-    return len(files), files_added, files_modified, files_removed
+    return len(pull_request_files), files_added, files_modified, files_removed
 
-def get_num_lines_changed(build: dict) -> Tuple[int, int, int, int, int]:
+def get_num_lines_changed(build: dict, build_pr_number: int, pull_request_files: dict) -> Tuple[int, int, int, int, int]:
     """
     Calculate the number of lines changed, added and removed in a build.
 
@@ -215,27 +206,20 @@ def get_num_lines_changed(build: dict) -> Tuple[int, int, int, int, int]:
     int: The number of lines added in the build.
     int: The number of lines removed in the build.
     """
-    pr_number = get_build_pr_number(build)
-    full_name = build['repository']['full_name']
-    owner, repo_name = full_name.split('/')
     lines_added = 0
     lines_removed = 0
     test_lines_changed = 0
     source_code_modified = False
     extensions = [".py", ".js", ".mjs", ".jsx", ".ts", ".tsx", ".java", ".cs", ".php", ".rb", ".swift", ".kt", ".kts", ".go", ".rs", ".scala", ".hs"]
 
-    if pr_number is None:
+    if build_pr_number is None:
         return 0, 0, 0, 0, 0
-
-    # Get the files for this PR
-    github_manager = GithubManager()
-    files = github_manager.get_pull_request_files(owner, repo_name, pr_number, number_of_files=100)
 
     # 0: source code modified and no tests modified
     # 1: source code modified and tests modified
     # 2: no source code modified, not applicable
     unit_tests = 2
-    for file in files:
+    for file in pull_request_files:
         lines_added += file['additions']
         lines_removed += file['deletions']
 
@@ -353,10 +337,13 @@ def get_features(repo_name: str, branch: str, csv_file: str) -> None:
     None
     """
     # Get all files from its build folder
+
     builds_folder = get_builds_folder(repo_name, branch)
     files = os.listdir(builds_folder)
 
     df = pd.DataFrame(columns=['PS', 'PL', 'TF', 'NC', 'FC', 'FA', 'FM', 'FR', 'LC', 'LA', 'LR', 'LT', 'UT' ,'FD', 'WD', 'DH', 'outcome'])
+
+    github_manager = GithubManager()
 
     for file in files:
         # Logear el nombre del archivo
@@ -366,13 +353,19 @@ def get_features(repo_name: str, branch: str, csv_file: str) -> None:
 
         # Extract the features
         for build in builds["workflow_runs"]:
+            build_pr_number = get_build_pr_number(build)
+            if build_pr_number is not None:
+                full_name = build['repository']['full_name']
+                owner, repo_name = full_name.split('/')
+                files = github_manager.get_pull_request_files(owner, repo_name, build_pr_number, number_of_files=100)
+
             build_id = build['id']
             PS = get_performance_short(build_id, builds)
             PL = get_performance_long(build_id, builds)
             TF = get_time_frequency(build_id, builds)
-            NC = get_num_commits(build)
-            FC, FA, FM, FR = get_num_files_changed(build)
-            LC, LA, LR, LT, UT = get_num_lines_changed(build)
+            NC = get_num_commits(build, build_pr_number)
+            FC, FA, FM, FR = get_num_files_changed(build, build_pr_number, files)
+            LC, LA, LR, LT, UT = get_num_lines_changed(build, build_pr_number, files)
             FD = get_failure_distance(build_id, builds)
             WD = get_weekday(build)
             DH = get_hour(build)
