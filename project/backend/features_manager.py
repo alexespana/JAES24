@@ -20,7 +20,7 @@ executor = ThreadPoolExecutor(max_workers=4)
 
 
 # Indicate type annotations
-def get_performance_short(run_id: int, builds: dict) -> float:
+def get_performance_short(run_id: int, builds: dict, id_to_index: dict) -> float:
     """
     This function calculates the performance of a build by counting the number
     of successful builds after the target build.
@@ -34,25 +34,14 @@ def get_performance_short(run_id: int, builds: dict) -> float:
     """
     threshold = 5
     successful_builds = 0
-    found_target_build = False
-    builds_after_target = []
+    start_index = id_to_index[run_id]
+    end_index = start_index + threshold
 
-    for run in builds["workflow_runs"]:
-        if found_target_build:
-            builds_after_target.append(run)
-            if len(builds_after_target) <= threshold:
-                if run["conclusion"] == "success":
-                    successful_builds += 1
-            else:
-                break
+    successful_builds = sum([1 for run in builds["workflow_runs"][start_index:end_index] if run["conclusion"] == "success"])
 
-        if run["id"] == run_id:
-            found_target_build = True
+    return (successful_builds / max(len(builds["workflow_runs"][start_index:end_index]), 1)) * 100
 
-
-    return (successful_builds / max(len(builds_after_target), 1)) * 100 
-
-def get_performance_long(run_id: int, builds: dict) -> float:
+def get_performance_long(run_id: int, builds: dict, id_to_index: dict) -> float:
     """
     Calculate the performance long term of a repository by counting the number
     of successful builds after the target build.
@@ -65,19 +54,11 @@ def get_performance_long(run_id: int, builds: dict) -> float:
     float: The performance of the build in percentage.
     """
     successful_builds = 0
-    found_target_build = False
-    builds_after_target = 0
+    start_index = id_to_index[run_id]
 
-    for run in builds["workflow_runs"]:
-        if found_target_build:
-            builds_after_target += 1
-            if run["conclusion"] == "success":
-                successful_builds += 1
-           
-        if run["id"] == run_id:
-            found_target_build = True
+    successful_builds = sum([1 for run in builds["workflow_runs"][start_index:] if run["conclusion"] == "success"])
 
-    return (successful_builds / max(builds_after_target, 1)) * 100 
+    return (successful_builds / max(len(builds["workflow_runs"][start_index:]), 1)) * 100 
 
 def get_time_frequency(run_id: int, builds: dict) -> int:
     """
@@ -351,6 +332,8 @@ def get_features(repo_name: str, branch: str, csv_file: str) -> None:
         with open(builds_folder + file, 'r') as f:
             builds = json.load(f)
 
+        id_to_index = {build['id']: index for index, build in enumerate(builds["workflow_runs"])}
+
         # Extract the features
         for build in builds["workflow_runs"]:
             build_pr_number = get_build_pr_number(build)
@@ -360,8 +343,8 @@ def get_features(repo_name: str, branch: str, csv_file: str) -> None:
                 files = github_manager.get_pull_request_files(owner, repo_name, build_pr_number, number_of_files=100)
 
             build_id = build['id']
-            PS = get_performance_short(build_id, builds)
-            PL = get_performance_long(build_id, builds)
+            PS = get_performance_short(build_id, builds, id_to_index)
+            PL = get_performance_long(build_id, builds, id_to_index)
             TF = get_time_frequency(build_id, builds)
             NC = get_num_commits(build, build_pr_number)
             FC, FA, FM, FR = get_num_files_changed(build, build_pr_number, files)
