@@ -60,7 +60,7 @@ def get_performance_long(run_id: int, builds: dict, id_to_index: dict) -> float:
 
     return (successful_builds / max(len(builds["workflow_runs"][start_index:]), 1)) * 100 
 
-def get_time_frequency(run_id: int, builds: dict) -> int:
+def get_time_frequency(run_id: int, builds: dict, id_to_index: dict) -> int:
     """
     Calculate the time frequency between the target build and the previous build.
 
@@ -71,23 +71,16 @@ def get_time_frequency(run_id: int, builds: dict) -> int:
     Returns:
     float: The time frequency between the target build and the previous build (hours).
     """
-    previous_build_search = False
-    created_target_build = None
-    created_previous_build = None
+    target_index = id_to_index[run_id]
+    previous_index = target_index + 1
 
+    try:
+        created_previous_date = builds["workflow_runs"][previous_index]['created_at']
+    except IndexError:
+        created_previous_date = builds["workflow_runs"][target_index]['created_at']
 
-    for run in builds["workflow_runs"]:
-        if previous_build_search:
-            created_previous_build = run['created_at']
-            previous_build_search = False
-
-        if run["id"] == run_id:
-            created_target_build = run['created_at']
-            previous_build_search = True
-
-    created_previous_build = created_previous_build if created_previous_build is not None else created_target_build
-    target_date = datetime.datetime.strptime(created_target_build, "%Y-%m-%dT%H:%M:%SZ")
-    previous_date = datetime.datetime.strptime(created_previous_build, "%Y-%m-%dT%H:%M:%SZ")
+    target_date = datetime.datetime.strptime(builds["workflow_runs"][target_index]['created_at'], "%Y-%m-%dT%H:%M:%SZ")
+    previous_date = datetime.datetime.strptime(created_previous_date, "%Y-%m-%dT%H:%M:%SZ")
 
     return round((target_date - previous_date).total_seconds() / HOUR_CONVERTER)
 
@@ -221,7 +214,7 @@ def get_num_lines_changed(build: dict, build_pr_number: int, pull_request_files:
 
     return lines_added + lines_removed, lines_added, lines_removed, test_lines_changed, unit_tests
 
-def get_failure_distance(run_id: int, builds: dict) -> int:
+def get_failure_distance(run_id: int, builds: dict, id_to_index: dict) -> int:
     """
     Search for the run_id build and count the number of successful builds
     until the first failed build.
@@ -233,18 +226,17 @@ def get_failure_distance(run_id: int, builds: dict) -> int:
     Returns:
     int: The number of successful builds until the first failed build.
     """
-    found_target_build = False
     successful_builds = 0
 
-    for run in builds["workflow_runs"]:
-        if found_target_build:
-            if run["conclusion"] == "failure":
-                break
-            else:   # success, cancelled, skipped, None
-                successful_builds += 1
-            
-        if run["id"] == run_id:
-            found_target_build = True
+    start_index = id_to_index[run_id]
+
+
+    for run in builds["workflow_runs"][start_index + 1:]:
+        if run["conclusion"] == "failure":
+            break
+        
+        # success, cancelled, skipped, None
+        successful_builds += 1
 
     return successful_builds
 
@@ -345,11 +337,11 @@ def get_features(repo_name: str, branch: str, csv_file: str) -> None:
             build_id = build['id']
             PS = get_performance_short(build_id, builds, id_to_index)
             PL = get_performance_long(build_id, builds, id_to_index)
-            TF = get_time_frequency(build_id, builds)
+            TF = get_time_frequency(build_id, builds, id_to_index)
             NC = get_num_commits(build, build_pr_number)
             FC, FA, FM, FR = get_num_files_changed(build, build_pr_number, files)
             LC, LA, LR, LT, UT = get_num_lines_changed(build, build_pr_number, files)
-            FD = get_failure_distance(build_id, builds)
+            FD = get_failure_distance(build_id, builds, id_to_index)
             WD = get_weekday(build)
             DH = get_hour(build)
             outcome = get_outcome(build)
