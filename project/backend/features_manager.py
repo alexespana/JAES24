@@ -9,15 +9,11 @@ import datetime
 import time
 import pandas as pd
 import json
-from typing import Tuple
+from typing import Tuple, Optional
 from constants import HOUR_CONVERTER
-from concurrent.futures import ThreadPoolExecutor
 from github_manager import GithubManager
 from utils import get_owner, get_repo_name, get_builds_folder, get_features_folder
 from model_manager import train_all
-
-executor = ThreadPoolExecutor(max_workers=4)
-
 
 # Indicate type annotations
 def get_performance_short(run_id: int, builds: dict, id_to_index: dict) -> float:
@@ -84,7 +80,7 @@ def get_time_frequency(run_id: int, builds: dict, id_to_index: dict) -> int:
 
     return round((target_date - previous_date).total_seconds() / HOUR_CONVERTER)
 
-def get_build_pr_number(build: dict) -> int:
+def get_build_pr_number(build: dict) -> Optional[int]:
     """
     Extract the pull request number from a build.
 
@@ -103,7 +99,10 @@ def get_build_pr_number(build: dict) -> int:
         # Get the name of the PR which trigerred the build
         display_title = build['display_title']
         # Get the label (organization:ref-name) who triggered the build
-        label = build['head_repository']['owner']['login'] + ':' + build['head_branch']
+        if build['head_repository'] is None:
+            return None
+        else:
+            label = build['head_repository']['owner']['login'] + ':' + build['head_branch']
 
         # Get pull requests for this branch
         github_manager = GithubManager()
@@ -135,7 +134,7 @@ def get_num_commits(build: dict, build_pr_number: int) -> int:
 
     # Get the commits for this PR
     github_manager = GithubManager()
-    commits = github_manager.get_pull_request_commits(owner, repo_name, build_pr_number, number_of_commits=100)
+    commits = github_manager.get_pull_request_commits(owner, repo_name, build_pr_number)
 
     return len(commits)
 
@@ -332,7 +331,7 @@ def get_features(repo_name: str, branch: str, csv_file: str) -> None:
             if build_pr_number is not None:
                 full_name = build['repository']['full_name']
                 owner, repo_name = full_name.split('/')
-                files = github_manager.get_pull_request_files(owner, repo_name, build_pr_number, number_of_files=100)
+                files = github_manager.get_pull_request_files(owner, repo_name, build_pr_number)
 
             build_id = build['id']
             PS = get_performance_short(build_id, builds, id_to_index)
@@ -358,20 +357,16 @@ def get_features(repo_name: str, branch: str, csv_file: str) -> None:
 
         df = df.drop(df.index)
 
-def process_repository(repository_url: str, branch: str, features_file: str, pickle_pattern: str) -> None:
+def process_repository(repository_url: str, branch: str, features_file: str, pickle_pattern: str, evaluate: bool = False) -> None:
     owner = get_owner(repository_url)
     repo_name = get_repo_name(repository_url)
     
     # Get all the builds from repository from 2019 (GitHub Actions started in 2019) to 2024
-    executor.submit(get_builds_by_months, owner, repo_name, branch)
-
-    # Wait some time to collect a sufficient number of builds
-    time.sleep(900)     # 15 minutes
+    get_builds_by_months(owner, repo_name, branch)
 
     # Extract the features from the builds (located in the builds folder))
     get_features(repo_name, branch, features_file)
 
     # Train all models with the features extracted
-    x_train = pd.read_csv(get_features_folder(repo_name, branch) + features_file)
-    y_train = x_train.pop('outcome')
-    train_all(x_train, y_train, pickle_pattern)
+    train_data = pd.read_csv(get_features_folder(repo_name, branch) + features_file)
+    train_all(train_data, pickle_pattern, evaluate)
