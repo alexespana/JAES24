@@ -19,3 +19,5 @@ GET_BUILDS = 'https://api.github.com/repos/OWNER/REPO/actions/runs'
 GET_BUILD = 'https://api.github.com/repos/OWNER/REPO/actions/runs/RUN_ID'
 # Converter to obtain the time frequency in hours
 HOUR_CONVERTER = 3600
+# Time to retry the request in seconds
+RETRY_TIME = 60

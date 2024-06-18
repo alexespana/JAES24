@@ -1,10 +1,11 @@
 import os
+import time
 import requests
 import datetime
 import json
 from typing import Tuple
 from utils import replace_fields, get_month_start_end, get_builds_folder
-from constants import GET_PRS, GET_PR, GET_PR_COMMITS, GET_PR_FILES, GET_BUILDS, GET_BUILD
+from constants import GET_PRS, GET_PR, GET_PR_COMMITS, GET_PR_FILES, GET_BUILDS, GET_BUILD, RETRY_TIME
 from flask import jsonify
 
 class GithubManager:
@@ -16,7 +17,7 @@ class GithubManager:
             "X-GitHub-Api-Version": "2022-11-28"
         }   
 
-    def get_pull_requests(self, owner: str, repo_name: str, label: str = None, number_of_prs: int = 101) -> dict:
+    def get_pull_requests(self, owner: str, repo_name: str, label: str = None, number_of_prs: int = 101) -> list:
         """
         This method allows obtaining up to the last 100 pull requests from a
         repository. If the number of pull requests exceeds the maximun value (100),
@@ -44,17 +45,20 @@ class GithubManager:
             next_page = url
             
             while next_page:
-                response = requests.get(next_page, params=params, headers=self.headers)
-                response.raise_for_status()
+                try:
+                    response = requests.get(next_page, params=params, headers=self.headers)
+                    response.raise_for_status()
 
-                data = response.json()
-                results.extend(data)
+                    data = response.json()
+                    results.extend(data)
 
-                # Check if there's a next page
-                if 'next' in response.links:
-                    next_page = response.links['next']['url']
-                else:
-                    next_page = None
+                    # Check if there's a next page
+                    if 'next' in response.links:
+                        next_page = response.links['next']['url']
+                    else:
+                        next_page = None
+                except Exception:
+                    time.sleep(RETRY_TIME)
 
             return results
         else:
@@ -73,7 +77,7 @@ class GithubManager:
         else:
             return jsonify({"error": "Not found"}), 404
 
-    def get_pull_request_commits(self, owner: str, repo_name: str, pull_request_number: int, number_of_commits: int = 101) -> dict:
+    def get_pull_request_commits(self, owner: str, repo_name: str, pull_request_number: int, number_of_commits: int = 101) -> list:
         """"
         This method allows obtaining up to the last 100 commits from a pull request. If 
         the number of commits exceeds the maximun value (100), all pull request commits
@@ -100,17 +104,20 @@ class GithubManager:
             next_page = url
             
             while next_page:
-                response = requests.get(next_page, params=params, headers=self.headers)
-                response.raise_for_status()
+                try:
+                    response = requests.get(next_page, params=params, headers=self.headers)
+                    response.raise_for_status()
 
-                data = response.json()
-                results.extend(data)
+                    data = response.json()
+                    results.extend(data)
 
-                # Check if there's a next page
-                if 'next' in response.links:
-                    next_page = response.links['next']['url']
-                else:
-                    next_page = None
+                    # Check if there's a next page
+                    if 'next' in response.links:
+                        next_page = response.links['next']['url']
+                    else:
+                        next_page = None
+                except Exception:
+                    time.sleep(RETRY_TIME)
 
             return results
         else:
@@ -146,17 +153,20 @@ class GithubManager:
             next_page = url
 
             while next_page:
-                response = requests.get(next_page, params=params, headers=self.headers)
-                response.raise_for_status()
+                try:
+                    response = requests.get(next_page, params=params, headers=self.headers)
+                    response.raise_for_status()
 
-                data = response.json()
-                results.extend(data)
+                    data = response.json()
+                    results.extend(data)
 
-                # Check if there's a next page
-                if 'next' in response.links:
-                    next_page = response.links['next']['url']
-                else:
-                    next_page = None
+                    # Check if there's a next page
+                    if 'next' in response.links:
+                        next_page = response.links['next']['url']
+                    else:
+                        next_page = None
+                except Exception:
+                    time.sleep(RETRY_TIME)
 
             return results
         else:
@@ -251,24 +261,27 @@ class GithubManager:
         last_created_at = None
 
         while page:
-            response = requests.get(page, params=params, headers=self.headers)
-            response.raise_for_status()
+            try:
+                response = requests.get(page, params=params, headers=self.headers)
+                response.raise_for_status()
 
-            data = response.json()
+                data = response.json()
 
-            if "workflow_runs" in data and data["workflow_runs"]:
-                last_created_at = data["workflow_runs"][-1]["created_at"]
-                results["workflow_runs"].extend(data["workflow_runs"])
+                if "workflow_runs" in data and data["workflow_runs"]:
+                    last_created_at = data["workflow_runs"][-1]["created_at"]
+                    results["workflow_runs"].extend(data["workflow_runs"])
 
-            # Check if there's a next page
-            if 'next' in response.links:
-                page = response.links['next']['url']
-            else:
-                page = None
-                if count < max_iterations:
-                    more_builds = False
+                # Check if there's a next page
+                if 'next' in response.links:
+                    page = response.links['next']['url']
+                else:
+                    page = None
+                    if count < max_iterations:
+                        more_builds = False
 
-            count += 1
+                count += 1
+            except Exception:
+                time.sleep(RETRY_TIME)
 
         return results, more_builds, last_created_at
 
