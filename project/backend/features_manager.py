@@ -311,15 +311,15 @@ def get_features(repo_name: str, branch: str, csv_file: str) -> None:
     # Get all files from its build folder
 
     builds_folder = get_builds_folder(repo_name, branch)
-    files = os.listdir(builds_folder)
+    build_files = os.listdir(builds_folder)
+    sorted_builds_files = sorted(build_files, reverse = True)
+
 
     df = pd.DataFrame(columns=['PS', 'PL', 'TF', 'NC', 'FC', 'FA', 'FM', 'FR', 'LC', 'LA', 'LR', 'LT', 'UT' ,'FD', 'WD', 'DH', 'outcome'])
 
     github_manager = GithubManager()
 
-    for file in files:
-        # Logear el nombre del archivo
-        
+    for file in sorted_builds_files:        
         with open(builds_folder + file, 'r') as f:
             builds = json.load(f)
 
@@ -331,15 +331,15 @@ def get_features(repo_name: str, branch: str, csv_file: str) -> None:
             if build_pr_number is not None:
                 full_name = build['repository']['full_name']
                 owner, repo_name = full_name.split('/')
-                files = github_manager.get_pull_request_files(owner, repo_name, build_pr_number)
+                pr_files = github_manager.get_pull_request_files(owner, repo_name, build_pr_number)
 
             build_id = build['id']
             PS = get_performance_short(build_id, builds, id_to_index)
             PL = get_performance_long(build_id, builds, id_to_index)
             TF = get_time_frequency(build_id, builds, id_to_index)
             NC = get_num_commits(build, build_pr_number)
-            FC, FA, FM, FR = get_num_files_changed(build, build_pr_number, files)
-            LC, LA, LR, LT, UT = get_num_lines_changed(build, build_pr_number, files)
+            FC, FA, FM, FR = get_num_files_changed(build, build_pr_number, pr_files)
+            LC, LA, LR, LT, UT = get_num_lines_changed(build, build_pr_number, pr_files)
             FD = get_failure_distance(build_id, builds, id_to_index)
             WD = get_weekday(build)
             DH = get_hour(build)
