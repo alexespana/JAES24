@@ -91,28 +91,26 @@ def get_build_pr_number(build: dict) -> Optional[int]:
     int: The pull request number.
     """
     pr_number = None
-    # Check if the build is triggered by a pull request event
-    if 'pull_request' in build['event']:
-        # Get the owner and repository name
-        full_name = build['repository']['full_name']
-        owner, repo_name = full_name.split('/')
-        # Get the name of the PR which trigerred the build
-        display_title = build['display_title']
-        # Get the label (organization:ref-name) who triggered the build
-        if build['head_repository'] is None:
-            return None
-        else:
-            label = build['head_repository']['owner']['login'] + ':' + build['head_branch']
 
-        # Get pull requests for this branch
-        github_manager = GithubManager()
-        pull_requests = github_manager.get_pull_requests(owner, repo_name, label)
+    # Get the owner and repository name
+    full_name = build['repository']['full_name']
+    owner, repo_name = full_name.split('/')
+    # Get the name of the PR which trigerred the build
+    display_title = build['display_title']
+    # Get the label (organization:ref-name) who triggered the build
+    if build['head_repository'] is None:
+        return None
+    else:
+        label = build['head_repository']['owner']['login'] + ':' + build['head_branch']
 
-        # Search for the PR that triggered the build
-        for pr in pull_requests:
-            if pr['title'] == display_title:
-                pr_number = pr['number']
-                break
+    # Get pull requests for this branch
+    pull_requests = github_manager.get_pull_requests(owner, repo_name, label)
+
+    # Search for the PR that triggered the build
+    for pr in pull_requests:
+        if pr['title'] == display_title:
+            pr_number = pr['number']
+            break
 
     return pr_number
 
@@ -133,27 +131,23 @@ def get_num_commits(build: dict, build_pr_number: int) -> int:
         return 0
 
     # Get the commits for this PR
-    github_manager = GithubManager()
     commits = github_manager.get_pull_request_commits(owner, repo_name, build_pr_number)
 
     return len(commits)
 
-def get_num_files_changed(build: dict, build_pr_number: int, pull_request_files: dict) -> Tuple[int, int, int, int]:
+def get_num_files_changed(pull_request_files: dict) -> Tuple[int, int, int, int]:
     """
-    Calculate the number of files changed, added, modified and removed in a build.
+    Calculate the number of lines changed, added and removed in a build.
 
     Args:
     build (dict): The dictionary containing the build metadata.
 
     Returns:
-    int: The number of files changed in the build.
-    int: The number of files added in the build.
-    int: The number of files modified in the build.
-    int: The number of files removed in the build.
+    int: The number of lines changed in the build.
+    int: The number of lines added in the build.
+    int: The number of lines modified in the build.
+    int: The number of lines removed in the build.
     """
-    if build_pr_number is None:
-        return 0, 0, 0, 0
-
     files_added = 0
     files_modified = 0
     files_removed = 0
@@ -167,7 +161,7 @@ def get_num_files_changed(build: dict, build_pr_number: int, pull_request_files:
 
     return len(pull_request_files), files_added, files_modified, files_removed
 
-def get_num_lines_changed(build: dict, build_pr_number: int, pull_request_files: dict) -> Tuple[int, int, int, int, int]:
+def get_num_lines_changed(pull_request_files: dict) -> Tuple[int, int, int, int, int]:
     """
     Calculate the number of lines changed, added and removed in a build.
 
@@ -178,15 +172,14 @@ def get_num_lines_changed(build: dict, build_pr_number: int, pull_request_files:
     int: The number of lines changed in the build.
     int: The number of lines added in the build.
     int: The number of lines removed in the build.
+    int: The number of test lines changed.
+    int: Whether unit tests have been written or not.
     """
     lines_added = 0
     lines_removed = 0
     test_lines_changed = 0
     source_code_modified = False
     extensions = [".py", ".js", ".mjs", ".jsx", ".ts", ".tsx", ".java", ".cs", ".php", ".rb", ".swift", ".kt", ".kts", ".go", ".rs", ".scala", ".hs"]
-
-    if build_pr_number is None:
-        return 0, 0, 0, 0, 0
 
     # 0: source code modified and no tests modified
     # 1: source code modified and tests modified
@@ -292,7 +285,6 @@ def get_builds_by_months(owner: str, repo_name: str, branch: str) -> None:
             if year == current_year and month > datetime.datetime.now().month:
                 break
 
-            github_manager = GithubManager()
             github_manager.save_month_builds(month, year, owner, repo_name, branch)
 
 def get_features(repo_name: str, branch: str, csv_file: str) -> None:
