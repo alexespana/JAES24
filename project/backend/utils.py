@@ -56,8 +56,8 @@ def get_repo_name(url: str) -> str:
     repo_name = url.split('/')[-1]
     return repo_name
 
-def replace_fields(url, owner: str = '', repo_name: str = '', pull_number: int = '', run_id: int = '') -> str:
-    url = url.replace('OWNER', owner).replace('REPO', repo_name).replace('PULL_NUMBER', pull_number).replace('RUN_ID', run_id)
+def replace_fields(url, owner: str = '', repo_name: str = '', pull_number: int = '', run_id: int = '', sha: int = '') -> str:
+    url = url.replace('OWNER', owner).replace('REPO', repo_name).replace('PULL_NUMBER', pull_number).replace('RUN_ID', run_id).replace('COMMIT_SHA', sha)
     return url
 
 def normalize_branch_name(branch: str) -> str:

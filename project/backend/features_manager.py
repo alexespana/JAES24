@@ -10,10 +10,13 @@ import time
 import pandas as pd
 import json
 from typing import Tuple, Optional
+from model_manager import train_all
 from constants import HOUR_CONVERTER
 from github_manager import GithubManager
 from utils import get_owner, get_repo_name, get_builds_folder, get_features_folder
-from model_manager import train_all
+
+# Github Manager instance
+github_manager = GithubManager()
 
 # Indicate type annotations
 def get_performance_short(run_id: int, builds: dict, id_to_index: dict) -> float:
@@ -301,17 +304,12 @@ def get_features(repo_name: str, branch: str, csv_file: str) -> None:
     None
     """
     # Get all files from its build folder
+    builds_folder = get_builds_folder(repo_name, branch) 
+    sorted_builds_files = sorted(os.listdir(builds_folder), reverse = True)
 
-    builds_folder = get_builds_folder(repo_name, branch)
-    build_files = os.listdir(builds_folder)
-    sorted_builds_files = sorted(build_files, reverse = True)
+    df = pd.DataFrame(columns=['ID', 'PS', 'PL', 'TF', 'NC', 'FC', 'FA', 'FM', 'FR', 'LC', 'LA', 'LR', 'LT', 'UT' ,'FD', 'WD', 'DH', 'outcome'])
 
-
-    df = pd.DataFrame(columns=['PS', 'PL', 'TF', 'NC', 'FC', 'FA', 'FM', 'FR', 'LC', 'LA', 'LR', 'LT', 'UT' ,'FD', 'WD', 'DH', 'outcome'])
-
-    github_manager = GithubManager()
-
-    for file in sorted_builds_files:        
+    for file in sorted_builds_files:
         with open(builds_folder + file, 'r') as f:
             builds = json.load(f)
 
@@ -319,26 +317,40 @@ def get_features(repo_name: str, branch: str, csv_file: str) -> None:
 
         # Extract the features
         for build in builds["workflow_runs"]:
-            build_pr_number = get_build_pr_number(build)
-            if build_pr_number is not None:
-                full_name = build['repository']['full_name']
-                owner, repo_name = full_name.split('/')
-                pr_files = github_manager.get_pull_request_files(owner, repo_name, build_pr_number)
-
-            build_id = build['id']
+            build_id = build['id']            
+            full_name = build['repository']['full_name']
+            owner, repo_name = full_name.split('/')
             PS = get_performance_short(build_id, builds, id_to_index)
             PL = get_performance_long(build_id, builds, id_to_index)
             TF = get_time_frequency(build_id, builds, id_to_index)
-            NC = get_num_commits(build, build_pr_number)
-            FC, FA, FM, FR = get_num_files_changed(build, build_pr_number, pr_files)
-            LC, LA, LR, LT, UT = get_num_lines_changed(build, build_pr_number, pr_files)
             FD = get_failure_distance(build_id, builds, id_to_index)
             WD = get_weekday(build)
             DH = get_hour(build)
             outcome = get_outcome(build)
 
+            # Get the event type which triggered the build
+            event_type = get_event_type(build)
+            
+            if 'pull_request' in event_type:
+                build_pr_number = get_build_pr_number(build)
+
+                if build_pr_number is None:     
+                    continue
+
+                pr_files = github_manager.get_pull_request_files(owner, repo_name, build_pr_number)
+                NC = get_num_commits(build, build_pr_number)
+
+            elif event_type == 'push' or event_type == 'schedule' or event_type == 'dynamic':
+                NC = 1
+                sha = build['head_sha']
+                commit = github_manager.get_commit(owner, repo_name, sha)
+                pr_files = commit['files']
+
+            FC, FA, FM, FR = get_num_files_changed(pr_files)
+            LC, LA, LR, LT, UT = get_num_lines_changed(pr_files)
+
             # Add CI build
-            df.loc[len(df.index)] = [PS, PL, TF, NC, FC, FA, FM, FR, LC, LA, LR, LT, UT, FD, WD, DH, outcome]
+            df.loc[len(df.index)] = [build_id, PS, PL, TF, NC, FC, FA, FM, FR, LC, LA, LR, LT, UT, FD, WD, DH, outcome]
 
         # Save the features in a csv file or add them to an existing file
         try:
@@ -361,4 +373,19 @@ def process_repository(repository_url: str, branch: str, features_file: str, pic
 
     # Train all models with the features extracted
     train_data = pd.read_csv(get_features_folder(repo_name, branch) + features_file)
+    train_data = train_data.drop(columns=['ID'])
+    
     train_all(train_data, pickle_pattern, evaluate)
+
+
+def get_event_type(build: dict) -> str:
+    """
+    Extract the type of event that triggered the build.
+
+    Args:
+    build (dict): The dictionary containing the build metadata.
+
+    Returns:
+    str: The type of event that triggered the build.
+    """
+    return build['event']

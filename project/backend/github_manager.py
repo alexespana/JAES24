@@ -1,11 +1,11 @@
 import os
+import json
 import time
 import requests
 import datetime
-import json
 from typing import Tuple
 from utils import replace_fields, get_month_start_end, get_builds_folder
-from constants import GET_PRS, GET_PR, GET_PR_COMMITS, GET_PR_FILES, GET_BUILDS, GET_BUILD, RETRY_TIME
+from constants import GET_PRS, GET_PR, GET_PR_COMMITS, GET_PR_FILES, GET_BUILDS, GET_BUILD, RETRY_TIME, GET_COMMIT
 from flask import jsonify
 
 class GithubManager:
@@ -323,3 +323,25 @@ class GithubManager:
             # Save the builds in a file, (JSON)
             with open(get_builds_folder(repo_name, branch) + start_date + '_' + end_date, "w") as f:
                 f.write(json.dumps(builds))
+
+    def get_commit(self, owner: str, repo_name: str, sha: str) -> dict:
+        """
+        Get a specific commit.
+
+        Args:
+        owner (str): The owner of the repository.
+        repo_name (str): The name of the repository.
+        sha (str): The commit sha.
+
+        Returns:
+        dict: The commit information.
+        """
+        url = replace_fields(GET_COMMIT, owner=owner, repo_name=repo_name, sha=sha)
+        while(url):
+            try:
+                response = requests.get(url, headers=self.headers)
+                response.raise_for_status()
+
+                return response.json()
+            except Exception:
+                time.sleep(RETRY_TIME)
