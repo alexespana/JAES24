@@ -140,16 +140,18 @@ def get_features_folder(repo_name: str, branch: str) -> str:
     """
     return FEATURES_FOLDER + repo_name + '_' + normalize_branch_name(branch) + '/'
 
-def print_model_metrics(model_type: str, confusion_matrix: np.ndarray, acc: float, precision: float, recall: float, f1: float) -> str:
+def print_model_metrics(model_type: str, confusion_matrix: np.ndarray, acc: float, precision: float, recall: float, f1: float, auc: float) -> str:
     """
     Print the model metrics in a friendly format.
 
     Args:
     model_type (str): The type of the model.
+    confusion_matrix (np.ndarray): The confusion matrix.
     acc (float): The accuracy score.
     precision (float): The precision score.
     recall (float): The recall score.
     f1 (float): The F1 score.
+    auc (float): The AUC score.
 
     Returns:
     str: The model metrics in a friendly format.
@@ -162,6 +164,7 @@ def print_model_metrics(model_type: str, confusion_matrix: np.ndarray, acc: floa
                 "Precision: {:.6f}\n".format(precision) + \
                 "Recall: {:.6f}\n".format(recall) + \
                 "F1: {:.6f}\n".format(f1) + \
+                "AUC: {:.6f}\n".format(auc) + \
                 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
     
     return message
