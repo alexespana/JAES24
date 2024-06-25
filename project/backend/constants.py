@@ -23,3 +23,12 @@ GET_COMMIT = 'https://api.github.com/repos/OWNER/REPO/commits/COMMIT_SHA'
 HOUR_CONVERTER = 3600
 # Time to retry the request in seconds
 RETRY_TIME = 60
+
+# Model classifiers types
+DT_CLASSIFIER = 'Decision Tree'
+RF_CLASSIFIER = 'Random Forest'
+LR_CLASSIFIER = 'Logistic Regression'
+SVM_CLASSIFIER = 'Support Vector Machine'
+KNN_CLASSIFIER = 'K-Nearest Neighbors'
+NN_CLASSIFIER = 'Neural Network'
+
