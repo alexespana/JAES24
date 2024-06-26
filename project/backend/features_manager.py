@@ -9,15 +9,14 @@ import datetime
 import time
 import pandas as pd
 import json
-from typing import Tuple
+from typing import Tuple, Optional
+from model_manager import train_all
 from constants import HOUR_CONVERTER
-from concurrent.futures import ThreadPoolExecutor
 from github_manager import GithubManager
 from utils import get_owner, get_repo_name, get_builds_folder, get_features_folder
-from model_manager import train_all
 
-executor = ThreadPoolExecutor(max_workers=4)
-
+# Github Manager instance
+github_manager = GithubManager()
 
 # Indicate type annotations
 def get_performance_short(run_id: int, builds: dict, id_to_index: dict) -> float:
@@ -84,7 +83,7 @@ def get_time_frequency(run_id: int, builds: dict, id_to_index: dict) -> int:
 
     return round((target_date - previous_date).total_seconds() / HOUR_CONVERTER)
 
-def get_build_pr_number(build: dict) -> int:
+def get_build_pr_number(build: dict) -> Optional[int]:
     """
     Extract the pull request number from a build.
 
@@ -95,25 +94,26 @@ def get_build_pr_number(build: dict) -> int:
     int: The pull request number.
     """
     pr_number = None
-    # Check if the build is triggered by a pull request event
-    if 'pull_request' in build['event']:
-        # Get the owner and repository name
-        full_name = build['repository']['full_name']
-        owner, repo_name = full_name.split('/')
-        # Get the name of the PR which trigerred the build
-        display_title = build['display_title']
-        # Get the label (organization:ref-name) who triggered the build
+
+    # Get the owner and repository name
+    full_name = build['repository']['full_name']
+    owner, repo_name = full_name.split('/')
+    # Get the name of the PR which trigerred the build
+    display_title = build['display_title']
+    # Get the label (organization:ref-name) who triggered the build
+    if build['head_repository'] is None:
+        return None
+    else:
         label = build['head_repository']['owner']['login'] + ':' + build['head_branch']
 
-        # Get pull requests for this branch
-        github_manager = GithubManager()
-        pull_requests = github_manager.get_pull_requests(owner, repo_name, label)
+    # Get pull requests for this branch
+    pull_requests = github_manager.get_pull_requests(owner, repo_name, label)
 
-        # Search for the PR that triggered the build
-        for pr in pull_requests:
-            if pr['title'] == display_title:
-                pr_number = pr['number']
-                break
+    # Search for the PR that triggered the build
+    for pr in pull_requests:
+        if pr['title'] == display_title:
+            pr_number = pr['number']
+            break
 
     return pr_number
 
@@ -134,27 +134,23 @@ def get_num_commits(build: dict, build_pr_number: int) -> int:
         return 0
 
     # Get the commits for this PR
-    github_manager = GithubManager()
-    commits = github_manager.get_pull_request_commits(owner, repo_name, build_pr_number, number_of_commits=100)
+    commits = github_manager.get_pull_request_commits(owner, repo_name, build_pr_number)
 
     return len(commits)
 
-def get_num_files_changed(build: dict, build_pr_number: int, pull_request_files: dict) -> Tuple[int, int, int, int]:
+def get_num_files_changed(pull_request_files: dict) -> Tuple[int, int, int, int]:
     """
-    Calculate the number of files changed, added, modified and removed in a build.
+    Calculate the number of lines changed, added and removed in a build.
 
     Args:
     build (dict): The dictionary containing the build metadata.
 
     Returns:
-    int: The number of files changed in the build.
-    int: The number of files added in the build.
-    int: The number of files modified in the build.
-    int: The number of files removed in the build.
+    int: The number of lines changed in the build.
+    int: The number of lines added in the build.
+    int: The number of lines modified in the build.
+    int: The number of lines removed in the build.
     """
-    if build_pr_number is None:
-        return 0, 0, 0, 0
-
     files_added = 0
     files_modified = 0
     files_removed = 0
@@ -168,7 +164,7 @@ def get_num_files_changed(build: dict, build_pr_number: int, pull_request_files:
 
     return len(pull_request_files), files_added, files_modified, files_removed
 
-def get_num_lines_changed(build: dict, build_pr_number: int, pull_request_files: dict) -> Tuple[int, int, int, int, int]:
+def get_num_lines_changed(pull_request_files: dict) -> Tuple[int, int, int, int, int]:
     """
     Calculate the number of lines changed, added and removed in a build.
 
@@ -179,15 +175,14 @@ def get_num_lines_changed(build: dict, build_pr_number: int, pull_request_files:
     int: The number of lines changed in the build.
     int: The number of lines added in the build.
     int: The number of lines removed in the build.
+    int: The number of test lines changed.
+    int: Whether unit tests have been written or not.
     """
     lines_added = 0
     lines_removed = 0
     test_lines_changed = 0
     source_code_modified = False
     extensions = [".py", ".js", ".mjs", ".jsx", ".ts", ".tsx", ".java", ".cs", ".php", ".rb", ".swift", ".kt", ".kts", ".go", ".rs", ".scala", ".hs"]
-
-    if build_pr_number is None:
-        return 0, 0, 0, 0, 0
 
     # 0: source code modified and no tests modified
     # 1: source code modified and tests modified
@@ -293,7 +288,6 @@ def get_builds_by_months(owner: str, repo_name: str, branch: str) -> None:
             if year == current_year and month > datetime.datetime.now().month:
                 break
 
-            github_manager = GithubManager()
             github_manager.save_month_builds(month, year, owner, repo_name, branch)
 
 def get_features(repo_name: str, branch: str, csv_file: str) -> None:
@@ -310,17 +304,12 @@ def get_features(repo_name: str, branch: str, csv_file: str) -> None:
     None
     """
     # Get all files from its build folder
+    builds_folder = get_builds_folder(repo_name, branch) 
+    sorted_builds_files = sorted(os.listdir(builds_folder), reverse = True)
 
-    builds_folder = get_builds_folder(repo_name, branch)
-    files = os.listdir(builds_folder)
+    df = pd.DataFrame(columns=['ID', 'PS', 'PL', 'TF', 'NC', 'FC', 'FA', 'FM', 'FR', 'LC', 'LA', 'LR', 'LT', 'UT' ,'FD', 'WD', 'DH', 'outcome'])
 
-    df = pd.DataFrame(columns=['PS', 'PL', 'TF', 'NC', 'FC', 'FA', 'FM', 'FR', 'LC', 'LA', 'LR', 'LT', 'UT' ,'FD', 'WD', 'DH', 'outcome'])
-
-    github_manager = GithubManager()
-
-    for file in files:
-        # Logear el nombre del archivo
-        
+    for file in sorted_builds_files:
         with open(builds_folder + file, 'r') as f:
             builds = json.load(f)
 
@@ -328,26 +317,40 @@ def get_features(repo_name: str, branch: str, csv_file: str) -> None:
 
         # Extract the features
         for build in builds["workflow_runs"]:
-            build_pr_number = get_build_pr_number(build)
-            if build_pr_number is not None:
-                full_name = build['repository']['full_name']
-                owner, repo_name = full_name.split('/')
-                files = github_manager.get_pull_request_files(owner, repo_name, build_pr_number, number_of_files=100)
-
-            build_id = build['id']
+            build_id = build['id']            
+            full_name = build['repository']['full_name']
+            owner, repo_name = full_name.split('/')
             PS = get_performance_short(build_id, builds, id_to_index)
             PL = get_performance_long(build_id, builds, id_to_index)
             TF = get_time_frequency(build_id, builds, id_to_index)
-            NC = get_num_commits(build, build_pr_number)
-            FC, FA, FM, FR = get_num_files_changed(build, build_pr_number, files)
-            LC, LA, LR, LT, UT = get_num_lines_changed(build, build_pr_number, files)
             FD = get_failure_distance(build_id, builds, id_to_index)
             WD = get_weekday(build)
             DH = get_hour(build)
             outcome = get_outcome(build)
 
+            # Get the event type which triggered the build
+            event_type = get_event_type(build)
+            
+            if 'pull_request' in event_type:
+                build_pr_number = get_build_pr_number(build)
+
+                if build_pr_number is None:     
+                    continue
+
+                pr_files = github_manager.get_pull_request_files(owner, repo_name, build_pr_number)
+                NC = get_num_commits(build, build_pr_number)
+
+            elif event_type == 'push' or event_type == 'schedule' or event_type == 'dynamic':
+                NC = 1
+                sha = build['head_sha']
+                commit = github_manager.get_commit(owner, repo_name, sha)
+                pr_files = commit['files']
+
+            FC, FA, FM, FR = get_num_files_changed(pr_files)
+            LC, LA, LR, LT, UT = get_num_lines_changed(pr_files)
+
             # Add CI build
-            df.loc[len(df.index)] = [PS, PL, TF, NC, FC, FA, FM, FR, LC, LA, LR, LT, UT, FD, WD, DH, outcome]
+            df.loc[len(df.index)] = [build_id, PS, PL, TF, NC, FC, FA, FM, FR, LC, LA, LR, LT, UT, FD, WD, DH, outcome]
 
         # Save the features in a csv file or add them to an existing file
         try:
@@ -358,20 +361,31 @@ def get_features(repo_name: str, branch: str, csv_file: str) -> None:
 
         df = df.drop(df.index)
 
-def process_repository(repository_url: str, branch: str, features_file: str, pickle_pattern: str) -> None:
+def process_repository(repository_url: str, branch: str, features_file: str, pickle_pattern: str, evaluate: bool = False) -> None:
     owner = get_owner(repository_url)
     repo_name = get_repo_name(repository_url)
     
     # Get all the builds from repository from 2019 (GitHub Actions started in 2019) to 2024
-    executor.submit(get_builds_by_months, owner, repo_name, branch)
-
-    # Wait some time to collect a sufficient number of builds
-    time.sleep(900)     # 15 minutes
+    get_builds_by_months(owner, repo_name, branch)
 
     # Extract the features from the builds (located in the builds folder))
     get_features(repo_name, branch, features_file)
 
     # Train all models with the features extracted
-    x_train = pd.read_csv(get_features_folder(repo_name, branch) + features_file)
-    y_train = x_train.pop('outcome')
-    train_all(x_train, y_train, pickle_pattern)
+    train_data = pd.read_csv(get_features_folder(repo_name, branch) + features_file)
+    train_data = train_data.drop(columns=['ID'])
+    
+    train_all(train_data, pickle_pattern, evaluate)
+
+
+def get_event_type(build: dict) -> str:
+    """
+    Extract the type of event that triggered the build.
+
+    Args:
+    build (dict): The dictionary containing the build metadata.
+
+    Returns:
+    str: The type of event that triggered the build.
+    """
+    return build['event']

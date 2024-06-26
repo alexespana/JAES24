@@ -4,3 +4,4 @@ scikit-learn
 requests
 psycopg2-binary
 Flask-SQLAlchemy
+matplotlib

@@ -17,5 +17,18 @@ GET_PR_FILES = 'https://api.github.com/repos/OWNER/REPO/pulls/PULL_NUMBER/files'
 GET_BUILDS = 'https://api.github.com/repos/OWNER/REPO/actions/runs'
 # Gets a specific workflow run
 GET_BUILD = 'https://api.github.com/repos/OWNER/REPO/actions/runs/RUN_ID'
+# Get a specific commit
+GET_COMMIT = 'https://api.github.com/repos/OWNER/REPO/commits/COMMIT_SHA'
 # Converter to obtain the time frequency in hours
 HOUR_CONVERTER = 3600
+# Time to retry the request in seconds
+RETRY_TIME = 60
+
+# Model classifiers types
+DT_CLASSIFIER = 'Decision Tree'
+RF_CLASSIFIER = 'Random Forest'
+LR_CLASSIFIER = 'Logistic Regression'
+SVM_CLASSIFIER = 'Support Vector Machine'
+KNN_CLASSIFIER = 'K-Nearest Neighbors'
+NN_CLASSIFIER = 'Neural Network'
+

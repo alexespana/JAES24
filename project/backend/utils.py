@@ -10,6 +10,7 @@ replace_fields(url: str, owner: str, repo_name: str, pull_number: str, run_id: s
 import re
 import os
 import calendar
+import numpy as np
 from typing import Tuple
 from constants import FEATURES_FOLDER, AIMODELS_FOLDER
 
@@ -56,8 +57,8 @@ def get_repo_name(url: str) -> str:
     repo_name = url.split('/')[-1]
     return repo_name
 
-def replace_fields(url, owner: str = '', repo_name: str = '', pull_number: int = '', run_id: int = '') -> str:
-    url = url.replace('OWNER', owner).replace('REPO', repo_name).replace('PULL_NUMBER', pull_number).replace('RUN_ID', run_id)
+def replace_fields(url, owner: str = '', repo_name: str = '', pull_number: int = '', run_id: int = '', sha: int = '') -> str:
+    url = url.replace('OWNER', owner).replace('REPO', repo_name).replace('PULL_NUMBER', pull_number).replace('RUN_ID', run_id).replace('COMMIT_SHA', sha)
     return url
 
 def normalize_branch_name(branch: str) -> str:
@@ -138,3 +139,32 @@ def get_features_folder(repo_name: str, branch: str) -> str:
     str: The folder path for the CSV files.
     """
     return FEATURES_FOLDER + repo_name + '_' + normalize_branch_name(branch) + '/'
+
+def print_model_metrics(model_type: str, confusion_matrix: np.ndarray, acc: float, precision: float, recall: float, f1: float, auc: float) -> str:
+    """
+    Print the model metrics in a friendly format.
+
+    Args:
+    model_type (str): The type of the model.
+    confusion_matrix (np.ndarray): The confusion matrix.
+    acc (float): The accuracy score.
+    precision (float): The precision score.
+    recall (float): The recall score.
+    f1 (float): The F1 score.
+    auc (float): The AUC score.
+
+    Returns:
+    str: The model metrics in a friendly format.
+    """
+    message = "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" + \
+                "Model type: {}\n".format(model_type) + \
+                "Confusion matrix:\n" + \
+                "{}\n\n".format(confusion_matrix) + \
+                "Accuracy: {:.6f}\n".format(acc) + \
+                "Precision: {:.6f}\n".format(precision) + \
+                "Recall: {:.6f}\n".format(recall) + \
+                "F1: {:.6f}\n".format(f1) + \
+                "AUC: {:.6f}\n".format(auc) + \
+                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+    
+    return message
