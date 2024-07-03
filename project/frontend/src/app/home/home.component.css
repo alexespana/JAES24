@@ -1,0 +1,44 @@
+/* Styles for home page */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f0f0f0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+  
+.home-container {
+    height: 100vh; 
+    width: 100vw; 
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #ccc;
+    background: linear-gradient(90deg, #1C86EE, #4B0082); 
+    padding: 20px;
+    color: white;
+    font-size: 1rem;
+}
+
+.home-header {
+    position: absolute;
+    top: 0;
+    width: 100%;
+    text-align: center;
+    padding: 1rem;
+    background-color: rgba(0, 0, 0, 0.5); 
+}
+
+.home-header h1 {
+    margin: 0;
+    font-size: 2rem;
+    color: white;
+}
+  
+.home-content {
+    margin-top: 2rem;
+} 
