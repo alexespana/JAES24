@@ -8,6 +8,7 @@ from typing import Tuple
 from sklearn.svm import SVC
 from utils import print_model_metrics
 from constants import AIMODELS_FOLDER
+from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.neural_network import MLPClassifier
 from sklearn.linear_model import LogisticRegression
@@ -120,6 +121,15 @@ def train_all(data, pickle_pattern, model_evaluation = False, test_percentage=0.
         x_train = data
         y_train = data.pop('outcome')
 
+    # Normalize the data
+    zscore = StandardScaler()
+    minmax = MinMaxScaler()
+    x_train_zscore = zscore.fit_transform(x_train)
+    x_test_zscore = zscore.transform(x_test)
+    x_train_min_max = minmax.fit_transform(x_train)
+    x_test_min_max = minmax.transform(x_test)
+
+
     dt = DecisionTreeClassifier(random_state=seed)
     train(dt, x_train, y_train)
     with open(get_model_path(pickle_pattern, DT_CLASSIFIER), 'wb') as file:
@@ -131,22 +141,22 @@ def train_all(data, pickle_pattern, model_evaluation = False, test_percentage=0.
         pickle.dump(rf, file)
 
     lr = LogisticRegression(random_state=seed, max_iter=15000)
-    train(lr, x_train, y_train)
+    train(lr, x_train_zscore, y_train)
     with open(get_model_path(pickle_pattern, LR_CLASSIFIER), 'wb') as file:
         pickle.dump(lr, file)
 
     svc = SVC(random_state=seed, probability=True)
-    train(svc, x_train, y_train)
+    train(svc, x_train_zscore, y_train)
     with open(get_model_path(pickle_pattern, SVM_CLASSIFIER), 'wb') as file:
         pickle.dump(svc, file)
 
     knn = KNeighborsClassifier()
-    train(knn, x_train, y_train)
+    train(knn, x_train_min_max, y_train)
     with open(get_model_path(pickle_pattern, KNN_CLASSIFIER), 'wb') as file:
         pickle.dump(knn, file)
 
     nn = MLPClassifier(random_state=seed)
-    train(nn, x_train, y_train)
+    train(nn, x_train_min_max, y_train)
     with open(get_model_path(pickle_pattern, NN_CLASSIFIER), 'wb') as file:
         pickle.dump(nn, file)
 
@@ -161,19 +171,19 @@ def train_all(data, pickle_pattern, model_evaluation = False, test_percentage=0.
         plot_confusion_matrix(y_test, predictions_rf, pickle_pattern, RF_CLASSIFIER)
         plot_roc_curve(y_test, predictions_prob_rf, pickle_pattern, RF_CLASSIFIER)
 
-        predictions_lr, predictions_prob_lr = predict(get_model_path(pickle_pattern, LR_CLASSIFIER), x_test)
+        predictions_lr, predictions_prob_lr = predict(get_model_path(pickle_pattern, LR_CLASSIFIER), x_test_zscore)
         plot_confusion_matrix(y_test, predictions_lr, pickle_pattern, LR_CLASSIFIER)
         plot_roc_curve(y_test, predictions_prob_lr, pickle_pattern, LR_CLASSIFIER)
 
-        predictions_svm, predictions_prob_svm = predict(get_model_path(pickle_pattern, SVM_CLASSIFIER), x_test)
+        predictions_svm, predictions_prob_svm = predict(get_model_path(pickle_pattern, SVM_CLASSIFIER), x_test_zscore)
         plot_confusion_matrix(y_test, predictions_svm, pickle_pattern, SVM_CLASSIFIER)
         plot_roc_curve(y_test, predictions_prob_svm, pickle_pattern, SVM_CLASSIFIER)
 
-        predictions_knn, predictions_prob_knn = predict(get_model_path(pickle_pattern, KNN_CLASSIFIER), x_test)
+        predictions_knn, predictions_prob_knn = predict(get_model_path(pickle_pattern, KNN_CLASSIFIER), x_test_min_max)
         plot_confusion_matrix(y_test, predictions_knn, pickle_pattern, KNN_CLASSIFIER)
         plot_roc_curve(y_test, predictions_prob_knn, pickle_pattern, KNN_CLASSIFIER)
 
-        predictions_nn, predictions_prob_nn = predict(get_model_path(pickle_pattern, NN_CLASSIFIER), x_test)
+        predictions_nn, predictions_prob_nn = predict(get_model_path(pickle_pattern, NN_CLASSIFIER), x_test_min_max)
         plot_confusion_matrix(y_test, predictions_nn, pickle_pattern, NN_CLASSIFIER)
         plot_roc_curve(y_test, predictions_prob_nn, pickle_pattern, NN_CLASSIFIER)
 
