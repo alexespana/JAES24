@@ -229,6 +229,48 @@ def predict(model_path, x_test) -> Tuple[list, list]:
     
     return predictions, predictions_prob
 
+def accumulate_features(old_features: pd.DataFrame, new_feature: pd.DataFrame) -> pd.DataFrame:
+    """
+    Accumulate build changes.
+
+    Args:
+    old_features (DataFrame): first build features.
+    new_feature (DataFrame): second build features.
+
+    Returns:
+    DataFrame: The accumulated features.
+    """
+    result  = new_feature.copy()
+
+    if 'NC' in result.columns:
+        result['NC'] = old_features['NC'] + new_feature['NC']
+
+    if 'FC' in result.columns:
+        result['FC'] = old_features['FC'] + new_feature['FC']
+
+    if 'FA' in result.columns:
+        result['FA'] = old_features['FA'] + new_feature['FA']
+
+    if 'FM' in result.columns:
+        result['FM'] = old_features['FM'] + new_feature['FM']
+
+    if 'FR' in result.columns:
+        result['FR'] = old_features['FR'] + new_feature['FR']
+
+    if 'LC' in result.columns:  
+        result['LC'] = old_features['LC'] + new_feature['LC']
+
+    if 'LA' in result.columns:
+        result['LA'] = old_features['LA'] + new_feature['LA']
+
+    if 'LR' in result.columns:
+        result['LR'] = old_features['LR'] + new_feature['LR']
+
+    if 'LT' in result.columns:
+        result['LT'] = old_features['LT'] + new_feature['LT']
+
+    return result
+
 def calculate_metrics(y_test: list, predictions: list, predictions_prob: list)-> Tuple[float, float, float, float, float]:
     """
     Calculate the metrics.
