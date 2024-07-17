@@ -3,11 +3,13 @@ This file contains utility functions related to Artificial Intelligence (AI) mod
 """
 import os
 import pickle
+import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 from typing import Tuple
 from sklearn.svm import SVC
-from utils import print_model_metrics
 from constants import AIMODELS_FOLDER
+from utils import print_model_metrics, ndarray_to_dataframe
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.neural_network import MLPClassifier
@@ -93,42 +95,29 @@ def train(model, x_train, y_train):
 
     return model
 
-def train_all(data, pickle_pattern, model_evaluation = False, test_percentage=0.2, seed = 42):
+def train_all_models(data: pd.DataFrame, pickle_pattern: str, seed = 42) -> Tuple[StandardScaler, MinMaxScaler]:
     """
-    Train all models.
+    Train all models and save them into the specified folder.
 
     Args:
-    x_train (DataFrame): The training data.
-    y_train (DataFrame): The target values.
+    data: features and target values
+    pickle_pattern: the base pattern to save the models
+    seed: the seed for the random number generator
 
     Returns:
-    dict: The trained models.
+    zscore: the zscore scaler
+    minmax: the minmax scaler
     """
-    if model_evaluation:       
-        total_rows = len(data)
-        test_size = int(total_rows * test_percentage)
-        train_size = total_rows - test_size
-        
-        # Split the data into training and test sets
-        # TRAIN: The last 80% of builds (older)
-        x_train = data[-train_size:]
-        y_train = x_train.pop('outcome')
-
-        # TEST: The first 20% of builds (latest)
-        x_test = data[:test_size]
-        y_test = x_test.pop('outcome')
-    else:
-        x_train = data
-        y_train = data.pop('outcome')
+    x_train = data
+    y_train = data.pop('outcome')
 
     # Normalize the data
     zscore = StandardScaler()
     minmax = MinMaxScaler()
     x_train_zscore = zscore.fit_transform(x_train)
-    x_test_zscore = zscore.transform(x_test)
     x_train_min_max = minmax.fit_transform(x_train)
-    x_test_min_max = minmax.transform(x_test)
-
+    x_train_zscore = ndarray_to_dataframe(x_train.columns, x_train_zscore)
+    x_train_min_max = ndarray_to_dataframe(x_train.columns, x_train_min_max)
 
     dt = DecisionTreeClassifier(random_state=seed)
     train(dt, x_train, y_train)
@@ -155,59 +144,99 @@ def train_all(data, pickle_pattern, model_evaluation = False, test_percentage=0.
     with open(get_model_path(pickle_pattern, KNN_CLASSIFIER), 'wb') as file:
         pickle.dump(knn, file)
 
-    nn = MLPClassifier(random_state=seed)
+    nn = MLPClassifier(random_state=seed, max_iter=15000)
     train(nn, x_train_min_max, y_train)
     with open(get_model_path(pickle_pattern, NN_CLASSIFIER), 'wb') as file:
         pickle.dump(nn, file)
 
 
-    # Save the models evaluation in a file
-    if model_evaluation:    
-        predictions_dt, predictions_prob_dt = predict(get_model_path(pickle_pattern, DT_CLASSIFIER), x_test)
-        plot_confusion_matrix(y_test, predictions_dt, pickle_pattern, DT_CLASSIFIER)
-        plot_roc_curve(y_test, predictions_prob_dt, pickle_pattern, DT_CLASSIFIER)
+    return zscore, minmax
 
-        predictions_rf, predictions_prob_rf = predict(get_model_path(pickle_pattern, RF_CLASSIFIER), x_test)
-        plot_confusion_matrix(y_test, predictions_rf, pickle_pattern, RF_CLASSIFIER)
-        plot_roc_curve(y_test, predictions_prob_rf, pickle_pattern, RF_CLASSIFIER)
+def train_and_evaluate_all_models(data: pd.DataFrame, pickle_pattern: str, test_percentage: float = 0.2, with_accumulation: bool = False,  seed: int = 42):
+    """
+    Train and evaluate all models for a given dataset.
 
-        predictions_lr, predictions_prob_lr = predict(get_model_path(pickle_pattern, LR_CLASSIFIER), x_test_zscore)
-        plot_confusion_matrix(y_test, predictions_lr, pickle_pattern, LR_CLASSIFIER)
-        plot_roc_curve(y_test, predictions_prob_lr, pickle_pattern, LR_CLASSIFIER)
+    Args:
+    data: features and target values
+    pickle_pattern: the base pattern to save the models
+    test_percentage: the percentage of the data to be used for testing
+    with_accumulation: whether to accumulate the predictions
+    seed: the seed for the random number generator
 
-        predictions_svm, predictions_prob_svm = predict(get_model_path(pickle_pattern, SVM_CLASSIFIER), x_test_zscore)
-        plot_confusion_matrix(y_test, predictions_svm, pickle_pattern, SVM_CLASSIFIER)
-        plot_roc_curve(y_test, predictions_prob_svm, pickle_pattern, SVM_CLASSIFIER)
+    Returns:
+    None
+    """
+    # Total number of builds
+    total_rows = len(data)
 
-        predictions_knn, predictions_prob_knn = predict(get_model_path(pickle_pattern, KNN_CLASSIFIER), x_test_min_max)
-        plot_confusion_matrix(y_test, predictions_knn, pickle_pattern, KNN_CLASSIFIER)
-        plot_roc_curve(y_test, predictions_prob_knn, pickle_pattern, KNN_CLASSIFIER)
+    # Number of builds for training and testing
+    train_size = int(total_rows * (1 - test_percentage))
+    test_size = total_rows - train_size
 
-        predictions_nn, predictions_prob_nn = predict(get_model_path(pickle_pattern, NN_CLASSIFIER), x_test_min_max)
-        plot_confusion_matrix(y_test, predictions_nn, pickle_pattern, NN_CLASSIFIER)
-        plot_roc_curve(y_test, predictions_prob_nn, pickle_pattern, NN_CLASSIFIER)
+    # Ratio of successful and failed builds
+    value_counts = data['outcome'].value_counts()
+    failure_proportion = value_counts[0] / total_rows
+    success_proportion = value_counts[1] / total_rows
 
-        # Save the evaluation in a file
-        with open(AIMODELS_FOLDER + pickle_pattern + '/' + pickle_pattern + '_evaluation.txt', 'w') as file:
-            file.write('=================================================================\n')
-            file.write('\t~~~~~~~ Evaluation of the models for ' + pickle_pattern + ' ~~~~~~~')
-            file.write('\n=================================================================\n')
-            file.write('- Total number of builds = ' + str(total_rows) + '\n')
-            file.write('- Training size = ' + str(train_size) + '\n')
-            file.write('- Test size = ' + str(test_size) + '\n')
+    # TRAIN: The last (1 - {test_percentage}) of builds (older)
+    x_train = data[-train_size:]
 
-            file.write(print_model_metrics(DT_CLASSIFIER, *calculate_metrics(y_test, predictions_dt, predictions_prob_dt)))
-            file.write('\n')
-            file.write(print_model_metrics(RF_CLASSIFIER, *calculate_metrics(y_test, predictions_rf, predictions_prob_rf)))
-            file.write('\n')
-            file.write(print_model_metrics(LR_CLASSIFIER, *calculate_metrics(y_test, predictions_lr, predictions_prob_lr)))
-            file.write('\n')
-            file.write(print_model_metrics(SVM_CLASSIFIER, *calculate_metrics(y_test, predictions_svm, predictions_prob_svm)))
-            file.write('\n')
-            file.write(print_model_metrics(KNN_CLASSIFIER, *calculate_metrics(y_test, predictions_knn, predictions_prob_knn)))
-            file.write('\n')
-            file.write(print_model_metrics(NN_CLASSIFIER, *calculate_metrics(y_test, predictions_nn, predictions_prob_nn)))
-            file.write('\n')
+    # TEST: The first {test_percentage} of builds (latest)
+    x_test = data[:test_size]
+
+    # True tagrtes fot the test set 
+    y_test = x_test.pop('outcome')
+
+    # Train models and get transformers
+    zscore, minmax = train_all_models(x_train, pickle_pattern, seed)
+
+    # TESTING
+    predictions_dt, predictions_prob_dt = predict(get_model_path(pickle_pattern, DT_CLASSIFIER), x_test, y_test, with_accumulation)
+    plot_confusion_matrix(y_test, predictions_dt, pickle_pattern, DT_CLASSIFIER)
+    plot_roc_curve(y_test, predictions_prob_dt, pickle_pattern, DT_CLASSIFIER)
+
+    predictions_rf, predictions_prob_rf = predict(get_model_path(pickle_pattern, RF_CLASSIFIER), x_test, y_test, with_accumulation)
+    plot_confusion_matrix(y_test, predictions_rf, pickle_pattern, RF_CLASSIFIER)
+    plot_roc_curve(y_test, predictions_prob_rf, pickle_pattern, RF_CLASSIFIER)
+
+    predictions_lr, predictions_prob_lr = predict(get_model_path(pickle_pattern, LR_CLASSIFIER), x_test, y_test, with_accumulation, zscore)
+    plot_confusion_matrix(y_test, predictions_lr, pickle_pattern, LR_CLASSIFIER)
+    plot_roc_curve(y_test, predictions_prob_lr, pickle_pattern, LR_CLASSIFIER)
+
+    predictions_svm, predictions_prob_svm = predict(get_model_path(pickle_pattern, SVM_CLASSIFIER), x_test, y_test, with_accumulation, zscore)
+    plot_confusion_matrix(y_test, predictions_svm, pickle_pattern, SVM_CLASSIFIER)
+    plot_roc_curve(y_test, predictions_prob_svm, pickle_pattern, SVM_CLASSIFIER)
+
+    predictions_knn, predictions_prob_knn = predict(get_model_path(pickle_pattern, KNN_CLASSIFIER), x_test, y_test, with_accumulation, minmax)
+    plot_confusion_matrix(y_test, predictions_knn, pickle_pattern, KNN_CLASSIFIER)
+    plot_roc_curve(y_test, predictions_prob_knn, pickle_pattern, KNN_CLASSIFIER)
+
+    predictions_nn, predictions_prob_nn = predict(get_model_path(pickle_pattern, NN_CLASSIFIER), x_test, y_test, with_accumulation, minmax)
+    plot_confusion_matrix(y_test, predictions_nn, pickle_pattern, NN_CLASSIFIER)
+    plot_roc_curve(y_test, predictions_prob_nn, pickle_pattern, NN_CLASSIFIER)
+
+    # Save the evaluation in a file
+    with open(AIMODELS_FOLDER + pickle_pattern + '/' + pickle_pattern + '_evaluation.txt', 'w') as file:
+        file.write('=================================================================\n')
+        file.write('\t~~~~~~~ Evaluation of the models for ' + pickle_pattern + ' ~~~~~~~')
+        file.write('\n=================================================================\n')
+        file.write('- Total number of builds = ' + str(total_rows) + '\n')
+        file.write('- Training size = ' + str(train_size) + '\n')
+        file.write('- Test size = ' + str(test_size) + '\n')
+        file.write('- Ratio of pass/fail builds = ' + str(success_proportion) + '/' + str(failure_proportion) + '\n')
+
+        file.write(print_model_metrics(DT_CLASSIFIER, *calculate_metrics(y_test, predictions_dt, predictions_prob_dt)))
+        file.write('\n')
+        file.write(print_model_metrics(RF_CLASSIFIER, *calculate_metrics(y_test, predictions_rf, predictions_prob_rf)))
+        file.write('\n')
+        file.write(print_model_metrics(LR_CLASSIFIER, *calculate_metrics(y_test, predictions_lr, predictions_prob_lr)))
+        file.write('\n')
+        file.write(print_model_metrics(SVM_CLASSIFIER, *calculate_metrics(y_test, predictions_svm, predictions_prob_svm)))
+        file.write('\n')
+        file.write(print_model_metrics(KNN_CLASSIFIER, *calculate_metrics(y_test, predictions_knn, predictions_prob_knn)))
+        file.write('\n')
+        file.write(print_model_metrics(NN_CLASSIFIER, *calculate_metrics(y_test, predictions_nn, predictions_prob_nn)))
+        file.write('\n')
 
 def predict(model_path, x_test) -> Tuple[list, list]:
     """
