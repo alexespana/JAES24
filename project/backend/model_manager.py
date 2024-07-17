@@ -238,24 +238,83 @@ def train_and_evaluate_all_models(data: pd.DataFrame, pickle_pattern: str, test_
         file.write(print_model_metrics(NN_CLASSIFIER, *calculate_metrics(y_test, predictions_nn, predictions_prob_nn)))
         file.write('\n')
 
-def predict(model_path, x_test) -> Tuple[list, list]:
+def predict(model_path, x_test, y_test, with_accumulation, transformer = None) -> Tuple[list, list]:
     """
     Make predictions.
 
     Args:
     model_path (str): The path of the trained model.
     x_test (DataFrame): The test data.
+    y_test (DataFrame): The actual target values.
+    with_accumulation (bool): Whether to accumulate the predictions.
+    transformer: The transformer to normalize the data.
 
     Returns:
-    DataFrame: The predictions.
+    predictions: The predicted target values.
+    predictions_prob: The predicted probabilities.
     """
     with open(model_path,'rb') as file:
         model = pickle.load(file)
 
-    # Make predictions
-    predictions = model.predict(x_test)
-    predictions_prob = model.predict_proba(x_test)[:, 1]
-    
+    if not with_accumulation:
+        # Normalize the data
+        if transformer is not None:
+            columns = x_test.columns
+            x_test = transformer.transform(x_test)
+            x_test = ndarray_to_dataframe(columns, x_test)
+
+        # Make predictions for all builds directly
+        predictions = model.predict(x_test)
+        predictions_prob = model.predict_proba(x_test)[:, 1]
+    else:
+        # Cumulative predictions
+        last_prediction = None
+        last_features = None
+        in_failure_sequence = False
+        predictions = np.zeros(len(x_test))
+        predictions_prob = np.zeros(len(x_test))
+
+        # Create an empty DataFrame
+        build_features = pd.DataFrame(columns=x_test.columns)
+        build_features.loc[0] = [None] * len(x_test.columns)
+
+        for index, row in x_test.iterrows():           
+            if in_failure_sequence:     # Subsequent failures
+                # Predict automatically a failure
+                predictions[index] = 0
+                predictions_prob[index] = 0
+                last_prediction = 0
+
+                # Case: False positive
+                if y_test.iloc[index] == 1:
+                    in_failure_sequence = False
+            else:
+                build_features.iloc[0] = row
+
+                if last_prediction == 1: 
+                    build_features =  accumulate_features(last_features, build_features)
+
+                # Save the last features before normalization
+                last_features = build_features.copy()
+
+                # Normalize the data
+                if transformer is not None:
+                    build_features = transformer.transform(build_features)
+                    build_features = ndarray_to_dataframe(x_test.columns, build_features)
+        
+                prediction_i = model.predict(build_features)
+                prediction_prob_i = model.predict_proba(build_features)[:, 1]
+
+                predictions[index] = prediction_i
+                predictions_prob[index] = prediction_prob_i
+
+                last_prediction = prediction_i
+
+                if last_prediction == 0:    # Check if the last prediction was a failure
+                    if y_test.iloc[index] == 0:     # First failure
+                        in_failure_sequence = True
+                        last_features.loc[0] = [None] * len(x_test.columns)
+
     return predictions, predictions_prob
 
 def accumulate_features(old_features: pd.DataFrame, new_feature: pd.DataFrame) -> pd.DataFrame:
