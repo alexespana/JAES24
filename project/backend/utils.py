@@ -11,6 +11,7 @@ import re
 import os
 import calendar
 import numpy as np
+import pandas as pd
 from typing import Tuple
 from constants import FEATURES_FOLDER, AIMODELS_FOLDER
 
@@ -168,3 +169,16 @@ def print_model_metrics(model_type: str, confusion_matrix: np.ndarray, acc: floa
                 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
     
     return message
+
+def ndarray_to_dataframe(columns: list, data: np.ndarray) -> pd.DataFrame:
+    """
+    Convert a NumPy array to a Pandas DataFrame.
+
+    Args:
+    columns (list): The column names.
+    data (np.ndarray): The data.
+
+    Returns:
+    pd.DataFrame: The Pandas DataFrame.
+    """
+    return pd.DataFrame(data, columns=columns)
