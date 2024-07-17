@@ -46,36 +46,42 @@ These metrics have been calculated considering that the true positive (TP) case 
     <th style="border-width: 3px;">junit5</th>
     <th>SmartBuildSkip</th>
     <th>Our approach</th>
+    <th>Our approach without accumulation</th>
   </tr>
   <tr>
     <td><b>ACC</b></td>
     <td>0.966234</td>
+    <td>0.962338</td>
     <td>0.966234</td>
   </tr>
   <tr>
     <td><b>Precision</b></td>
     <td>0.000000</td>
+    <td>0.363636</td>
     <td>0.500000</td>
   </tr>
   <tr>
     <td><b>Recall</b></td>
     <td>0.000000</td>
+    <td>0.153846</td>
     <td>0.076923</td>
   </tr>
   <tr>
     <td><b>F1-score</b></td>
     <td>0.000000</td>
+    <td>0.216216</td>
     <td>0.133333</td>
   </tr>
   <tr>
     <td><b>AUC</b></td>
-    <td>0.523935</td>
+    <td>0.456214</td>
+    <td>0.980666</td>
     <td>0.982191</td>
   </tr>
 </table>
 
-- SmartBuildSkip: in this case, we see that the classifier has a fairly high accuracy, this may be simply because the number of failed builds is very low, so the classifier can predict the majority class with a high accuracy. The precision, recall and f1-score are `0`, which means that the classifier is not able to predict the failed builds. The AUC is `0.523935`, which means hat the model does not have almost discriminative capacity between positive and negative classes. 
-- Our approach: we can see that the accuracy is the same as the SmartBuildSkip, but the precision, recall and f1-score are higher. We have a value of `0.5` for precision, which is not a very good value, it indicates that `50%` of the instances predicted as a failed build are actually failed builds. The recall is `0.076923`, which means that the `7.6923%` of the truly failed builds were correctly predicted by the model. The F1-score is `0.133333`, which is a low value, but it is higher than the SmartBuildSkip. The AUC is `0.982191`, which is a very high value, this means that the model is able to distinguish between the classes.
+- SmartBuildSkip: in this case, we see that the classifier has a fairly high accuracy, this may be simply because the number of failed builds is very low, so the classifier can predict the majority class with a high accuracy. The precision, recall and f1-score are `0`, which means that the classifier is not able to predict the failed builds. The AUC is `0.456214`, which means hat the model does not have almost discriminative capacity between positive and negative classes. 
+- Our approach: we can see that the accuracy is the same as the SmartBuildSkip, but the precision, recall and f1-score are higher. We have a value of `0.363636` for precision, which is not a very good value, it indicates that `36.3636%` of the instances predicted as a failed build are actually failed builds. The recall is `0.153846`, which means that the `15.3846%` of the truly failed builds were correctly predicted by the model. The F1-score is `0.216216`, which is a low value, but it is higher than the SmartBuildSkip. The AUC is `0.980666`, which is a very high value, this means that the model is able to distinguish between the classes.
 
 It is worth mentioning that these results have been obtained using a random forest classifier; however, using a decision tree classifier, the results are quite better (decision tree classifier):
 
@@ -88,27 +94,27 @@ It is worth mentioning that these results have been obtained using a random fore
   <tr>
     <td><b>ACC</b></td>
     <td>0.966234</td>
-    <td>0.977922</td>
+    <td>0.950649</td>
   </tr>
   <tr>
     <td><b>Precision</b></td>
     <td>0.000000</td>
-    <td>0.666667</td>
+    <td>0.396552</td>
   </tr>
   <tr>
     <td><b>Recall</b></td>
     <td>0.000000</td>
-    <td>0.692308</td>
+    <td>0.884615</td>
   </tr>
   <tr>
     <td><b>F1-score</b></td>
     <td>0.000000</td>
-    <td>0.679245</td>
+    <td>0.547619</td>
   </tr>
   <tr>
     <td><b>AUC</b></td>
-    <td>0.523935</td>
-    <td>0.840105</td>
+    <td>0.456214</td>
+    <td>0.918786</td>
   </tr>
 </table>
 
@@ -117,8 +123,8 @@ The value of the F1-score is higher than the random forest classifier, which mea
 #### xls: [https://github.com/google/xls](https://github.com/google/xls)
 
 - Number of builds = `6341`
-- Training size = `5073`
-- Test size = `1268`
+- Training size = `5072`
+- Test size = `1269`
 - Ratio of pass/fail builds = `0.9149976344425169/0.08500236555748304`
 
 
@@ -127,42 +133,48 @@ The value of the F1-score is higher than the random forest classifier, which mea
     <th style="border-width: 3px;">xls</th>
     <th>SmartBuildSkip</th>
     <th>Our approach</th>
+    <th>Our approach without accumulation</th>
   </tr>
   <tr>
     <td><b>ACC</b></td>
-    <td>0.912461</td>
-    <td>0.987382</td>
+    <td>0.912530</td>
+    <td>0.914106</td>
+    <td>0.985028</td>
   </tr>
   <tr>
     <td><b>Precision</b></td>
     <td>0.000000</td>
-    <td>0.970297</td>
+    <td>0.505376</td>
+    <td>0.942308</td>
   </tr>
   <tr>
     <td><b>Recall</b></td>
     <td>0.000000</td>
+    <td>0.846847</td>
     <td>0.882883</td>
   </tr>
   <tr>
     <td><b>F1-score</b></td>
     <td>0.000000</td>
-    <td>0.924528</td>
+    <td>0.632997</td>
+    <td>0.911628</td>
   </tr>
   <tr>
     <td><b>AUC</b></td>
-    <td>0.522460</td>
-    <td>0.998661</td>
+    <td>0.488653</td>
+    <td>0.922568</td>
+    <td>0.998320</td>
   </tr>
 </table>
 
-- SmartBuildSkip: as previously mentioned, the accuracy is high, but the precision, recall and f1-score are `0`, which means that the classifier is not able to predict the failed builds. The AUC is `0.522460`, which means that the model does not have almost discriminative capacity between positive and negative classes.
-- Our approach: we have a higher accuracy than the SmartBuildSkip, and the precision, recall and f1-score are higher. The precision is `0.970297`, which is a very good value, it indicates that `97.0297%` of the instances predicted as a failed build are actually failed builds. The recall is `0.882883`, which means that the `88.2883%` of the truly failed builds were correctly predicted by the model. The F1-score is `0.924528`, which is a high value. The AUC is `0.998661`, which is a very high value, this means that the model is able to distinguish between the classes.
+- SmartBuildSkip: as previously mentioned, the accuracy is high, but the precision, recall and f1-score are `0`, which means that the classifier is not able to predict the failed builds. The AUC is `0.488653`, which means that the model does not have almost discriminative capacity between positive and negative classes.
+- Our approach: we have a higher accuracy than the SmartBuildSkip, and the precision, recall and f1-score are higher. The precision is `0.505376`, which is a very good value, it indicates that `50.5376%` of the instances predicted as a failed build are actually failed builds. The recall is `0.846847`, which means that the `84.6847%` of the truly failed builds were correctly predicted by the model. The F1-score is `0.632997`, which is a high value. The AUC is `0.922568`, which is a very high value, this means that the model is able to distinguish between the classes.
 
 #### TypeScript: [https://github.com/microsoft/TypeScript](https://github.com/microsoft/TypeScript)
 
 - Number of builds = `7177`
-- Training size = `5742`
-- Test size = `1435`
+- Training size = `5741`
+- Test size = `1436`
 - Ratio of pass/fail builds = `0.9763132227950397/0.02368677720496029`
 
 <table align="center" border="1">
@@ -170,36 +182,42 @@ The value of the F1-score is higher than the random forest classifier, which mea
     <th style="border-width: 3px;">TypeScript</th>
     <th>SmartBuildSkip</th>
     <th>Our approach</th>
+    <th>Our approach without accumulation</th>
   </tr>
   <tr>
     <td><b>ACC</b></td>
-    <td>0.985366</td>
-    <td>0.988153</td>
+    <td>0.985376</td>
+    <td>0.979109</td>
+    <td>0.989554</td>
   </tr>
   <tr>
     <td><b>Precision</b></td>
     <td>0.000000</td>
-    <td>0.583333</td>
+    <td>0.390244</td>
+    <td>0.650000</td>
   </tr>
   <tr>
     <td><b>Recall</b></td>
     <td>0.000000</td>
-    <td>0.666667</td>
+    <td>0.761905</td>
+    <td>0.619048</td>
   </tr>
   <tr>
     <td><b>F1-score</b></td>
     <td>0.000000</td>
-    <td>0.622222</td>
+    <td>0.516129</td>
+    <td>0.634146</td>
   </tr>
   <tr>
     <td><b>AUC</b></td>
-    <td>0.521301</td>
-    <td>0.994814</td>
+    <td>0.496113</td>
+    <td>0.986185</td>
+    <td>0.996298</td>
   </tr>
 </table>
 
-- SmartBuildSkip: the accuracy is high, but the precision, recall and f1-score are `0`, which means that the classifier is not able to predict the failed builds. The AUC is `0.521301`, which means that the model does not have almost discriminative capacity between positive and negative classes.
-- Our approach: we have a higher accuracy than the SmartBuildSkip, and the precision, recall and f1-score are higher. The precision is `0.583333`, which is a good value, it indicates that `58.3333%` of the instances predicted as a failed build are actually failed builds. The recall is `0.666667`, which means that the `66.6667%` of the truly failed builds were correctly predicted by the model. The F1-score is `0.622222`, which is a high value. The AUC is `0.994814`, which is a very high value, this means that the model is able to distinguish between the classes.
+- SmartBuildSkip: the accuracy is high, but the precision, recall and f1-score are `0`, which means that the classifier is not able to predict the failed builds. The AUC is `0.496113`, which means that the model does not have almost discriminative capacity between positive and negative classes.
+- Our approach: we have a higher accuracy than the SmartBuildSkip, and the precision, recall and f1-score are higher. The precision is `0.390244`, which is a good value, it indicates that `39.0244%` of the instances predicted as a failed build are actually failed builds. The recall is `0.761905`, which means that the `76.1905%` of the truly failed builds were correctly predicted by the model. The F1-score is `0.516129`, which is a high value. The AUC is `0.986185`, which is a very high value, this means that the model is able to distinguish between the classes.
 
 As with the case of the xls repository, we have obtained better results using a `decision tree classifier`:
 
@@ -212,27 +230,27 @@ As with the case of the xls repository, we have obtained better results using a 
   <tr>
     <td><b>ACC</b></td>
     <td>0.985366</td>
-    <td>0.995819</td>
+    <td>0.980501</td>
   </tr>
   <tr>
     <td><b>Precision</b></td>
     <td>0.000000</td>
-    <td>0.941176</td>
+    <td>0.414634</td>
   </tr>
   <tr>
     <td><b>Recall</b></td>
     <td>0.000000</td>
-    <td>0.761905</td>
+    <td>0.809524</td>
   </tr>
   <tr>
     <td><b>F1-score</b></td>
     <td>0.000000</td>
-    <td>0.842105</td>
+    <td>0.548387</td>
   </tr>
   <tr>
     <td><b>AUC</b></td>
-    <td>0.521301</td>
-    <td>0.880599</td>
+    <td>0.496113</td>
+    <td>0.896281</td>
   </tr>
 </table>
 
