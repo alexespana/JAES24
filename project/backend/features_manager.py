@@ -6,11 +6,10 @@ train the model and make predictions later on.
 import re
 import os
 import datetime
-import time
 import pandas as pd
 import json
 from typing import Tuple, Optional
-from model_manager import train_all
+from model_manager import train_all_models, train_and_evaluate_all_models
 from constants import HOUR_CONVERTER
 from github_manager import GithubManager
 from utils import get_owner, get_repo_name, get_builds_folder, get_features_folder
@@ -361,7 +360,7 @@ def get_features(repo_name: str, branch: str, csv_file: str) -> None:
 
         df = df.drop(df.index)
 
-def process_repository(repository_url: str, branch: str, features_file: str, pickle_pattern: str, evaluate: bool = False) -> None:
+def process_repository(repository_url: str, branch: str, features_file: str, pickle_pattern: str, evaluate: bool = False, with_accumulation: bool = False) -> None:
     owner = get_owner(repository_url)
     repo_name = get_repo_name(repository_url)
     
@@ -372,11 +371,13 @@ def process_repository(repository_url: str, branch: str, features_file: str, pic
     get_features(repo_name, branch, features_file)
 
     # Train all models with the features extracted
-    train_data = pd.read_csv(get_features_folder(repo_name, branch) + features_file)
-    train_data = train_data.drop(columns=['ID'])
+    features = pd.read_csv(get_features_folder(repo_name, branch) + features_file)
+    features = features.drop(columns=['ID'])
     
-    train_all(train_data, pickle_pattern, evaluate)
-
+    if evaluate:
+        train_and_evaluate_all_models(features, pickle_pattern, with_accumulation)
+    else:
+        train_all_models(features, pickle_pattern)
 
 def get_event_type(build: dict) -> str:
     """
