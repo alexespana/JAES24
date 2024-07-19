@@ -183,8 +183,9 @@ def train_and_evaluate_all_models(data: pd.DataFrame, pickle_pattern: str, test_
 
     # TEST: The first {test_percentage} of builds (latest)
     x_test = data[:test_size]
+    x_test = x_test.iloc[::-1]      # older --> latest
 
-    # True tagrtes fot the test set 
+    # True targets for the test set 
     y_test = x_test.pop('outcome')
 
     # Train models and get transformers
@@ -311,9 +312,9 @@ def predict(model_path, x_test, y_test, with_accumulation, transformer = None) -
                 last_prediction = prediction_i
 
                 if last_prediction == 0:    # Check if the last prediction was a failure
+                    last_features.loc[0] = [None] * len(x_test.columns)
                     if y_test.iloc[index] == 0:     # First failure
                         in_failure_sequence = True
-                        last_features.loc[0] = [None] * len(x_test.columns)
 
     return predictions, predictions_prob
 
