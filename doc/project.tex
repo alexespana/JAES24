@@ -1,0 +1,43 @@
+\documentclass{llncs}
+
+\usepackage[spanish, es-tabla]{babel} % Spanish language
+\usepackage{graphicx}
+\usepackage{adjustbox}
+
+\setcounter{secnumdepth}{5}
+\setcounter{tocdepth}{5}
+
+\begin{document}
+
+    % Cover page
+    \input{cover_page/cover_page.tex}
+
+    % Preface
+    \input{prefaces/preface.tex}
+
+    % Table of Contents
+    \tableofcontents
+    \newpage
+
+    % Introduction
+    \input{sections/01_introduction.tex}
+
+    % Background
+    \input{sections/02_background.tex}
+
+    % Problem Description
+    \input{sections/03_description.tex}
+
+    % Implementation
+    \input{sections/04_implementation.tex}
+
+    % Contributions
+    \input{sections/05_contributions.tex}
+
+    % Results
+    \input{sections/06_results.tex}
+
+    % Conclusions
+    \input{sections/07_conclusions.tex}
+
+\end{document}
