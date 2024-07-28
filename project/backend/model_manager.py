@@ -3,6 +3,7 @@ This file contains utility functions related to Artificial Intelligence (AI) mod
 """
 import os
 import pickle
+import shutil
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -178,12 +179,11 @@ def train_and_evaluate_all_models(data: pd.DataFrame, pickle_pattern: str, test_
     failure_proportion = value_counts[0] / total_rows
     success_proportion = value_counts[1] / total_rows
 
-    # TRAIN: The last (1 - {test_percentage}) of builds (older)
-    x_train = data[-train_size:]
+    # TRAIN: The first (1 - {test_percentage}) of builds (older)
+    x_train = data[:train_size]
 
-    # TEST: The first {test_percentage} of builds (latest)
-    x_test = data[:test_size]
-    x_test = x_test.iloc[::-1]      # older --> latest
+    # TEST: The last {test_percentage} of builds (latest)
+    x_test = data[-test_size:]
 
     # True targets for the test set 
     y_test = x_test.pop('outcome')
@@ -239,6 +239,98 @@ def train_and_evaluate_all_models(data: pd.DataFrame, pickle_pattern: str, test_
         file.write(print_model_metrics(NN_CLASSIFIER, *calculate_metrics(y_test, predictions_nn, predictions_prob_nn)))
         file.write('\n')
 
+def k_fold_cross_validation(data: pd.DataFrame, pickle_pattern: str, k: int = 11, with_accumulation: bool = False, seed: int = 42):
+    """
+    Perform k-fold cross validation build features.
+
+    Args:
+    data: features and target values
+    pickle_pattern: the base pattern to save the models
+    k: the number of folds
+    seed: the seed for the random number generator
+
+    Returns:
+    None
+    """
+    k_fold_size = len(data) // k
+
+
+    shutil.rmtree(AIMODELS_FOLDER + pickle_pattern + '/k-Fold Cross-Validation', ignore_errors=True)  
+    os.makedirs(AIMODELS_FOLDER + pickle_pattern + '/k-Fold Cross-Validation', exist_ok=True)
+
+    for i in range(1, k):
+        fold_folder = AIMODELS_FOLDER + pickle_pattern + '/k-Fold Cross-Validation/Fold-' + str(i)
+        os.makedirs(fold_folder, exist_ok=True)
+
+        train_end_index = i * k_fold_size
+
+        # Train susbet
+        train_data = data[:train_end_index]
+
+        # Test subset
+        x_test = data[train_end_index + 1:train_end_index + k_fold_size]
+
+        # True targets for the test set 
+        y_test = x_test.pop('outcome')
+
+        # TRAIN
+        zscore, minmax = train_all_models(train_data, pickle_pattern, seed)
+
+        # TEST
+        predictions_dt, predictions_prob_dt = predict(get_model_path(pickle_pattern, DT_CLASSIFIER), x_test, y_test, with_accumulation)
+        plot_confusion_matrix(y_test, predictions_dt, pickle_pattern, DT_CLASSIFIER)
+        plot_roc_curve(y_test, predictions_prob_dt, pickle_pattern, DT_CLASSIFIER)
+
+        predictions_rf, predictions_prob_rf = predict(get_model_path(pickle_pattern, RF_CLASSIFIER), x_test, y_test, with_accumulation)
+        plot_confusion_matrix(y_test, predictions_rf, pickle_pattern, RF_CLASSIFIER)
+        plot_roc_curve(y_test, predictions_prob_rf, pickle_pattern, RF_CLASSIFIER)
+
+        predictions_lr, predictions_prob_lr = predict(get_model_path(pickle_pattern, LR_CLASSIFIER), x_test, y_test, with_accumulation, zscore)
+        plot_confusion_matrix(y_test, predictions_lr, pickle_pattern, LR_CLASSIFIER)
+        plot_roc_curve(y_test, predictions_prob_lr, pickle_pattern, LR_CLASSIFIER)
+
+        predictions_svm, predictions_prob_svm = predict(get_model_path(pickle_pattern, SVM_CLASSIFIER), x_test, y_test, with_accumulation, zscore)
+        plot_confusion_matrix(y_test, predictions_svm, pickle_pattern, SVM_CLASSIFIER)
+        plot_roc_curve(y_test, predictions_prob_svm, pickle_pattern, SVM_CLASSIFIER)
+
+        predictions_knn, predictions_prob_knn = predict(get_model_path(pickle_pattern, KNN_CLASSIFIER), x_test, y_test, with_accumulation, minmax)
+        plot_confusion_matrix(y_test, predictions_knn, pickle_pattern, KNN_CLASSIFIER)
+        plot_roc_curve(y_test, predictions_prob_knn, pickle_pattern, KNN_CLASSIFIER)
+
+        predictions_nn, predictions_prob_nn = predict(get_model_path(pickle_pattern, NN_CLASSIFIER), x_test, y_test, with_accumulation, minmax)
+        plot_confusion_matrix(y_test, predictions_nn, pickle_pattern, NN_CLASSIFIER)
+        plot_roc_curve(y_test, predictions_prob_nn, pickle_pattern, NN_CLASSIFIER)
+
+        # Save the evaluation in a file
+        with open(AIMODELS_FOLDER + pickle_pattern + '/' + pickle_pattern + '_evaluation.txt', 'w') as file:
+            file.write('=================================================================\n')
+            file.write('\t~~~~~~~ ' + str(i) +'-Fold Cross Validation for ' + pickle_pattern + ' ~~~~~~~')
+            file.write('\n=================================================================\n')
+            file.write('- Total number of builds = ' + str(train_end_index + k_fold_size) + '\n')
+            file.write('- Training size = ' + str(len(train_data)) + '\n')
+            file.write('- Test size = ' + str(len(x_test)) + '\n')
+
+            file.write(print_model_metrics(DT_CLASSIFIER, *calculate_metrics(y_test, predictions_dt, predictions_prob_dt)))
+            file.write('\n')
+            file.write(print_model_metrics(RF_CLASSIFIER, *calculate_metrics(y_test, predictions_rf, predictions_prob_rf)))
+            file.write('\n')
+            file.write(print_model_metrics(LR_CLASSIFIER, *calculate_metrics(y_test, predictions_lr, predictions_prob_lr)))
+            file.write('\n')
+            file.write(print_model_metrics(SVM_CLASSIFIER, *calculate_metrics(y_test, predictions_svm, predictions_prob_svm)))
+            file.write('\n')
+            file.write(print_model_metrics(KNN_CLASSIFIER, *calculate_metrics(y_test, predictions_knn, predictions_prob_knn)))
+            file.write('\n')
+            file.write(print_model_metrics(NN_CLASSIFIER, *calculate_metrics(y_test, predictions_nn, predictions_prob_nn)))
+            file.write('\n')
+
+        # Move all results for this k-fold to the fold folder
+        for item in os.listdir(AIMODELS_FOLDER + pickle_pattern):
+            src_path = os.path.join(AIMODELS_FOLDER + pickle_pattern, item)
+            dest_path = os.path.join(fold_folder, item)
+
+            if os.path.isfile(src_path):
+                shutil.move(src_path, dest_path)
+
 def predict(model_path, x_test, y_test, with_accumulation, transformer = None) -> Tuple[list, list]:
     """
     Make predictions.
@@ -279,7 +371,7 @@ def predict(model_path, x_test, y_test, with_accumulation, transformer = None) -
         build_features = pd.DataFrame(columns=x_test.columns)
         build_features.loc[0] = [None] * len(x_test.columns)
 
-        for index, row in x_test.iterrows():           
+        for index, (_, row) in enumerate(x_test.iterrows()):
             if in_failure_sequence:     # Subsequent failures
                 # Predict automatically a failure
                 predictions[index] = 0
@@ -393,7 +485,7 @@ def plot_confusion_matrix(y_test: list, predictions: list, pickle_pattern: str, 
     ConfusionMatrixDisplay.from_predictions(y_test, predictions)
     # Save the plot to a file
     plt.savefig(AIMODELS_FOLDER + pickle_pattern + '/' + 'cm_' + parse_classifier(classifier_type) + '.png')
-    plt.close()
+    plt.close('all')
 
 def plot_roc_curve(y_test: list, predictions_prob: list, pickle_pattern: str, classifier_type: str)-> None:
     """
@@ -416,4 +508,4 @@ def plot_roc_curve(y_test: list, predictions_prob: list, pickle_pattern: str, cl
     plt.legend(loc="lower right")
     # Save the plot to a file
     plt.savefig(AIMODELS_FOLDER + pickle_pattern + '/' + 'roc_' + parse_classifier(classifier_type) + '.png')
-    plt.close()
+    plt.close('all')
