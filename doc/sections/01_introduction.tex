@@ -1,1 +1,53 @@
 \section{Introducción}
+La Integración Continua (\textit{Continuous Integration, CI}) es una práctica de desarrollo de
+\textit{software} que busca automatizar el proceso de fusión de cambios de código en un proyecto,
+donde cada integración es verificada mediante la ejecución automática de pruebas. Este proceso
+busca la detección temprana de errores y mejorar la calidad del software, permitiendo una
+integración más frecuente y rápida del trabajo de todos los desarrolladores. Las buenas prácticas
+de \textit{CI} \cite{9} permiten una rápida detección de errores y su resolución, un
+\textit{feedback} rápido, la reducción de errores que provienen de tareas manuales, unas tasas de
+\textit{commits} y \textit{pull requests} más altas, una calidad del \textit{software} mayor,
+reconocer errores en producción temprano antes del despliegue, etc. Numerosos son sus ámbitos
+de aplicación: \textit{software} empresarial, desarrollo de aplicaciones web, proyectos de código
+abierto, aplicaciones móviles, etc. Todo ello, haciendo uso de las distintas herramientas que
+existen en el mercado \cite{10}, como \textit{GitHub Actions}, \textit{Jenkins},
+\textit{Travis CI}, \textit{CircleCI}, \textit{Azure DevOps}, entre otras.\\
+
+El ciclo de vida de la Integración Continua, a pesar de ofrecer numerosas ventajas, conlleva
+grandes costos asociados debido a los recursos computacionales \cite{11} necesarios para ejecutar
+las construcciones, comúnmente denominadas \textit{builds}. A lo largo de este trabajo,
+nos referiremos como costo computacional al hecho de ejecutar una \textit{build}, es decir, el
+proceso de construir el \textit{software} y ejecutar todas las pruebas cuando la \textit{CI} es
+lanzada. Este costo asociado se acentúa en empresas de gran tamaño, donde el número de
+\textit{builds} que se ejecutan diariamente es muy elevado \cite{12,13}. Además, hay que sumar
+la larga duración que pueden tene la ejecución de las \textit{builds} en este tipo de empresas.\\
+
+En los últimos años, han surgido numerosos enfoques centrados en reducir el costo computacional
+asociado a la ejecución de \textit{CI} \cite{2,4,5,6,7,8}. La idea principal de estos enfoques es
+reducir el número de \textit{builds} que se ejecutan, prediciendo el resultado antes de su
+ejecución y, por lo tanto ahorrándose ese costo computacional. Las \textit{builds} predichas como
+construcciones exitosas (\textit{build pass}) no se ejecutan, mientras que las predichas como
+construcciones fallidas (\textit{build failure}) sí se ejecutan. De esta forma, se mantiene el
+valor conceptual de la \textit{CI}, que es la detección temprana de errores, pero reduciendo
+el costo computacional asociado en el proceso. Este estudio toma como punto de partida el
+algoritmo de \textit{machine learning} \textit{SmartBuildSkip} \cite{2}. La idea principal es
+realizar una contribución a este algoritmo, usando features más significativas para predecir, o
+bien realizando una variante propia del mismo que mejore los resultados obtenidos. Por lo tanto,
+este estudio se enmarca en el desarrollo de software moderno, específicamente en el ámbito de
+la Integración Continua y la predicción automática del resultado de dicha integración.\\
+
+La memoria queda organizada de la siguiente forma: en primer lugar, se estableceran los
+objetivos y preguntas de investigación que pretende reponder este trabajo. Posteriormente, se
+realizará un estudio del estado del arte que sitúe los antecedentes previos a la Integración
+Continua y la predicción automática de resultados de \textit{builds}. A continuación, se
+describirá la solución propuesta, describiendo los detalles de la implementación, las
+tecnologías usadas. Después se presentarán las pruebas y resultados obtenidos, comparando la
+solución con otras existentes, a modo de validar y verificar la aportación. Seguidamente, se
+comentarán las amenazas a la validez, una parte esencial en cualquier trabajo de investigación.
+Este apartado nos permite identificar y discutir posibles limitaciones que podrían afectar a la
+validez de los resultados y a las conclusiones. Por último, se darán unas conclusiones sobre los
+resultados obtenidos y se propondrán posibles líneas de trabajo futuro.
+
+\section{Objetivos y Preguntas de Investigación}
+
+Continua...
