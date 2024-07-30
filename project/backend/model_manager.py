@@ -125,7 +125,7 @@ def train_all_models(data: pd.DataFrame, pickle_pattern: str, seed = 42) -> Tupl
     with open(get_model_path(pickle_pattern, DT_CLASSIFIER), 'wb') as file:
         pickle.dump(dt, file)
 
-    rf = RandomForestClassifier(random_state=seed)
+    rf = RandomForestClassifier(random_state=seed, class_weight={0: 20, 1: 1})
     train(rf, x_train, y_train)
     with open(get_model_path(pickle_pattern, RF_CLASSIFIER), 'wb') as file:
         pickle.dump(rf, file)
