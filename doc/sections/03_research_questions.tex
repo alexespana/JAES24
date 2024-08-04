@@ -1,0 +1,44 @@
+\section{Objetivos y preguntas de investigación}
+En un estudio de carácter exploratorio como el que se propone, definir unos objetivos y preguntas
+de investigación se convierte en una tarea fundamental para la correcta orientación del trabajo.
+En este sentido, los objetivos nos permiten establecer una serie de metas a alcanzar, mientras
+que las preguntas de investigación nos ayudan a centrar el estudio en aspectos concretos que
+queremos responder. Los objetivos de la investigación son los siguientes:
+
+\begin{itemize}
+    \item \textbf{OB-1}: implementar un algoritmo de aprendizaje automático que genere un modelo
+          predictivo (un \textit{predictor}) basado en un conjunto de características
+          \textit{features} extraídas de las \textit{builds}.\\
+    \item \textbf{OB-2}: utilizar la \textit{API} de GitHub para obtener datos relevantes sobre
+          las \textit{builds}, como su histórico, características asociadas, resultados anteriores
+          de la integración continua.\\
+    \item \textbf{OB-3}: desarrollar e implementar diferentes algoritmos de predicción con la
+          selección de diferentes características con el objetivo de proporcionar múltiples
+          opciones a la hora de predecir el resultado de la integración continua.\\
+    \item \textbf{OB-4}: implementar una interfaz gráfica que sirva como punto de entrada de
+          datos para el algoritmo de predicción y que permita visualizar los resultados
+          obtenidos.
+\end{itemize}
+
+Las preguntas de investigación tienen el objetivo de estructurr y orientar el proceso de
+investigación. A continuación se establecen las preguntas de investigación junto a las
+métricas usadas para su evaluación:
+
+
+\begin{itemize}
+    \item \textbf{PI-1}: ¿Qué algoritmo de predicción produce los mejores resultados en la
+          predicción automática del resultado de la integración continua?\\
+          \begin{itemize}
+            \item \textbf{Métrica}: \textit{accuracy}, \textit{precision}, \textit{recall} y
+                  \textit{F1-score} del modelo.\\
+          \end{itemize}
+
+    \item \textbf{PI-2}: ¿Qué características de las \textit{builds} son más significativas en
+          la predicción?\\
+
+          \begin{itemize}
+            \item \textbf{Métrica}: importancia de cada feature a través de la interpretación de los
+                  coeficientes del modelo.
+          \end{itemize}
+
+\end{itemize}
