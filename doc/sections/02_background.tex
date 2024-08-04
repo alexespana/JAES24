@@ -1,1 +1,93 @@
-\section{Antecedentes}
+\section{Antecedentes y trabajos relacionados}
+\subsection{Antecedentes}
+Este trabajo se centra en la implementación, evaluación y mejora del algoritmo de predicción de
+\textit{CI} propuesto en \cite{2}. Para comprender mejor el contexto en el que se desarrolla,
+primero vamos a presentar algunos de los conceptos básicos de \textit{CI} y del problema que
+nos ocupa. En primer lugar, se describirá el ciclo de vida de \textit{CI}, junto a las dos
+casuísticas que pueden darse en el proceso de integración. En segundo lugar, hablaremos sobre la
+extracción de características, un aspecto fundamental para algoritmos de predicción. Por último,
+se hablará del consumo de recursos computacionales que supone la implementación de \textit{CI},
+de ahí la principal motivación de este trabajo, la reducción de dichos costes.
+
+
+\subsubsection{El ciclo de vida de la Integración Continua.}
+La Integración Continua es un proceso iterativo en el cual varios contribuidores hacen cambios
+sobre un mismo código base añadiendo nuevas funcionalidades, para luego integrarlas a la misma
+linea temporal de desarrollo, de forma controlada y automatizada. Cada integración se realiza
+a través de la compilación, construcción y ejecución de pruebas automatizadas sobre el código
+fuente \cite{14}. Aunque pueda parecerlo, la Integración Continua no es un proceso trivial, en
+\cite{15} se describen las buenas prácticas de \textit{CI} que deben seguirse para garantizar
+la calidad del software, algunas de las cuales han sido fuertemente adoptadas en el sector, como
+son el punto de código fuente único, la automatización de \textit{builds} y el desarrollo de
+pruebas unitarias o de validación interna. Sin embargo, en el mundo real, la forma de aplicar
+cada una de estas técnicas y la prioridad con la que se aplican puede estar fuertemente
+influenciada \cite{9} por la cultura empresarial donde se desarrollen.\\
+
+\textbf{Ejemplo práctico}: Un desarrollador hace un \textit{commit} (una
+instantánea de los cambios realizados) y mediante una acción de \textit{push}, lo envía al
+repositorio central. El servidor de \textit{CI} \cite{10} (Jenkins, Travis CI, GitHub Actions,
+etc.) detecta automáticamente este nuevo \textit{commit} y desencadena el \textit{pipeline} de
+\textit{CI}. El servidor extrae el nuevo código del repositorio y comienza a construir la
+aplicación, lo que denominados la fase de construcción o \textit{build}. Esta parte puede incluir
+la compilación del código fuente, la instalación de dependencias, etc. Una vez que la aplicación
+está construida, se ejecutan una serie de pruebas automatizadas (\textit{Self-Testing code})
+\cite{11}. Dichas pruebas pueden ser pruebas unitarias, pruebas de integración, pruebas
+funcionales o pruebas de interfaz de usuario. Dependiendo del resultado de las fases anteriores,
+podemos encontrarnos dos casos:
+
+\begin{itemize}
+    \item \textbf{La \textit{build} ha sido exitosa}: todas las pruebas han pasado con éxito. En
+          este caso, el servidor de \textit{CI} puede desplegar la aplicación en un entorno de
+          pruebas o producción.
+    \item \textbf{La \textit{build} ha fallado}: alguna de las pruebas ha fallado. En este caso,
+          el servidor de \textit{CI} suele notificar a los desarrolladores y detiene el
+          despliegue de la aplicación.
+\end{itemize}
+
+
+\subsubsection{Características de las \textit{builds}.}
+Al ejecutarse una \textit{build}, se pueden extraer de ella una serie de características con las
+que algoritmos de predicción pueden predecir el resultado de la integración. Tener un conjunto
+de \textit{features} bien seleccionadas y significativas mejorará la precisión de los modelos.
+La mayoría de estudios utilizan catacteríticas extraídas directamente de la base de datos de
+TravisTorrent \cite{7}, sin embargo, estas características no son las mejores para predecir
+\textit{builds} que fallan, es decir, \textit{builds failures}. Algunos enfoques \cite{7,8}
+hacen uso de características basadas en la \textit{build} actual, la \textit{build} anterior y
+el histórico ligado a todas las ejecuciones de \textit{builds} anteriores. Sin embargo, esto
+supone una limitación para la detección de los primeros \textit{failures} \cite{2}, ya que estos
+dependen mucho del resultado de la \textit{build} anterior y, por definición, estarán siempre
+precedidos por una \textit{build} exitosa.\\
+
+Los \textit{build failures} pueden categorizarse en una serie de tipos. \textit{Rausch et al.}
+\cite{16} muestra una categorización de las \textit{build failures} según el tipo de error
+que las origina, identificándose un total de 14 categorías. En el estudio se demostró que más
+del 80\% de los errores se producían en la fase de ejecución de pruebas o \textit{tests}. Todo
+ello, teniendo en cuenta el \textit{dataset} de estudio, 14 proyectos de código abierto basados
+en Java que usan Travis CI. En \cite{19} se realiza un estudio a gran escala con 3.6 millones
+de \textit{builds} en el que se demuestra que factores como la cantidad de cambios en el código
+fuente, el número de \textit{commits}, el número de archivos modificados o la herramienta de
+integración usada tienen una relación estadísticamente significativa con las compilaciones
+fallidas.\\ 
+
+\subsubsection{El costo de la Integración Continua.}
+La implementación de la Integración Continua, a pesar de ofrecer numerosas ventajas, también
+supone un coste computacional y económico. Además del costo computacional que supone ejecutar
+la \textit{CI}, debemos de sumarle el costo que supone el tiempo no productivo de los
+desarrolladores si estos no saben como proceder sin saber el resultado de la integración.
+Hilton et al. \cite{2} estudiaron los beneficios y costes de aplicar \textit{CI} en proyectos
+de código abierto. Entre el costo de aplicar \textit{CI}, encontraron que: algunos proyectos
+no adoptan \textit{CI} porque sus desarrolladores no están familiarizados con ella, que es
+frecuente que se realicen cambios en la configuración de \textit{CI} y que estos sean debidos
+a versiones obsoletas en las dependencias y, por último, que el tiempo asociado a
+\textit{builds} exitosas es menor que el tiempo asociado a \textit{builds} fallidas. Klotins et
+al. \cite{21} realizaron un trabajo con múltiples casos de estudio en el que se encontró que
+la aplicación de \textit{CI} mejoraba notablemente los procesos de desarrollo internos en las
+empresas, sin embargo, se destaca la necesidad de evaluar las consecuencias de aplicar este
+tipo de desarrollo desde una perspectiva del cliente en la adopción de entregas continuas. En
+\cite{20} se presenta un estudio empírico en el que se resalta que los desarrolladores vieron
+los \textit{build failures} como difíciles de resolver, pensando que podrían retrasar el
+desarrollo de \textit{software} y reducir la productividad del equipo. Además, se menciona
+que factores técnicos como humanos desempeñan un papel fundamental en la adopción de
+\textit{CI}.\\
+
+\subsection{Trabajos relacionados}
