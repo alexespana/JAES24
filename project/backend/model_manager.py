@@ -254,6 +254,10 @@ def k_fold_cross_validation(data: pd.DataFrame, pickle_pattern: str, k: int = 11
     """
     k_fold_size = len(data) // k
 
+    # Average results of k-fold cross validation
+    y_test_folds = []
+    predictions_rf_folds = []
+    predictions_prob_rf_folds = []
 
     shutil.rmtree(AIMODELS_FOLDER + pickle_pattern + '/k-Fold Cross-Validation', ignore_errors=True)  
     os.makedirs(AIMODELS_FOLDER + pickle_pattern + '/k-Fold Cross-Validation', exist_ok=True)
@@ -301,6 +305,11 @@ def k_fold_cross_validation(data: pd.DataFrame, pickle_pattern: str, k: int = 11
         plot_confusion_matrix(y_test, predictions_nn, pickle_pattern, NN_CLASSIFIER)
         plot_roc_curve(y_test, predictions_prob_nn, pickle_pattern, NN_CLASSIFIER)
 
+        # Save the results for this fold
+        y_test_folds.extend(y_test)
+        predictions_rf_folds.extend(predictions_rf)
+        predictions_prob_rf_folds.extend(predictions_prob_rf)
+
         # Save the evaluation in a file
         with open(AIMODELS_FOLDER + pickle_pattern + '/' + pickle_pattern + '_evaluation.txt', 'w') as file:
             file.write('=================================================================\n')
@@ -330,6 +339,11 @@ def k_fold_cross_validation(data: pd.DataFrame, pickle_pattern: str, k: int = 11
 
             if os.path.isfile(src_path):
                 shutil.move(src_path, dest_path)
+
+    # Save results only for Random Forest
+    with open(AIMODELS_FOLDER + pickle_pattern + '/' + 'k-Fold Cross-Validation/' + 'evaluation.txt', 'w') as file:
+        file.write(print_model_metrics(RF_CLASSIFIER, *calculate_metrics(y_test_folds, predictions_rf_folds, predictions_prob_rf_folds)))
+        file.write('\n')
 
 def predict(model_path, x_test, y_test, with_accumulation, transformer = None) -> Tuple[list, list]:
     """
