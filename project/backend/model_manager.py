@@ -11,6 +11,7 @@ from typing import Tuple, Optional
 from sklearn.svm import SVC
 from constants import AIMODELS_FOLDER
 from utils import print_model_metrics, ndarray_to_dataframe
+from sklearn.model_selection import FixedThresholdClassifier
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.neural_network import MLPClassifier
@@ -61,7 +62,7 @@ def predict_and_calculate_metrics(pickle_pattern: str, x_test: pd.DataFrame,
     # Extract kwargs
     output_file = kwargs.get('output_file', 'evaluation.txt')
     key_fold = kwargs.get('key_fold', False)
-
+    sensitivity_threshold = kwargs.get('sensitivity_threshold', None)
 
     # Predict for all types of classifiers
     predictions_dt, predictions_prob_dt = predict(get_model_path(pickle_pattern, DT_CLASSIFIER), x_test, y_test, with_accumulation)
@@ -103,6 +104,21 @@ def predict_and_calculate_metrics(pickle_pattern: str, x_test: pd.DataFrame,
         predictions_prob = [predictions_prob_dt, predictions_prob_rf, predictions_prob_lr, predictions_prob_svm, predictions_prob_knn, predictions_prob_nn]
         
         return predictions, predictions_prob
+    elif sensitivity_threshold is not None:
+        df = pd.DataFrame(columns=['sensitivity', 'recall_dt', 'recall_rf', 'recall_lr', 'recall_svm', 'recall_knn', 'recall_nn'])
+        df.loc[0] = [sensitivity_threshold, 
+                     recall_score(y_test, predictions_dt, pos_label=0, zero_division=0),
+                     recall_score(y_test, predictions_rf, pos_label=0, zero_division=0),
+                     recall_score(y_test, predictions_lr, pos_label=0, zero_division=0),
+                     recall_score(y_test, predictions_svm, pos_label=0, zero_division=0),
+                     recall_score(y_test, predictions_knn, pos_label=0, zero_division=0),
+                     recall_score(y_test, predictions_nn, pos_label=0, zero_division=0)
+                    ]
+        try:
+            with open(AIMODELS_FOLDER + pickle_pattern + '/Sensitivity/results.csv', 'x') as f:
+                df.to_csv(f, index=False)
+        except FileExistsError:
+            df.to_csv(AIMODELS_FOLDER + pickle_pattern + '/Sensitivity/results.csv', mode='a', header=False, index=False)
 
 def plot_figures(y_test: pd.DataFrame, predictions: pd.DataFrame, predictions_prob: pd.DataFrame, pickle_pattern: str, classifier_type: str) -> None:
     """
@@ -119,7 +135,8 @@ def plot_figures(y_test: pd.DataFrame, predictions: pd.DataFrame, predictions_pr
     None
     """
     plot_confusion_matrix(y_test, predictions, pickle_pattern, classifier_type)
-    plot_roc_curve(y_test, predictions_prob, pickle_pattern, classifier_type) 
+    if len(set(y_test)) > 1:
+        plot_roc_curve(y_test, predictions_prob, pickle_pattern, classifier_type) 
 
 def get_model_path(model_name: str, classifier_type: str) -> str:
     """
@@ -188,7 +205,7 @@ def train(model, x_train, y_train):
 
     return model
 
-def train_all_models(data: pd.DataFrame, pickle_pattern: str, seed = 42) -> Tuple[StandardScaler, MinMaxScaler]:
+def train_all_models(data: pd.DataFrame, pickle_pattern: str, seed = 42, sensitivity_threshold: float = 0.5) -> Tuple[StandardScaler, MinMaxScaler]:
     """
     Train all models and save them into the specified folder.
 
@@ -212,40 +229,49 @@ def train_all_models(data: pd.DataFrame, pickle_pattern: str, seed = 42) -> Tupl
     x_train_zscore = ndarray_to_dataframe(x_train.columns, x_train_zscore)
     x_train_min_max = ndarray_to_dataframe(x_train.columns, x_train_min_max)
 
+    # Create models
     dt = DecisionTreeClassifier(random_state=seed)
-    train(dt, x_train, y_train)
+    rf = RandomForestClassifier(random_state=seed, class_weight={0: 20, 1: 1})
+    lr = LogisticRegression(random_state=seed, max_iter=15000)
+    svc = SVC(random_state=seed, probability=True)
+    knn = KNeighborsClassifier()
+    nn = MLPClassifier(random_state=seed, max_iter=15000)
+
+    # Adjust the threshold for sensitivity
+    if sensitivity_threshold is not None:
+        dt = FixedThresholdClassifier(dt, threshold=sensitivity_threshold, pos_label=0, response_method="predict_proba")
+        rf = FixedThresholdClassifier(rf, threshold=sensitivity_threshold, pos_label=0, response_method="predict_proba")
+        lr = FixedThresholdClassifier(lr, threshold=sensitivity_threshold, pos_label=0, response_method="predict_proba")
+        svc = FixedThresholdClassifier(svc, threshold=sensitivity_threshold, pos_label=0, response_method="predict_proba")
+        knn = FixedThresholdClassifier(knn, threshold=sensitivity_threshold, pos_label=0, response_method="predict_proba")
+        nn = FixedThresholdClassifier(nn, threshold=sensitivity_threshold, pos_label=0, response_method="predict_proba")
+
+
+    # Train models
+    train(dt, x_train, y_train) 
+    train(rf, x_train, y_train)
+    train(lr, x_train_zscore, y_train)
+    train(svc, x_train_zscore, y_train)
+    train(knn, x_train_min_max, y_train)
+    train(nn, x_train_min_max, y_train)
+
+    # Save models
     with open(get_model_path(pickle_pattern, DT_CLASSIFIER), 'wb') as file:
         pickle.dump(dt, file)
-
-    rf = RandomForestClassifier(random_state=seed, class_weight={0: 20, 1: 1})
-    train(rf, x_train, y_train)
     with open(get_model_path(pickle_pattern, RF_CLASSIFIER), 'wb') as file:
         pickle.dump(rf, file)
-
-    lr = LogisticRegression(random_state=seed, max_iter=15000)
-    train(lr, x_train_zscore, y_train)
     with open(get_model_path(pickle_pattern, LR_CLASSIFIER), 'wb') as file:
         pickle.dump(lr, file)
-
-    svc = SVC(random_state=seed, probability=True)
-    train(svc, x_train_zscore, y_train)
     with open(get_model_path(pickle_pattern, SVM_CLASSIFIER), 'wb') as file:
         pickle.dump(svc, file)
-
-    knn = KNeighborsClassifier()
-    train(knn, x_train_min_max, y_train)
     with open(get_model_path(pickle_pattern, KNN_CLASSIFIER), 'wb') as file:
         pickle.dump(knn, file)
-
-    nn = MLPClassifier(random_state=seed, max_iter=15000)
-    train(nn, x_train_min_max, y_train)
     with open(get_model_path(pickle_pattern, NN_CLASSIFIER), 'wb') as file:
         pickle.dump(nn, file)
 
-
     return zscore, minmax
 
-def train_and_evaluate_all_models(data: pd.DataFrame, pickle_pattern: str, test_percentage: float = 0.2, with_accumulation: bool = False,  seed: int = 42):
+def train_and_evaluate_all_models(data: pd.DataFrame, pickle_pattern: str, test_percentage: float = 0.2, with_accumulation: bool = False,  seed: int = 42, sensitivity_threshold: float = None):
     """
     Train and evaluate all models for a given dataset.
 
@@ -281,7 +307,7 @@ def train_and_evaluate_all_models(data: pd.DataFrame, pickle_pattern: str, test_
     y_test = x_test.pop('outcome')
 
     # Train models and get transformers
-    zscore, minmax = train_all_models(x_train, pickle_pattern, seed)
+    zscore, minmax = train_all_models(x_train, pickle_pattern, seed, sensitivity_threshold)
 
     # TESTING
     predict_and_calculate_metrics(pickle_pattern, x_test, y_test, 
@@ -289,9 +315,35 @@ def train_and_evaluate_all_models(data: pd.DataFrame, pickle_pattern: str, test_
                                   total_rows, train_size, test_size, 
                                   success_proportion, failure_proportion, 
                                   'Standard evaluation for ' + pickle_pattern + ' with test percentage of ' + str(test_percentage),
-                                  output_file = 'Standard_evaluation.txt')
+                                  output_file = 'Standard_evaluation.txt',
+                                  sensitivity_threshold = sensitivity_threshold)
 
-def k_fold_cross_validation(data: pd.DataFrame, pickle_pattern: str, k: int = 11, with_accumulation: bool = False, seed: int = 42):
+def get_sensitivity_results(data: pd.DataFrame, pickle_pattern: str, test_percentage: float = 0.2, with_accumulation: bool = False, seed: int = 42):
+    """
+    Get the recall values for different sensitivity thresholds.
+
+    Args:
+    data: features and target values
+    pickle_pattern: the base pattern to save the models
+    test_percentage: the percentage of the data to be used for testing
+    with_accumulation: whether to accumulate the predictions
+    seed: the seed for the random number generator
+
+    Returns:
+    None
+    """
+    thresholds = [round(i * 0.05, 2) for i in range(21)]
+
+    # Save results in a folder (csv files)
+    shutil.rmtree(AIMODELS_FOLDER + pickle_pattern + '/k-Fold Cross-Validation', ignore_errors=True)
+    shutil.rmtree(AIMODELS_FOLDER + pickle_pattern + '/Sensitivity', ignore_errors=True)  
+    os.makedirs(AIMODELS_FOLDER + pickle_pattern + '/Sensitivity', exist_ok=True)
+
+    for threshold in  thresholds:
+        train_and_evaluate_all_models(data=data, pickle_pattern=pickle_pattern, test_percentage=test_percentage, with_accumulation=with_accumulation,
+                                      seed=seed, sensitivity_threshold=threshold)
+
+def k_fold_cross_validation(data: pd.DataFrame, pickle_pattern: str, k: int = 11, with_accumulation: bool = False, seed: int = 42, sensitivity_threshold: float = None):
     """
     Perform k-fold cross validation build features.
 
@@ -313,8 +365,9 @@ def k_fold_cross_validation(data: pd.DataFrame, pickle_pattern: str, k: int = 11
     predictions_lr, predictions_lr_prob, predictions_svm, predictions_svm_prob = [], [], [], []
     predictions_knn, predictions_knn_prob, predictions_nn, predictions_nn_prob = [], [], [], []
 
-    shutil.rmtree(AIMODELS_FOLDER + pickle_pattern + '/k-Fold Cross-Validation', ignore_errors=True)  
     os.makedirs(AIMODELS_FOLDER + pickle_pattern + '/k-Fold Cross-Validation', exist_ok=True)
+    os.makedirs(AIMODELS_FOLDER + pickle_pattern + '/k-Fold Cross-Validation/Sensitivity', exist_ok=True)
+
 
     for i in range(1, k):
         fold_folder = AIMODELS_FOLDER + pickle_pattern + '/k-Fold Cross-Validation/Fold-' + str(i)
@@ -328,8 +381,8 @@ def k_fold_cross_validation(data: pd.DataFrame, pickle_pattern: str, k: int = 11
         # Ratio of successful and failed builds
         total_rows = len(data[:train_end_index + k_fold_size])
         value_counts = data[:train_end_index + k_fold_size]['outcome'].value_counts()
-        failure_proportion = value_counts[0] / total_rows
-        success_proportion = value_counts[1] / total_rows
+        failure_proportion = value_counts.get(0,0) / total_rows
+        success_proportion = value_counts.get(1,0) / total_rows
 
         # Test subset
         x_test = data[train_end_index + 1:train_end_index + k_fold_size]
@@ -337,8 +390,13 @@ def k_fold_cross_validation(data: pd.DataFrame, pickle_pattern: str, k: int = 11
         # True targets for the test set 
         y_test = x_test.pop('outcome')
 
+        # Avoid training in cases where only one class is present
+        train_data_counts = train_data['outcome'].value_counts()
+        if (train_data_counts.get(0,0) == 0 or train_data_counts.get(1,0) == 0):      
+            continue
+        
         # TRAIN
-        zscore, minmax = train_all_models(train_data, pickle_pattern, seed)
+        zscore, minmax = train_all_models(train_data, pickle_pattern, seed, sensitivity_threshold)
 
         # TEST
         predictions, predictions_prob = predict_and_calculate_metrics(pickle_pattern, x_test, y_test, 
@@ -346,7 +404,8 @@ def k_fold_cross_validation(data: pd.DataFrame, pickle_pattern: str, k: int = 11
                                             train_end_index + k_fold_size, len(train_data), len(x_test),
                                             success_proportion, failure_proportion,
                                             str(i) + '-Fold Cross Validation for ' + pickle_pattern,
-                                            output_file = str(i) + '-Fold_evaluation.txt', key_fold=True)
+                                            output_file = str(i) + '-Fold_evaluation.txt', key_fold=True,
+                                            sensitivity_threshold = sensitivity_threshold)
 
         # Move all results for this k-fold to the fold folder
         for item in os.listdir(AIMODELS_FOLDER + pickle_pattern):
@@ -391,6 +450,22 @@ def k_fold_cross_validation(data: pd.DataFrame, pickle_pattern: str, k: int = 11
         file.write(print_model_metrics(SVM_CLASSIFIER, *calculate_metrics(y_test_folds, predictions_svm, predictions_svm_prob)))
         file.write(print_model_metrics(KNN_CLASSIFIER, *calculate_metrics(y_test_folds, predictions_knn, predictions_knn_prob)))
         file.write(print_model_metrics(NN_CLASSIFIER, *calculate_metrics(y_test_folds, predictions_nn, predictions_nn_prob)))
+
+    if sensitivity_threshold is not None:
+        df = pd.DataFrame(columns=['sensitivity', 'recall_dt', 'recall_rf', 'recall_lr', 'recall_svm', 'recall_knn', 'recall_nn'])
+        df.loc[0] = [sensitivity_threshold, 
+                     recall_score(y_test_folds, predictions_dt, pos_label=0, zero_division=0),
+                     recall_score(y_test_folds, predictions_rf, pos_label=0, zero_division=0),
+                     recall_score(y_test_folds, predictions_lr, pos_label=0, zero_division=0),
+                     recall_score(y_test_folds, predictions_svm, pos_label=0, zero_division=0),
+                     recall_score(y_test_folds, predictions_knn, pos_label=0, zero_division=0),
+                     recall_score(y_test_folds, predictions_nn, pos_label=0, zero_division=0)
+                    ]
+        try:
+            with open(AIMODELS_FOLDER + pickle_pattern + '/' + 'k-Fold Cross-Validation/Sensitivity/results.csv', 'x') as f:
+                df.to_csv(f, index=False)
+        except FileExistsError:
+            df.to_csv(AIMODELS_FOLDER + pickle_pattern + '/' + 'k-Fold Cross-Validation/Sensitivity/results.csv', mode='a', header=False, index=False)
 
 def predict(model_path, x_test, y_test, with_accumulation, transformer = None) -> Tuple[list, list]:
     """
@@ -524,12 +599,16 @@ def calculate_metrics(y_test: list, predictions: list, predictions_prob: list)->
     Returns:
     dict: The metrics.
     """
-    cm = confusion_matrix(y_test, predictions)
+    cm = confusion_matrix(y_test, predictions, labels=[0, 1])
     acc = accuracy_score(y_test, predictions)
     precision = precision_score(y_test, predictions, pos_label=0, zero_division=0)
     recall = recall_score(y_test, predictions, pos_label=0, zero_division=0)
     f1 = f1_score(y_test, predictions, pos_label=0, zero_division=0)
-    auc = roc_auc_score(y_test, predictions_prob)
+    
+    if len(set(y_test)) > 1:    
+        auc = roc_auc_score(y_test, predictions_prob)
+    else:
+        auc = -1
 
 
     return cm, acc, precision, recall, f1, auc
@@ -543,7 +622,7 @@ def plot_confusion_matrix(y_test: list, predictions: list, pickle_pattern: str, 
     predictions (DataFrame): The predicted target values.
     """
     plt.figure()
-    ConfusionMatrixDisplay.from_predictions(y_test, predictions)
+    ConfusionMatrixDisplay.from_predictions(y_test, predictions, labels=[0,1])
     # Save the plot to a file
     plt.savefig(AIMODELS_FOLDER + pickle_pattern + '/' + 'cm_' + parse_classifier(classifier_type) + '.png')
     plt.close('all')
