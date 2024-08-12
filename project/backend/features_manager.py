@@ -316,7 +316,12 @@ def get_features(repo_name: str, branch: str, csv_file: str) -> None:
 
         # Extract the features
         for build in builds["workflow_runs"]:
-            build_id = build['id']            
+            build_id = build['id']
+
+            # Skip builds that were skipped or canceled
+            if(build['conclusion'] == 'skipped' or build['conclusion'] == 'cancelled'):
+                continue
+
             full_name = build['repository']['full_name']
             owner, repo_name = full_name.split('/')
             PS = get_performance_short(build_id, builds, id_to_index)
@@ -329,7 +334,7 @@ def get_features(repo_name: str, branch: str, csv_file: str) -> None:
 
             # Get the event type which triggered the build
             event_type = get_event_type(build)
-            
+
             if 'pull_request' in event_type:
                 build_pr_number = get_build_pr_number(build)
 
@@ -338,8 +343,7 @@ def get_features(repo_name: str, branch: str, csv_file: str) -> None:
 
                 pr_files = github_manager.get_pull_request_files(owner, repo_name, build_pr_number)
                 NC = get_num_commits(build, build_pr_number)
-
-            elif event_type == 'push' or event_type == 'schedule' or event_type == 'dynamic':
+            else:
                 NC = 1
                 sha = build['head_sha']
                 commit = github_manager.get_commit(owner, repo_name, sha)
