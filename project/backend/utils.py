@@ -185,7 +185,7 @@ def ndarray_to_dataframe(columns: list, data: np.ndarray) -> pd.DataFrame:
     """
     return pd.DataFrame(data, columns=columns)
 
-def graph_sensitivities(sources: np.ndarray, logger) -> None:
+def graph_sensitivities(sources: np.ndarray) -> None:
     """
     Graph the sensitivities.
 
@@ -197,7 +197,7 @@ def graph_sensitivities(sources: np.ndarray, logger) -> None:
     """
     colors = ['blue', 'green', 'red']
     markers = ['o', 's', 'D']
-    approaches = ['SBS-Within', 'JAES24-Within', 'JAES24-Without']
+    approaches = ['SBS-Within', 'JAES24-Without']
 
     plt.figure(figsize=(10,6))
 
@@ -208,7 +208,6 @@ def graph_sensitivities(sources: np.ndarray, logger) -> None:
         dataframes = []
 
         for file in file_paths:
-            logger.info(file)
             df = pd.read_csv(source + file)
             dataframes.append(df)
 
@@ -224,5 +223,6 @@ def graph_sensitivities(sources: np.ndarray, logger) -> None:
         plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.15), ncol=3)
         plt.grid(True)
         plt.tight_layout()
-        plt.savefig('recall.svg', format='svg')
-        plt.close('all')
+    
+    plt.savefig('recall.svg', format='svg')
+    plt.close('all')
