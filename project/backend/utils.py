@@ -9,9 +9,11 @@ replace_fields(url: str, owner: str, repo_name: str, pull_number: str, run_id: s
 """
 import re
 import os
+import glob
 import calendar
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 from typing import Tuple
 from constants import FEATURES_FOLDER, AIMODELS_FOLDER
 
@@ -165,8 +167,8 @@ def print_model_metrics(model_type: str, confusion_matrix: np.ndarray, acc: floa
                 "Precision: {:.6f}\n".format(precision) + \
                 "Recall: {:.6f}\n".format(recall) + \
                 "F1: {:.6f}\n".format(f1) + \
-                "AUC: {:.6f}\n".format(auc) + \
-                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+                "AUC: {:.6f} (-1 = Undefined)\n".format(auc) + \
+                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"
     
     return message
 
@@ -182,3 +184,45 @@ def ndarray_to_dataframe(columns: list, data: np.ndarray) -> pd.DataFrame:
     pd.DataFrame: The Pandas DataFrame.
     """
     return pd.DataFrame(data, columns=columns)
+
+def graph_sensitivities(sources: np.ndarray, logger) -> None:
+    """
+    Graph the sensitivities.
+
+    Args:
+    sources (np.ndarray): The sources.
+
+    Returns:
+    None
+    """
+    colors = ['blue', 'green', 'red']
+    markers = ['o', 's', 'D']
+    approaches = ['SBS-Within', 'JAES24-Within', 'JAES24-Without']
+
+    plt.figure(figsize=(10,6))
+
+
+    for i, source in enumerate(sources):
+        file_paths = os.listdir(source)
+
+        dataframes = []
+
+        for file in file_paths:
+            logger.info(file)
+            df = pd.read_csv(source + file)
+            dataframes.append(df)
+
+        combined_df = pd.concat(dataframes, ignore_index=True)
+
+        # Group by 'sensitivity' and calculate the mean of 'recall'
+        mean_recall = combined_df.groupby('sensitivity')['recall_rf'].mean().reset_index()
+
+        plt.plot(mean_recall['sensitivity'], mean_recall['recall_rf'], marker = markers[i], color = colors[i], label = approaches[i], markersize=3)
+
+        plt.xlabel('Sensitivity')
+        plt.ylabel('Recall')
+        plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.15), ncol=3)
+        plt.grid(True)
+        plt.tight_layout()
+        plt.savefig('recall.svg', format='svg')
+        plt.close('all')
