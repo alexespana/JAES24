@@ -4,17 +4,17 @@ La Integración Continua (\textit{Continuous Integration, CI}) es una práctica 
 donde cada integración es verificada mediante la ejecución automática de pruebas. Este proceso
 busca la detección temprana de errores y mejorar la calidad del software, permitiendo una
 integración más frecuente y rápida del trabajo de todos los desarrolladores. Las buenas prácticas
-de \textit{CI} \cite{9} permiten una rápida detección de errores y su resolución, un
+de \textit{CI} \cite{8} permiten una rápida detección de errores y su resolución, un
 \textit{feedback} rápido, la reducción de errores que provienen de tareas manuales, unas tasas de
 \textit{commits} y \textit{pull requests} más altas, una calidad del \textit{software} mayor,
 reconocer errores en producción temprano antes del despliegue, etc. Numerosos son sus ámbitos
 de aplicación: \textit{software} empresarial, desarrollo de aplicaciones web, proyectos de código
 abierto, aplicaciones móviles, etc. Todo ello, haciendo uso de las distintas herramientas que
-existen en el mercado \cite{10}, como \textit{GitHub Actions}, \textit{Jenkins},
+existen en el mercado \cite{9}, como \textit{GitHub Actions}, \textit{Jenkins},
 \textit{Travis CI}, \textit{CircleCI}, \textit{Azure DevOps}, entre otras.\\
 
 El ciclo de vida de la Integración Continua, a pesar de ofrecer numerosas ventajas, conlleva
-grandes costos asociados debido a los recursos computacionales \cite{11} necesarios para ejecutar
+grandes costos asociados debido a los recursos computacionales \cite{10} necesarios para ejecutar
 las construcciones, comúnmente denominadas \textit{builds}. A lo largo de este trabajo,
 nos referiremos como costo computacional al hecho de ejecutar una \textit{build}, es decir, el
 proceso de construir el \textit{software} y ejecutar todas las pruebas cuando la \textit{CI} es
@@ -23,7 +23,7 @@ lanzada. Este costo asociado se acentúa en empresas de gran tamaño, donde el n
 la larga duración que pueden tene la ejecución de las \textit{builds} en este tipo de empresas.\\
 
 En los últimos años, han surgido numerosos enfoques centrados en reducir el costo computacional
-asociado a la ejecución de \textit{CI} \cite{2,4,5,6,7,8}. La idea principal de estos enfoques es
+asociado a la ejecución de \textit{CI} \cite{1,2,4,5,6,7}. La idea principal de estos enfoques es
 reducir el número de \textit{builds} que se ejecutan, prediciendo el resultado antes de su
 ejecución y, por lo tanto ahorrándose ese costo computacional. Las \textit{builds} predichas como
 construcciones exitosas (\textit{build pass}) no se ejecutan, mientras que las predichas como

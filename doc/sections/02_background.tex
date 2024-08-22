@@ -15,23 +15,23 @@ La Integración Continua es un proceso iterativo en el cual varios contribuidore
 sobre un mismo código base añadiendo nuevas funcionalidades, para luego integrarlas a la misma
 linea temporal de desarrollo, de forma controlada y automatizada. Cada integración se realiza
 a través de la compilación, construcción y ejecución de pruebas automatizadas sobre el código
-fuente \cite{14}. Aunque pueda parecerlo, la Integración Continua no es un proceso trivial, en
-\cite{15} se describen las buenas prácticas de \textit{CI} que deben seguirse para garantizar
+fuente \cite{10}. Aunque pueda parecerlo, la Integración Continua no es un proceso trivial, en
+\cite{12} se describen las buenas prácticas de \textit{CI} que deben seguirse para garantizar
 la calidad del software, algunas de las cuales han sido fuertemente adoptadas en el sector, como
 son el punto de código fuente único, la automatización de \textit{builds} y el desarrollo de
 pruebas unitarias o de validación interna. Sin embargo, en el mundo real, la forma de aplicar
 cada una de estas técnicas y la prioridad con la que se aplican puede estar fuertemente
-influenciada \cite{9} por la cultura empresarial donde se desarrollen.\\
+influenciada \cite{8} por la cultura empresarial donde se desarrollen.\\
 
 \textbf{Ejemplo práctico}: Un desarrollador hace un \textit{commit} (una
 instantánea de los cambios realizados) y mediante una acción de \textit{push}, lo envía al
-repositorio central. El servidor de \textit{CI} \cite{10} (Jenkins, Travis CI, GitHub Actions,
+repositorio central. El servidor de \textit{CI} \cite{9} (Jenkins, Travis CI, GitHub Actions,
 etc.) detecta automáticamente este nuevo \textit{commit} y desencadena el \textit{pipeline} de
 \textit{CI}. El servidor extrae el nuevo código del repositorio y comienza a construir la
 aplicación, lo que denominados la fase de construcción o \textit{build}. Esta parte puede incluir
 la compilación del código fuente, la instalación de dependencias, etc. Una vez que la aplicación
 está construida, se ejecutan una serie de pruebas automatizadas (\textit{Self-Testing code})
-\cite{11}. Dichas pruebas pueden ser pruebas unitarias, pruebas de integración, pruebas
+\cite{10}. Dichas pruebas pueden ser pruebas unitarias, pruebas de integración, pruebas
 funcionales o pruebas de interfaz de usuario. Dependiendo del resultado de las fases anteriores,
 podemos encontrarnos dos casos:
 
@@ -50,7 +50,7 @@ Al ejecutarse una \textit{build}, se pueden extraer de ella una serie de caracte
 que algoritmos de predicción pueden predecir el resultado de la integración. Tener un conjunto
 de \textit{features} bien seleccionadas y significativas mejorará la precisión de los modelos.
 La mayoría de estudios utilizan catacteríticas extraídas directamente de la base de datos de
-TravisTorrent \cite{7}, sin embargo, estas características no son las mejores para predecir
+TravisTorrent \cite{6}, sin embargo, estas características no son las mejores para predecir
 \textit{builds} que fallan, es decir, \textit{builds failures}. Algunos enfoques \cite{7,8}
 hacen uso de características basadas en la \textit{build} actual, la \textit{build} anterior y
 el histórico ligado a todas las ejecuciones de \textit{builds} anteriores. Sin embargo, esto
@@ -59,11 +59,11 @@ dependen mucho del resultado de la \textit{build} anterior y, por definición, e
 precedidos por una \textit{build} exitosa.\\
 
 Los \textit{build failures} pueden categorizarse en una serie de tipos. \textit{Rausch et al.}
-\cite{16} muestra una categorización de las \textit{build failures} según el tipo de error
+\cite{13} muestra una categorización de las \textit{build failures} según el tipo de error
 que las origina, identificándose un total de 14 categorías. En el estudio se demostró que más
 del 80\% de los errores se producían en la fase de ejecución de pruebas o \textit{tests}. Todo
 ello, teniendo en cuenta el \textit{dataset} de estudio, 14 proyectos de código abierto basados
-en Java que usan Travis CI. En \cite{19} se realiza un estudio a gran escala con 3.6 millones
+en Java que usan Travis CI. En \cite{16} se realiza un estudio a gran escala con 3.6 millones
 de \textit{builds} en el que se demuestra que factores como la cantidad de cambios en el código
 fuente, el número de \textit{commits}, el número de archivos modificados o la herramienta de
 integración usada tienen una relación estadísticamente significativa con las compilaciones
@@ -80,11 +80,11 @@ no adoptan \textit{CI} porque sus desarrolladores no están familiarizados con e
 frecuente que se realicen cambios en la configuración de \textit{CI} y que estos sean debidos
 a versiones obsoletas en las dependencias y, por último, que el tiempo asociado a
 \textit{builds} exitosas es menor que el tiempo asociado a \textit{builds} fallidas. Klotins et
-al. \cite{21} realizaron un trabajo con múltiples casos de estudio en el que se encontró que
+al. \cite{18} realizaron un trabajo con múltiples casos de estudio en el que se encontró que
 la aplicación de \textit{CI} mejoraba notablemente los procesos de desarrollo internos en las
 empresas, sin embargo, se destaca la necesidad de evaluar las consecuencias de aplicar este
 tipo de desarrollo desde una perspectiva del cliente en la adopción de entregas continuas. En
-\cite{20} se presenta un estudio empírico en el que se resalta que los desarrolladores vieron
+\cite{17} se presenta un estudio empírico en el que se resalta que los desarrolladores vieron
 los \textit{build failures} como difíciles de resolver, pensando que podrían retrasar el
 desarrollo de \textit{software} y reducir la productividad del equipo. Además, se menciona
 que factores técnicos como humanos desempeñan un papel fundamental en la adopción de
@@ -92,7 +92,7 @@ que factores técnicos como humanos desempeñan un papel fundamental en la adopc
 
 \subsection{Trabajos relacionados}
 Existen numerosos estudios que buscan reducir el costo asociado a la Integración Continua
-mediante la creación de \textit{predictors} \cite{8,5,2,18,7,17,4,1,22}. Hassan et al. \cite{8}
+mediante la creación de \textit{predictors} \cite{7,5,2,15,6,14,4,1,19}. Hassan et al. \cite{7}
 estudiaron un total de 402 proyectos Java con información de 256,055 \textit{builds}, procedentes
 de la base de datos de TravisTorrent. En su estudio se utilizan características extraídas
 directamente de la base de datos de TravisTorrent y otras propias, relacionando \textit{features}
@@ -112,26 +112,26 @@ entre proyectos, también llamada \textit{cross-project prediction}. Además, se
 algoritmo que usa \textit{Random Forest} como clasificador. Nuestro estudio se centra en
 la implementación, evaluación y mejora de este algoritmo.\\
 
-Saidani et al. \cite{18} propone un predictor que utiliza Redes Neuronales Recurrentes
+Saidani et al. \cite{15} propone un predictor que utiliza Redes Neuronales Recurrentes
 (\textit{RNN}) basadas en Memoria a Largo Plazo (\textit{LSTM}). Sus estudios revelan que este
 tipo de técnicas ofrecen mejores resultados que las que usan técnicas de \textit{Machine
 Learning}, obteniendo mejor rendimiento en términos de \textit{AUC}, \textit{F1-Score} y
-\textit{accuracy} cuando se trata de validación entre proyectos. En \cite{7} se propone una
+\textit{accuracy} cuando se trata de validación entre proyectos. En \cite{6} se propone una
 nueva solución en la que se usa un predictor que es dependiente del histórico de \textit{builds}
 pasadas para poder hacer sus predicciones. En este estudio existen métodos de selección de
 \textit{features} que selecionan determinadas \textit{features} en función del tipo de proyecto
-que se esté evaluando. En otro artículo, Ouni et al. \cite{17} propone una solución de línea de
+que se esté evaluando. En otro artículo, Ouni et al. \cite{14} propone una solución de línea de
 comandos donde se consigue mejorar el estado del arte en términos de \textit{F1-Score}, sin
-embargo, solo se tiene en cuenta el estudio \cite{8} comentado anteriormente. Jin et al.
+embargo, solo se tiene en cuenta el estudio \cite{7} comentado anteriormente. Jin et al.
 \cite{4} propone un nuevo predictor que mejora el ahorro de costo y la observación de
-\textit{builds} fallidas, mejorando el estado del arte. Finalmente, Jin et al. \cite{6} propone
+\textit{builds} fallidas, mejorando el estado del arte. Finalmente, Jin et al. \cite{1} propone
 una solución que emplea técnicas de selección de \textit{builds} y dos técnicas de selección
 de tests. Esta solución ejecuta seis técnicas existentes y luego usa los resultados como
 \textit{features} para un clasificador \textit{Random Forest}.\\
 
 Por otro lado, no existen proyectos documentados que usen técnicas de predicción de \textit{CI}
 para el ahorro de costos, por lo que es complicado evaluar el impacto económico real que estas
-pueden causar. Liu et al. \cite{22} utiliza simulación de procesos \textit{software} y
+pueden causar. Liu et al. \cite{19} utiliza simulación de procesos \textit{software} y
 experimentos basados en simulación para evaluar el impacto de estos \textit{predictors} de
 \textit{CI} en un entorno más realista. Entre sus descubrimientos, vieron que existe poca
 diferencia entre los \textit{predictors} del esado del arte y las estrategias aleatorias en
