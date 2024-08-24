@@ -13,14 +13,53 @@ abierto, aplicaciones móviles, etc. Todo ello, haciendo uso de las distintas he
 existen en el mercado \cite{9}, como \textit{GitHub Actions}, \textit{Jenkins},
 \textit{Travis CI}, \textit{CircleCI}, \textit{Azure DevOps}, entre otras.\\
 
+Para contextualizar el problema que nos ocupa, vamos a describir algunos términos relevantes para
+el entendimiento del mismo. A lo largo del trabajo, nos referiremos como \textit{build} al 
+proceso automático mediante el cual el código fuente se compila, se ejecutan las pruebas, y se
+genera un artefacto \textit{software}, ya sea un ejecutable, un contenedor, un paquete, etc., que
+está listo para ser desplegado o usado en producción. Cada \textit{build} es lanzada por lo
+que se denomina comúnmente \textit{trigger}, que puede ser un:
+\begin{itemize}
+    \item \underline{\textit{Commit}}: representa una ``instantánea'' del estado del proyecto en 
+    un momento específico, guardando las modificaciones que se han hecho a los archivos desde el
+    último \textit{commit}. Cada vez que el desarrollador realiza un \textit{commit}, se dispara
+    una nueva \textit{build}.
+    \item \underline{\textit{Pull request}}: un \textit{pull request} o solicitud de incorporación
+    de cambios es una solicitud formal para fusionar cambios propuestos en una rama de desarrollo
+    a otra rama, que generalmente es la rama principal. Este tipo de solicitud permite la
+    revisión de los cambios realizados, su discusión, y aprobación del código por parte de
+    otros desarrolladores antes de integrarlo con la rama principal. En este caso, al crear o
+    actualizar un \textit{pull request}, se lanza una \textit{build} para verificar que el código
+    cumple con los estándares de calidad.
+    \item \underline{\textit{Schedule}}: se pueden programar \textit{builds} para que se ejecuten
+    en un intervalo de tiempo regular, independendientemente de si hubo o no cambios en el código.
+\end{itemize}
+
+Existen numerosos sistemas de \textit{CI} en la actualidad, \textit{GitHub Actions},
+\textit{Jenkins}, \textit{Travis CI}, \textit{CircleCI}, \textit{Azure DevOps}, entre otros, sin
+embargo, en este trabajo nos centraremos en \textit{GitHub Actions}. \textit{GitHub Actions} es
+el sistema de \textit{CI} más utilizado en la actualidad, y al cual muchos otros sistemas
+migraron debido a sus características, especialmente \textit{Travis CI}. En 2020, \textit{Travis
+CI} decidió imponer numerosas restricciones a su plan gratuito para proyectos \textit{software}
+de código abierto \cite{9}, siendo este uno de los principales motivos para su migración hacia
+\textit{GitHub Actions}. Además, existen otras razones para esta migración, como puede ser
+utilizar una herramienta de \textit{CI} más confiable, mejor integración con soluciones 
+\textit{self-hosted}, mejor soporte para múltiples plataformas, la reducción de la cantidad de
+uso compartido de la herramienta, tener más funcionalidades, etc.\\
+
 El ciclo de vida de la Integración Continua, a pesar de ofrecer numerosas ventajas, conlleva
 grandes costos asociados debido a los recursos computacionales \cite{10} necesarios para ejecutar
 las construcciones, comúnmente denominadas \textit{builds}. A lo largo de este trabajo,
 nos referiremos como costo computacional al hecho de ejecutar una \textit{build}, es decir, el
 proceso de construir el \textit{software} y ejecutar todas las pruebas cuando la \textit{CI} es
 lanzada. Este costo asociado se acentúa en empresas de gran tamaño, donde el número de
-\textit{builds} que se ejecutan diariamente es muy elevado \cite{12,13}. Además, hay que sumar
-la larga duración que pueden tene la ejecución de las \textit{builds} en este tipo de empresas.\\
+\textit{builds} que se ejecutan diariamente es muy elevado \cite{12,13}. Ahorrar en dicho costo
+computacional se convierte por tanto en un objetivo clave para las mismas. Optimizando la cantidad
+de \textit{builds} que se ejecutan, podemos lograr una reducción significativa de este costo, ya
+que se habrán consumido menor cantidad de recursos. Además, hay que sumarle el tiempo de espera
+que los desarrolladores deben soportar cuando el tiempo de ejecución de la \textit{build} es
+elevado, pudiendo ralentizar el tiempo de respuesta ante problemas y ajustes rápidos en el
+desarrollo.\\
 
 En los últimos años, han surgido numerosos enfoques centrados en reducir el costo computacional
 asociado a la ejecución de \textit{CI} \cite{1,2,4,5,6,7}. La idea principal de estos enfoques es
@@ -31,17 +70,21 @@ construcciones fallidas (\textit{build failure}) sí se ejecutan. De esta forma,
 valor conceptual de la \textit{CI}, que es la detección temprana de errores, pero reduciendo
 el costo computacional asociado en el proceso. Este estudio toma como punto de partida el
 algoritmo de \textit{machine learning} \textit{SmartBuildSkip} \cite{2}. La idea principal es
-realizar una contribución a este algoritmo, usando features más significativas para predecir, o
-bien realizando una variante propia del mismo que mejore los resultados obtenidos. Por lo tanto,
-este estudio se enmarca en el desarrollo de software moderno, específicamente en el ámbito de
-la Integración Continua y la predicción automática del resultado de dicha integración.\\
+realizar una contribución a este algoritmo, realizando un estudio de las \textit{features} que
+se usan para la predicción, y añadiendo nuevas \textit{features} más significativas que puedan
+mejorar estudios existentes. Además, se creará una aplicación web sencilla con la que el usuario
+pueda interactuar de forma directa a través de una interfaz gráfica, abstrayendo la complejidad
+de los algoritmos de predicción y ofreciendo una forma intuitiva y sencilla de realizar
+predicciones basadas en un repositorio concreto. Por lo tanto, este estudio se enmarca en el
+desarrollo de software moderno, específicamente en el ámbito de la Integración Continua y la
+predicción automática del resultado de dicha integración.\\
 
 La memoria queda organizada de la siguiente forma: en primer lugar, se realiza un estudio del
 estado del arte que sitúa los antecedentes previos a la Integración Continua y la predicción
 automática de resultados de \textit{builds}. Posteriormente, se establecen los objetivos y
 preguntas de investigación que pretende este estudio responder. A continuación, se describe
 en detalle el problema a resolver, los principales obstáculos que se plantean y sus posibles
-soluciones. Acto seguido, se desarrolla con detalle nuestra propuesta al problema, describiendo
+soluciones. Acto seguido, se desarrolla con detalle nuestra enfoque al problema, describiendo
 las tecnologías usadas y el desarrollo de la solución. Después se presentarán las pruebas y
 resultados obtenidos, comparando la solución con otras existentes, a modo de validar y verificar
 la aportación de nuestra solución. Seguidamente, se comentarán las amenazas a la validez, una
