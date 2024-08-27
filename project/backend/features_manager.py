@@ -201,7 +201,7 @@ def get_num_lines_changed(pull_request_files: dict) -> Tuple[int, int, int, int,
 
         file_name = file['filename'].lower()
         if 'test' in file_name or 'spec' in file_name:
-            test_lines_changed = file['changes']
+            test_lines_changed += file['changes']
         else:
             extensions_pattern = "|".join(re.escape(ext) for ext in extensions)
             regex = re.compile(r"\b" + extensions_pattern + r"\b")
