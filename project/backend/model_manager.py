@@ -9,6 +9,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from typing import Tuple, Optional
 from sklearn.svm import SVC
+from collections import deque
 from constants import AIMODELS_FOLDER
 from utils import print_model_metrics, ndarray_to_dataframe
 from sklearn.model_selection import FixedThresholdClassifier
@@ -485,29 +486,57 @@ def predict(model_path, x_test, y_test, with_accumulation, transformer = None) -
     with open(model_path,'rb') as file:
         model = pickle.load(file)
 
-    if not with_accumulation:
-        # Normalize the data
-        if transformer is not None:
-            columns = x_test.columns
-            x_test = transformer.transform(x_test)
-            x_test = ndarray_to_dataframe(columns, x_test)
+    number_last_builds = 5
+    performance_short_queue = deque(maxlen=number_last_builds)
+    performance_long = np.full(len(x_test), -1)
 
-        # Make predictions for all builds directly
-        predictions = model.predict(x_test)
-        predictions_prob = model.predict_proba(x_test)[:, 1]
+    predictions = np.zeros(len(x_test))
+    predictions_prob = np.zeros(len(x_test))
+
+    # Create an empty DataFrame
+    build_features = pd.DataFrame(columns=x_test.columns)
+    build_features.loc[0] = [None] * len(x_test.columns)
+
+    if not with_accumulation:
+        # Directly predict
+        for index, (_, row) in enumerate(x_test.iterrows()):
+            # Update the performance short feature
+            if 'PS' in row:
+                row['PS'] = (performance_short_queue.count(1) / number_last_builds) * 100
+                row['PL'] = (np.sum(performance_long == 1) / len(x_test)) * 100
+
+            build_features.iloc[0] = row
+
+            # Normalize the data
+            if transformer is not None:
+                columns = x_test.columns
+                build_features = transformer.transform(build_features)
+                build_features = ndarray_to_dataframe(columns, build_features)
+
+            prediction_i = model.predict(build_features)
+            prediction_prob_i = model.predict_proba(build_features)[:, 1]
+
+            predictions[index] = prediction_i
+            predictions_prob[index] = prediction_prob_i
+
+            if prediction_i == 0:
+                performance_short_queue.append(y_test.iloc[index])
+                performance_long[index] = y_test.iloc[index]
+            else:
+                performance_short_queue.append(1)
+                performance_long[index] = 1
     else:
         # Cumulative predictions
         last_prediction = None
         last_features = None
         in_failure_sequence = False
-        predictions = np.zeros(len(x_test))
-        predictions_prob = np.zeros(len(x_test))
-
-        # Create an empty DataFrame
-        build_features = pd.DataFrame(columns=x_test.columns)
-        build_features.loc[0] = [None] * len(x_test.columns)
 
         for index, (_, row) in enumerate(x_test.iterrows()):
+            # Update the performance short feature
+            if 'PS' in row:
+                row['PS'] = (performance_short_queue.count(1) / number_last_builds) * 100
+                row['PL'] = (np.sum(performance_long == 1) / len(x_test)) * 100
+
             if in_failure_sequence:     # Subsequent failures
                 # Predict automatically a failure
                 predictions[index] = 0
@@ -517,6 +546,11 @@ def predict(model_path, x_test, y_test, with_accumulation, transformer = None) -
                 # Case: False positive
                 if y_test.iloc[index] == 1:
                     in_failure_sequence = False
+
+                # When it is predicted to fail, we always record the actual 
+                # result because we can see it.
+                performance_short_queue.append(y_test.iloc[index])
+                performance_long[index] = y_test.iloc[index]
             else:
                 build_features.iloc[0] = row
 
@@ -543,6 +577,15 @@ def predict(model_path, x_test, y_test, with_accumulation, transformer = None) -
                     last_features.loc[0] = [None] * len(x_test.columns)
                     if y_test.iloc[index] == 0:     # First failure
                         in_failure_sequence = True
+
+                    # When it is predicted to fail, we always record the actual 
+                    # result because we can see it.
+                    performance_short_queue.append(y_test.iloc[index])
+                    performance_long[index] = y_test.iloc[index]
+                else:
+                    # We assume it is true because the build does not run
+                    performance_short_queue.append(1)
+                    performance_long[index] = 1
 
     return predictions, predictions_prob
 
