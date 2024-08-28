@@ -503,7 +503,7 @@ def predict(model_path, x_test, y_test, with_accumulation, transformer = None) -
             # Update the performance short feature
             if 'PS' in row:
                 row['PS'] = (performance_short_queue.count(1) / number_last_builds) * 100
-                row['PL'] = (np.sum(performance_long == 1) / len(x_test)) * 100
+                row['PL'] = (np.sum(performance_long == 1) / (index+1)) * 100
 
             build_features.iloc[0] = row
 
