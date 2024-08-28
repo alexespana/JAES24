@@ -24,19 +24,19 @@ la calidad del software, algunas de las cuales han sido fuertemente adoptadas en
 por ejemplo:
 
 \begin{enumerate}
-      \item \underline{Punto de código fuente único}: para faclitar la integración de cualquier
+      \item \textbf{Punto de código fuente único}: para faclitar la integración de cualquier
       desarrollador a un proyecto, es fundamental que este pueda obtener el código fuente
       actualizado del proyecto. La mejor práctica es utilizar un sistema de control de versiones
       como fuente única del código. Todos los archivos necesarios para la construcción del sistema,
       incluidos \textit{scripts} de instalación, archivos de configuración, etc., deben estar
       en el repositorio.
-      \item \underline{Automatización de \textit{builds}}: para proyectos pequeños, construir la
+      \item \textbf{Automatización de \textit{builds}}: para proyectos pequeños, construir la
       aplicación puede ser tan sencillo como ejecutar un único comando. Sin embargo, para proyectos
       más complejos o con dependencias externas, la construcción puede ser un proceso complicado.
       El uso de \textit{scripts} de construcción automatizados es esencial para manejar estos
       procesos, llegando a analizar qué partes del código necesitan ser recompiladas, y gestionando
       dependencias para evitar recompilar innecesariamente.
-      \item \underline{Desarrollo de pruebas unitarias o de validación interna}: compilar el código
+      \item \textbf{Desarrollo de pruebas unitarias o de validación interna}: compilar el código
       no es suficiente para asegurar que el código funciona correctamente, por lo que se
       implementan pruebas automatizadas. Normalmente, estas se dividen en pruebas unitarias, que
       prueban partes específicas del código, y pruebas de aceptación, que prueban el sistema
@@ -200,14 +200,14 @@ mejorar los procesos de desarrollo \textit{software} en las empresas, sin embarg
 enfrentan a desafíos comunes en su implementación:
 
 \begin{enumerate}
-	\item \underline{Beneficios internos vs. externos}: se reconocen los beneficios internos de
+	\item \textbf{Beneficios internos vs. externos}: se reconocen los beneficios internos de
       aplicar \textit{CI}, como la agilización de los procesos y la liberación de recursos. Sin
       embargo, extender estos beneficios a los clientes y la adaptación de los modelos de negocio
       existentes representan un obstáculo mayor.
-	\item \underline{Cultura organizacional}: la implementación de \textit{CI} requiere cambios
+	\item \textbf{Cultura organizacional}: la implementación de \textit{CI} requiere cambios
       significativos en los procesos y en la cultura organizacional. Esto requiere compromiso por
       parte de los equipos de desarrollo y directivos.
-	\item \underline{Clientes}: convencer a los clientes para aceptar entregas más frecuentes y
+	\item \textbf{Clientes}: convencer a los clientes para aceptar entregas más frecuentes y
       compartir más datos es fundamental para sacar partido a las ventajas de \textit{CI}. Sin
       embargo, los clientes pueden ofrecer resistencia al cambio y esto puede poner en peligro
       las relaciones con los mismos.
@@ -294,13 +294,13 @@ analizando. En el estudio, se mencionan algunas más, pero finalmente se selecci
 siguientes:
 
 \begin{itemize}
-      \item \underline{\textit{SC}}: el número de líneas de código fuente cambiadas desde la
+      \item \textbf{\textit{SC}}: el número de líneas de código fuente cambiadas desde la
       última \textit{build}.
-      \item \underline{\textit{FC}}: el número de archivos modificados desde la última
+      \item \textbf{\textit{FC}}: el número de archivos modificados desde la última
       \textit{build}.
-      \item \underline{\textit{TC}}: el número de lineas de \textit{tests} cambiadas desde la
+      \item \textbf{\textit{TC}}: el número de lineas de \textit{tests} cambiadas desde la
       última \textit{build}.
-      \item \underline{\textit{NC}}: el número de \textit{commits} desde la última \textit{build}.
+      \item \textbf{\textit{NC}}: el número de \textit{commits} desde la última \textit{build}.
 \end{itemize}
 
 En cuanto a las \textit{project features}, estas son útiles cuando queremos predecir
@@ -313,11 +313,11 @@ de otros proyectos entrenados con estas \textit{features}. En el estudio, se men
 \textit{project features}, pero finalmente se seleccionan las siguientes:
 
 \begin{itemize}
-      \item \underline{\textit{TD}}: el número medio de líneas en los casos de prueba por cada
+      \item \textbf{\textit{TD}}: el número medio de líneas en los casos de prueba por cada
       1000 líneas ejecutables de código de producción.
-      \item \underline{\textit{PS}}: el número medio de líneas de código fuente de producción
+      \item \textbf{\textit{PS}}: el número medio de líneas de código fuente de producción
       ejecutale en el repositorio a lo largo de la historia de uso de \textit{CI} en el proyecto.
-      \item \underline{\textit{PA}}: la duración entre la primera y la última \textit{build} del
+      \item \textbf{\textit{PA}}: la duración entre la primera y la última \textit{build} del
       proyecto
 \end{itemize}
 

@@ -20,18 +20,18 @@ genera un artefacto \textit{software}, ya sea un ejecutable, un contenedor, un p
 está listo para ser desplegado o usado en producción. Cada \textit{build} es lanzada por lo
 que se denomina comúnmente \textit{trigger}, que puede ser un:
 \begin{itemize}
-    \item \underline{\textit{Commit}}: representa una ``instantánea'' del estado del proyecto en 
+    \item \textbf{\textit{Commit}}: representa una ``instantánea'' del estado del proyecto en 
     un momento específico, guardando las modificaciones que se han hecho a los archivos desde el
     último \textit{commit}. Cada vez que el desarrollador realiza un \textit{commit}, se dispara
     una nueva \textit{build}.
-    \item \underline{\textit{Pull request}}: un \textit{pull request} o solicitud de incorporación
+    \item \textbf{\textit{Pull request}}: un \textit{pull request} o solicitud de incorporación
     de cambios es una solicitud formal para fusionar cambios propuestos en una rama de desarrollo
     a otra rama, que generalmente es la rama principal. Este tipo de solicitud permite la
     revisión de los cambios realizados, su discusión, y aprobación del código por parte de
     otros desarrolladores antes de integrarlo con la rama principal. En este caso, al crear o
     actualizar un \textit{pull request}, se lanza una \textit{build} para verificar que el código
     cumple con los estándares de calidad.
-    \item \underline{\textit{Schedule}}: se pueden programar \textit{builds} para que se ejecuten
+    \item \textbf{\textit{Schedule}}: se pueden programar \textit{builds} para que se ejecuten
     en un intervalo de tiempo regular, independendientemente de si hubo o no cambios en el código.
 \end{itemize}
 
@@ -69,7 +69,7 @@ construcciones exitosas (\textit{build pass}) no se ejecutan, mientras que las p
 construcciones fallidas (\textit{build failure}) sí se ejecutan. De esta forma, se mantiene el
 valor conceptual de la \textit{CI}, que es la detección temprana de errores, pero reduciendo
 el costo computacional asociado en el proceso. Este estudio toma como punto de partida el
-algoritmo de \textit{machine learning} \textit{SmartBuildSkip} \cite{2}. La idea principal es
+algoritmo de \textit{Machine Learning} \textit{SmartBuildSkip} \cite{2}. La idea principal es
 realizar una contribución a este algoritmo, realizando un estudio de las \textit{features} que
 se usan para la predicción, y añadiendo nuevas \textit{features} más significativas que puedan
 mejorar estudios existentes. Además, se creará una aplicación web sencilla con la que el usuario
