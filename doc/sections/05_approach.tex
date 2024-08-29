@@ -1,1 +1,196 @@
 \section{Detalles de la propuesta}
+En este apartado, se dará una visión global del contenido y funcionamiento de nuestra propuesta.
+Se realizará una descripción completa de nuestro enfoque, desde los conceptos de \textit{IA}
+empleados hasta las herramientas y tecnologías empleadas para su resolución. En primer lugar, se
+detallará cómo se ha realizado la generación de los modelos, los tipos utilizados y sus
+características, así como cualquier concepto relacionado. Posteriormente, se describirán las
+técnicas empleadas para evaluar el rendimiento de los modelos. Continuaremos con la explicación
+en detalle de las \textit{features} empleadas, qué representan y cómo se ha realizado su cálculo.
+Finalmente, procederemos a explicar detalles técnicos de la implementación, como las tecnologías
+y recursos empleados, el procedimiento de extracción de datos, el entorno de ejecución, etc. En
+los siguientes apartados se describe con detalle cada uno de estos puntos.
+
+\subsection{Construcción del modelo}
+
+El Aprendizaje Automático (\textit{Machine Learning, ML})
+es un campo de la Inteligencia Artificial que se centra en desarrollar algoritmos y modelos que
+sean capaces de aprender y mejorar su desempeño en tareas específicas a partir de datos, sin la
+necesidad de ser explícitamente programadas. Los sistemas de \textit{ML} identifican patrones en
+los datos y utilizan estos patrones para hacer predicciones o tomar decisiones sobre los datos.
+Podemos encontrarnos con dos tipos de aprendizaje automático:
+
+\begin{itemize}
+	\item \textbf{Supervisado}: en este tipo de aprendizaje el modelo es entrenado utilizando un
+    conjunto de datos etiquetados. En este contexto ``etiquetado'' significa que cada instancia
+    en el conjunto de datos viene con una entrada (conjunto de características) y una salida
+    conocida (etiqueta o valor objetivo). En nuestro problema, la entrada sería el conjunto de
+    características (\textit{features}) que vamos a usar y, la salida, el resultado de la
+    integración continua (exitosa o fallida).
+	\item \textbf{No supervisado}: en este tipo de aprendizaje el modelo es entrenado utilizando
+    un conjunto de datos que no tiene etiquetas ni salidas predefinidas. A diferencia del
+    supervisado, en el que se indica al modelo lo que debe predecir, en el no supervisado el
+    modelo explora los datos en busca de patrones, estructuras, o relaciones ocultas.
+\end{itemize}
+
+Teniendo esto en cuenta, nos encontramos claramente ante un problema de aprendizaje supervisado,
+ya que tenemos las características propias de cada \textit{build}, que sería el conjunto de
+entrada que proporcionamos al modelo, y por otro lado, los resultados de las ejecuciones, que
+conformarían las etiquetas o valores objetivo de nuestro problema.\\
+
+Para poder responder a la pregunta de investigación \textbf{PI-1}, debemos explorar los
+distintos algoritmos de Aprendizaje Automático que existen y ver cuál de ellos ofrece mejores
+resultados en el problema que nos ocupa. En nuestro caso, nos encontramos con un claro problema
+de clasificación binaria en el ámbito del aprendizaje automático supervisado. En este contexto,
+tenemos dos clases posibles:
+\begin{enumerate}
+    \item \textbf{Clase positiva} (fallo de la \textit{build}): predicción de que la \textit{build}
+    fallará.\\
+    \item \textbf{Clase negativa} (éxito de la \textit{build}): predicción de que la \textit{build}
+    tendrá éxito.
+\end{enumerate}
+
+Por lo tanto, dado que nos encontramos con este tipo de problema, se ha decidido utilizar seis
+algoritmos de clasificación supervisada, entre los que nos encontramos:
+
+\begin{enumerate}
+    \item \textbf{Árboles de Decisión (\textit{Decision Trees, DT})}. Dividen el conjunto de datos
+    en subconjuntos más pequeños y más simples, basándose en ciertas características o condiciones,
+    que están representadas en un gráfico similar a un árbol. Cada nodo interno del árbol
+    representa una característica (o atributo), y cada rama representa el resultado de la
+    partición de los datos en función de esa característica. Las hojas del árbol contienen las
+    etiquetas o valores objetivo.\\
+    \item \textbf{Bosques Aleatorios (\textit{Random Forest, RF})}. Es un algoritmo de aprendizaje
+    supervisado que crea un conjunto de árboles de decisión durante el entrenamiento y realiza
+    la predicción promediando las predicciones de cada árbol individual. Es una técnica de
+    ensamblaje que combina múltiples modelos de aprendizaje para mejorar la precisión y la
+    estabilidad del modelo.\\
+    \item \textbf{Regresión Logística (\textit{Logistic Regression, LR})}. Es un algoritmo de
+    clasificación que se utiliza para predecir la probabilidad de que una variable dependiente
+    pertenezca a una categoría particular. Aunque se llama regresión, en realidad es un algoritmo
+    de clasificación binaria.\\
+    \item \textbf{Máquinas de Soporte Vectorial (\textit{Support Vector Machines, SVM})}. Es un
+    algoritmo de clasificación que busca encontrar el hiperplano que mejor divide un conjunto de
+    datos en dos clases. El hiperplano es la línea que maximiza el margen entre las dos clases. Si
+    los datos no son linealmente separables, se puede utilizar un truco matemático llamado
+    \textit{kernel trick} para transformar los datos en un espacio de mayor dimensión donde sí
+    sean separables.\\
+    \item \textbf{Vecinos más Cercanos (\textit{K-Nearest Neighbors, KNN})}. Es un algoritmo de
+    clasificación que se basa en la idea de que los puntos de datos que son similares deben
+    pertenecer a la misma clase. Para predecir la clase de un nuevo punto de datos, el algoritmo
+    busca los $k$ puntos de datos más cercanos en el conjunto de entrenamiento y asigna la clase
+    más común entre esos vecinos.\\
+    \item \textbf{Redes Neuronales (\textit{Neural Networks, NN})}. Son un conjunto de algoritmos
+    de aprendizaje automático que intentan imitar el funcionamiento del cerebro humano. Consiste en
+    una red de nodos interconectados, llamados neuronas, que se organizan en capas. Está formada
+    por una capa de entrada, una  varias capas ocultas y una capa de salida. Cada nodo está
+    conectado a los demás y tiene su propia ponderación y umbral asociados.
+\end{enumerate}
+
+Para realizar la predicción, no únicamente se le proporciona al modelo el conjunto de
+características de la \textit{build} y se predice, si no que se sigue un procedimiento más
+complejo y que simula el funcionamiento de SmartBuildSkip \cite{2}. Para comprenderlo, veamos
+el siguiente pseudocódigo:
+
+\begin{algorithm}
+    \caption{\textit{SmartBuildSkip con nuestra implementación}}
+    \begin{algorithmic}[1]
+    \State \textbf{Input:} List of builds
+    \State \textbf{Output:} Predictions of builds outcomes
+    
+    \State in\_failure\_sequence $\gets$ False \Comment{Inicializar estado de secuencia de fallos}
+    \For {each build in builds}
+        \If{in\_failure\_sequence}
+            \State Prediction $\gets$ Fail  \Comment{Predicción automática de fallo}
+            \If{build passes}               \Comment{Comprobar resultado}
+                \State in\_failure\_sequence $\gets$ False \Comment{Error en la predicción, vuelve a predecir con ML}
+            \EndIf
+            \Else
+            \State Prediction $\gets$ Machine Learning Prediction \Comment{Predicción usando ML}
+            \If {Prediction = Pass}
+                \State Accumulate changes with next build       \Comment{Se salta la build, acumulando cambios}
+            \Else
+                \If{build fails}                                \Comment{Comprobar resultado}
+                    \State in\_failure\_sequence $\gets$ True   \Comment{Entra en predicción automática de fallo}
+                \EndIf
+            \EndIf
+        \EndIf
+    \EndFor
+    \end{algorithmic}
+\end{algorithm}
+
+Como podemos observar, este algoritmo se divide en dos partes: una en la que predice
+automáticamente que la \textit{build} fallará y otra en la que se realiza la predicción mediante
+el uso de un modelo de aprendizaje automático. Esta forma de proceder es debida a las dos
+hipótesis que comentamos en la Sección \ref{sec:related_work}, que muchas \textit{builds} fallan
+consecutivamente después de que otra haya fallado y que las \textit{builds} exitosas siempre son
+más numerosas que las fallidas. Esto hace que nuestro algoritmo pueda saltarse mayor número de
+\textit{builds} a la vez que captura una mayor cantidad de \textit{build failures}.
+Consecuentemente, debido a la no ejecución de estas \textit{builds}, se estará logrando una
+optimización de recursos computacionales.
+
+\subsection{Evaluación del modelo}
+La evaluación de los modelos de clasificación tiene como objetivo medir y analizar el rendimiento
+de los modelos en la tarea de clasificación. Esta evaluación permite determinar qué tan bien el
+modelo puede predecir o clasificar nuevas instancias no vistas anteriormente, es decir, basándose
+en un conjunto de datos de prueba. Para realizar la evaluación de los modelos en nuestro problema,
+hemos seguido los siguientes pasos:
+
+\begin{enumerate}
+    \item \textbf{División del conjunto de datos}: se divide el conjunto de datos, en este caso
+    \textit{features} de cada \textit{build}, en dos partes: el conjunto de entrenamiento y el
+    conjunto de prueba. El conjunto de entrenamiento se utiliza para entrenar el modelo, mientras
+    que el conjunto de prueba se usa para evaluar su rendimiento. Dada la naturaleza de nuestro
+    problema, no podemos hacer esta división de manera aleatoria, ya que las \textit{builds} están
+    relacionadas temporalmente entre sí, por lo que no sería realista realizar una predicción
+    sobre una instancia antigua basándonos en \textit{builds} que se hayan ejecutado recientemente.
+    Por lo tanto, en nuestro caso se ha dividido el conjunto de datos igualmente en dos partes,
+    pero siendo el conjunto de entrenamiento más antiguo en su conjunto que el conjunto de prueba,
+    que es más reciente. Por ejemplo si se dividen los datos de entrenamiento y test en un 80\% y
+    20\% respectivamente, el conjunto de entrenamiento contendrá el 80\% de las \textit{builds}
+    más antiguas, mientras que el de prueba contendrá el 20\% de \textit{builds} más reciente.\\
+    \item \textbf{Predicción}: una vez entrenado el modelo con el conjunto de entrenamiento, se
+    realizan predicciones sobre el conjunto de prueba. Gracias a estas predicciones, podremos
+    verificar si nuestros modelos se comportan bien frente a instancias nuevas o no vistas con
+    anterioridad.\\
+    \item \textbf{Métricas de evaluación}: una vez realizadas las predicciones, hemos definido
+    las métricas de evaluación, que nos ayudarán a determinar el rendimiento de nuestros modelos.
+    Entre las métricas que hemos usado podemos encontrar: \textit{accuracy}, \textit{precision},
+    \textit{recall}, \textit{F1-score}, \textit{confusion matrix} y \textit{ROC curve}. Todas
+    ellas han sido explicadas en la Sección \ref{sec:research_questions}, exceptuando el área
+    bajo la curva \textit{ROC} (\textit{Area Under the Curve, AUC}), que mide la capacidad de
+    un modelo para distinguir entre clases positivas y negativas. Cuanto mayor sea el valor de
+    \textit{AUC}, mejor será el desempeño de modelo en la clasificación, ya que esta indica una
+    mayor capacidad para separar correctamente las clases.
+    
+
+\end{enumerate}
+
+
+
+
+
+
+\subsection{\textit{Features} empleadas}
+
+
+\subsection{Interfaz gráfica}
+
+
+\subsection{Detalles técnicos de la implementación}
+
+
+
+
+Hablar aquí de: Incluir tablas, imagenes, etc, quedan bien
+\begin{enumerate}
+    \item Técnologías usadas: flask, angular, librería scikit, postgresql, etc
+    \item API de Github: que es, token, endpoints, limitaciones, paginacion
+    \item Tipos de modelos usados: que son, como funcionan (dt, rf, lr, svm, knn, nn)
+    \item Normalizacion, que es, para que sirve, como la uso
+    \item features de SBS, features que yo uso, descripción, calculo, etc
+    \item Versiones del algoritmo: SBS-Within, JAES24-Within, JAES24-Without, con normalizacion,
+    sin normalizacion.
+    \item Particularidades: datos imbalanceados, que se hace, pesos 20:1.
+    \item Cómo se como se evaluan los modelos, k-fold cross validation en builds, como se realizan
+    las predicciones, calculo de PS, PL durante la prediccion. 
+\end{enumerate}
