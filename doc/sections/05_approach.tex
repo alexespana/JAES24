@@ -83,7 +83,10 @@ algoritmos de clasificación supervisada, entre los que nos encontramos:
     de aprendizaje automático que intentan imitar el funcionamiento del cerebro humano. Consiste en
     una red de nodos interconectados, llamados neuronas, que se organizan en capas. Está formada
     por una capa de entrada, una  varias capas ocultas y una capa de salida. Cada nodo está
-    conectado a los demás y tiene su propia ponderación y umbral asociados.
+    conectado a los demás y tiene su propia ponderación y umbral asociados. Concretamente, se ha
+    utilizado un Perceptrón Multicapa, que es un tipo de red neuronal utilizado para tareas de
+    clasificación. Cada neurona en un \textit{MLP} se conecta a las de la capa anterior con pesos
+    y aplica una función de activación a su suma ponderada.
 \end{enumerate}
 
 Para realizar la predicción, no únicamente se le proporciona al modelo el conjunto de
@@ -91,7 +94,7 @@ características de la \textit{build} y se predice, si no que se sigue un proced
 complejo y que simula el funcionamiento de SmartBuildSkip \cite{2}. Para comprenderlo, veamos
 el siguiente pseudocódigo:
 
-\begin{algorithm}
+\begin{algorithm}[H]
     \caption{\textit{SmartBuildSkip con nuestra implementación}}
     \begin{algorithmic}[1]
     \State \textbf{Input:} List of builds
@@ -128,6 +131,42 @@ más numerosas que las fallidas. Esto hace que nuestro algoritmo pueda saltarse 
 Consecuentemente, debido a la no ejecución de estas \textit{builds}, se estará logrando una
 optimización de recursos computacionales.
 
+\subsubsection{Hiperparámetros}
+Cuando se define un algoritmo de clasificación, es importante seleccionar y ajustar con cuidado
+los hiperparámetros, ya que estos controlan aspectos clave del proceso de entrenamiento y pueden
+determinar la capacidad del modelo para generalizar a nuevos datos. Para la definición de nuestros
+algoritmos de clasificación, se ha utilizado la biblioteca \textit{scikit-learn}, una popular
+biblioteca de \textit{Python} para \textit{Machine Learning} y análisis de datos. Por lo general,
+se han definido todos los algoritmos con los parámetros por defecto de la biblioteca
+\textit{scikit-learn}, con las siguientes particularidades:
+
+\begin{itemize}
+	\item En un conjunto de datos que contiene \textit{builds}, donde el número de \textit{builds}
+    exitosas es mucho mayor que el de \textit{builds} fallidas, estamos ante un problema de
+    desequilibrio de clases. En este contexto, asignar distintos pesos a las clases es una
+    estrategia útil para entrenar un modelo que sea más sensible en la detección de
+    \textit{builds failures}, a pesar de ser poco numerosas. Para ello, se ha definido un peso de
+    20:1 a favor de las \textit{build failures} en Árbol de Decisión, Bosque Aleatorio, Regresión
+    Logística y Máquinas de Soporte Vectorial.\\
+
+	\item En Regresión Logística, se establece el número máximo de iteraciones que el algoritmo de
+    optimización realizará antes de detenerse. En este caso se utiliza el valor 15.000 para
+    asegurar que el algoritmo tenga suficiente tiempo para converger.\\
+
+	\item En el algoritmo de Máquinas de Soporte Vectorial, hemos añadido el hiperparámetro que
+    habilita el cálculo de probabilidades de pertenencia a cada clase. Cuando el parámetro
+    \textit{probability} está habilitado, el modelo ajusta de manera interna un modelo de
+    probabilidad, permitiendo que las salidas del modelo sean las etiquetas de clase y sus
+    probabilidades.\\
+
+	\item Para el Perceptrón Multicapa (redes neuronales), se ha añadido, al igual que en Regresión
+    Logística, un parámetro que indica el número máximo de iteraciones para entrenar la red
+    neuronal. En este caso, se ha añadido con un valor de 15000.
+\end{itemize}
+
+Además de los parámetros antes mencionados, todos ellos tienen definida la semilla de
+reproducibilidad, que garantiza que los resultados sean reproducibles.
+
 \subsection{Evaluación del modelo}
 La evaluación de los modelos de clasificación tiene como objetivo medir y analizar el rendimiento
 de los modelos en la tarea de clasificación. Esta evaluación permite determinar qué tan bien el
@@ -154,20 +193,87 @@ hemos seguido los siguientes pasos:
     anterioridad.\\
     \item \textbf{Métricas de evaluación}: una vez realizadas las predicciones, hemos definido
     las métricas de evaluación, que nos ayudarán a determinar el rendimiento de nuestros modelos.
-    Entre las métricas que hemos usado podemos encontrar: \textit{accuracy}, \textit{precision},
-    \textit{recall}, \textit{F1-score}, \textit{confusion matrix} y \textit{ROC curve}. Todas
-    ellas han sido explicadas en la Sección \ref{sec:research_questions}, exceptuando el área
+    Las métricas que hemos usado son: \textit{accuracy}, \textit{precision}, \textit{recall},
+    \textit{F1-score}, \textit{confusion matrix} y \textit{ROC curve}. Todas
+    ellas han sido descritas en la Sección \ref{sec:research_questions}, exceptuando el área
     bajo la curva \textit{ROC} (\textit{Area Under the Curve, AUC}), que mide la capacidad de
     un modelo para distinguir entre clases positivas y negativas. Cuanto mayor sea el valor de
-    \textit{AUC}, mejor será el desempeño de modelo en la clasificación, ya que esta indica una
+    \textit{AUC}, mejor será el desempeño del modelo en la clasificación, ya que esta indica una
     mayor capacidad para separar correctamente las clases.
-    
-
 \end{enumerate}
 
+\subsubsection{Validación Cruzada}
+La validación cruzada (\textit{cross-validation}) es una técnica utilizada para la evaluación y
+selección de modelos, midiendo su rendimiento y capacidad de generalización. Su objetivo
+principal es evitar el sobreajuste (\textit{overfitting}), que ocurre cuando un modelo
+aprende demasiado de los datos de entrenamiento y es incapaz de generalizar a nuevos datos. Esta
+consiste en dividir el conjunto de datos en $k$ subconjuntos (\textit{folds}), entrenar el modelo
+en $k-1$ subconjuntos y evaluarlo en el subconjunto restante. Este proceso se repite $k$ veces,
+de forma que cada subconjunto se utiliza una vez como conjunto de prueba. Al final, se promedian
+los resultados de las $k$ iteraciones para obtener una estimación más precisa del rendimiento del
+modelo.\\
 
+En nuestro caso particular, hemos tenido que hacer una ligera variación de esta técnica. En
+nuestro problema, la división del conjunto de datos en $k$ subconjuntos no puede realizarse de
+manera aleatoria, ya que no tendría sentido realizar predicciones para instancias más antiguas
+utilizando para el entrenamiento instancias más recientes. Es decir, en nuestro problema existe
+una dependencia temporal y, por tanto, la secuencia y el orden de los datos son críticos para la
+validez de las predicciones. Los resultados y características de las \textit{builds} están
+influenciados por las \textit{builds} anteriores. Esto se debe a que cada \textit{build} puede
+depender de cambios de código, configuraciones, y otros factores que se acumulen o evolucionen
+con el tiempo. Por lo tanto, si se permite que las \textit{builds} más antiguas predigan utilizando
+información de \textit{builds} más recientes, se introduciría un sesgo temporal que no reflejaría
+el comportamiento real del sistema. Además de esto, usar datos de \textit{builds} futuras para
+predecir \textit{builds} antiguas no solamente introduce un sesgo, si no que también puede dar
+una falsa impresión de precisión del modelo, llevando a resultados artificialmente inflados de
+precisión durante esta fase de evaluación.\\
 
+En nuestra implementación dividimos el conjunto en 11 partes de forma secuencial, de modo que el
+primer subconjunto contenga las \textit{builds} más antiguas y el último las \textit{builds} más
+recientes. El subconjunto de \textit{folds} se recorre y en cada iteración, se entrena con la
+acumulación de subconjuntos anteriores, y se evalúa con el siguiente subconjunto, dejando el resto
+de subconjuntos sin utilizar. Siempre que se tengan $k$ \textit{folds} se realizarán $k-1$
+iteraciones, ya que en la última iteración se utilizará el último subconjunto como conjunto de
+prueba. Finalmente, dado que se habrán obtenido 10 resultados de las métricas de evaluación, se
+promedian para obtener una estimación más precisa del rendimiento del modelo.\\
 
+A continuación, se presenta de forma gráfica el funcionamiento de nuestro algoritmo de
+\textit{key-fold cross validation}:
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.5]{images/Cross validation.pdf}
+    \caption{Funcionamiento de la técnica \textit{key-fold cross validation}.}
+    \label{fig:confusion_matrix}
+\end{figure}
+
+\subsubsection{Umbral de decisión}
+La evaluación de los modelos a distintos grados de sensibilidad es especialmente relevante cuando
+se consideran problemas de clasificación con clases desbalanceadas o cuando el costo de los
+errores varían entre clases. En el problema que nos ocupa, se dan ambas condiciones: por lo
+general, el número de \textit{builds} exitosas es muy superior al de \textit{builds} fallidas y,
+el costo de predecir un falso negativo no es el mismo que el de predecir un falso positivo. Al
+ajustar la sensibilidad del modelo, se balancean las tasas de verdaderos positivos
+(\textit{recall}) y falsos positivos, lo que permite optimizar el rendimiento del modelo para
+diferentes contextos y necesidades.\\
+
+Muchos algoritmos de aprendizaje automático pueden predecir una probabilidad de
+pertenencia a una clase. Esto es útil porque proporciona una medida de la certeza o incertidumbre
+de una predicción y ofrece más detalles que solo predecir la etiqueta de la clase. En nuestro
+problema, es necesario convertir estas probabilidades en el valor de una clase. Esta conversión
+se basa en un parámetro llamado ``umbral de decisión''. El valor por defecto de este umbral
+es $0.5$ para probabilidades normalizadas en el intervalo $[0, 1]$. Por ejemplo, dadas las
+etiquetas de nuestro problema: $0$ (la \textit{build} falla) y $1$ (la \textit{build} pasa), si
+la probabilidad de que una \textit{build} falle es igual o mayor a $0.5$, se predecirá que la
+\textit{build} es exitosa, mientras que si es menor a $0.5$, se predecirá que la \textit{build}
+falla.\\
+
+En nuestra implementación, hemos evaluado el rendimiento de todos los modelos y variantes del
+mismo para valores del umbral de decisión comprendidos en el intervalo $[0, 1]$. Para ello, se
+han calculado las métricas de evaluación para cada valor del umbral y se han representado en
+gráficos para poder comparar el rendimiento de los modelos en función del umbral de decisión. De
+esta forma, se ha podido determinar cuál de ellos es el que mejor rendimiento ofrece y cuál de
+las implementaciones es la que mejor resultado proporciona.
 
 
 \subsection{\textit{Features} empleadas}
@@ -178,19 +284,3 @@ hemos seguido los siguientes pasos:
 
 \subsection{Detalles técnicos de la implementación}
 
-
-
-
-Hablar aquí de: Incluir tablas, imagenes, etc, quedan bien
-\begin{enumerate}
-    \item Técnologías usadas: flask, angular, librería scikit, postgresql, etc
-    \item API de Github: que es, token, endpoints, limitaciones, paginacion
-    \item Tipos de modelos usados: que son, como funcionan (dt, rf, lr, svm, knn, nn)
-    \item Normalizacion, que es, para que sirve, como la uso
-    \item features de SBS, features que yo uso, descripción, calculo, etc
-    \item Versiones del algoritmo: SBS-Within, JAES24-Within, JAES24-Without, con normalizacion,
-    sin normalizacion.
-    \item Particularidades: datos imbalanceados, que se hace, pesos 20:1.
-    \item Cómo se como se evaluan los modelos, k-fold cross validation en builds, como se realizan
-    las predicciones, calculo de PS, PL durante la prediccion. 
-\end{enumerate}
