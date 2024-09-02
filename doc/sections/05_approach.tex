@@ -277,7 +277,154 @@ las implementaciones es la que mejor resultado proporciona.
 
 
 \subsection{\textit{Features} empleadas}
+Las \textit{features} o características son las propiedades o atributos que se utilizan como entrada
+para entrenar un modelo. Son elementos fundamentales que permiten al modelo aprender patrones y
+tomar decisiones basadas en los datos. Las \textit{features} recogen información relevante de
+los datos, en este caso de las \textit{builds}. La calidad y relevancia de las mismas afecta
+al rendimiento del modelo, por lo que escoger las adecuadas es fundamental. Al hacer la selección
+de las \textit{features}, hay que tener en cuenta lo siguiente:
 
+\begin{itemize}
+    \item Elegir \textit{features} que sean relevantes y representativas del problema es importante
+    para que el modelo sea preciso y eficiente. Además, ayuda a reducir la dimensionalidad
+    del problema, lo que puede mejorar la eficiencia computacional y la interpretabilidad del
+    modelo.\\
+    \item Seleccionar gran cantidad de \textit{features} puede llevar a un sobreajuste del modelo,
+    donde el modelo aprende de patrones de datos ruidosos o irrelevantes. Esto puede llevar a un
+    rendimiento bajo y a modelos menos generalizables
+\end{itemize}
+
+\noindent A continuación, se presentan las features empleadas en nuestro problema.
+
+\begin{table}[h]
+    \centering
+    \caption{\textit{Build features} empleadas.}
+    \label{tab:features}
+
+    \begin{tabular}{|>{\centering\arraybackslash}m{4cm}|>{\centering\arraybackslash}m{8cm}|} % Encabezados centrados
+        \hline
+        \textbf{\textit{Feature}} & \textbf{Descripción breve} \\
+        \hline
+    \end{tabular}
+    \begin{tabular}{|>{\raggedright\arraybackslash}m{4cm}|>{\raggedright\arraybackslash}m{8cm}|} % Contenido alineado a la izquierda en la esquina superior
+        \hline
+        \textbf{\textit{Performance Short} (PS)\footnote{\textit{Build feature propuesta en \cite{2} pero que finalmente no se usó en el mismo.}}} & La proporción de \textit{builds} exitosas en las últimas cinco \textit{builds}.\\
+        \hline
+        \textbf{\textit{Performance Long} (PL)\footnotemark[1]} & La proporción de \textit{builds} exitosas de todas las \textit{builds} previas.\\
+        \hline
+        \textbf{\textit{Time Frequency} (TF)\footnotemark[1]} & El intervalo de tiempo en horas desde la última \textit{build}.\\
+        \hline
+        \textit{Number Commits} (NC) & El número de \textit{commits desde la última \textit{build}.}\\
+        \hline
+        \textit{Files Changed} (FC) & El número de archivos modificados desde la última \textit{build}, incluyendo archivos añadidos, modificados y eliminados.\\
+        \hline
+        \textbf{\textit{Files Added} (FA)} & El número de archivos añadidos desde la última \textit{build}.\\
+        \hline
+        \textbf{\textit{Files Modified} (FM)} & El número de archivos modificados desde la última \textit{build}.\\
+        \hline
+        \textbf{\textit{Files Removed} (FR)} & El número de archivos modificados desde la última \textit{build}.\\
+        \hline
+        \textit{Source Lines Changed} (LC) & El número de líneas de código modificadas desde la última \textit{build}, incluyendo líneas añadidas y eliminadas.\\
+        \hline
+        \textbf{\textit{Source Lines Added} (LA)} & El número de líneas de código añadidas desde la última \textit{build}.\\
+        \hline
+        \textbf{\textit{Source Lines Removed} (LR)} & El número de líneas de código eliminadas desde la última \textit{build}.\\
+        \hline
+        \textit{Test Lines Changed} (LT) & El número de líneas de código de \textit{test} modificadas desde la última \textit{build}, incluyendo líneas añadidas y eliminadas.\\
+        \hline
+        \textbf{\textit{Unit Tests} (UT)} & Si se han escrito pruebas unitarias desde la última \textit{build}.\\
+        \hline
+        \textbf{\textit{Failure Distance} (FD)\footnotemark[1]} & El número de \textit{builds} exitosas desde la última \textit{build} fallida.\\
+        \hline
+        \textbf{\textit{Week Day} (WD)\footnotemark[1]} & El día de la semana en el que se ha ejecutado la \textit{build}.\\
+        \hline
+        \textbf{\textit{Day Hour} (DH)\footnotemark[1]} & La hora del día en la que se ha ejecutado la \textit{build}.\\
+        \hline
+        \textbf{\textit{Commit Delay} (CD)} & El tiempo transcurrido en horas entre \textit{commits} de una misma \textit{build}.\\
+        \hline
+        % Añade más filas según sea necesario
+    \end{tabular}
+\end{table}
+\footnotetext{\textit{Build feature propuesta en SmartBuildSkip pero que finalmente no se usó para el entrenamiento del modelo \cite{2}}.}
+
+Las \textit{features} marcadas en negrita son \textit{features} nuevas propuestas en este trabajo
+para realizar el entrenamiento de los modelos, mientras las que no están marcadas en negrita son
+\textit{features} propuestas y utilizadas en estudios previos \cite{2}.\\
+
+\noindent Para el cálculo de las \textit{features} mencionadas en la Tabla \ref{tab:features},
+debemos tener en cuenta los siguientes aspectos:
+
+\begin{itemize}
+    \item \textbf{Información para el entrenamiento}: cuando obtenemos las características de las \textit{builds}
+    directamente desde el repositorio de código fuente, tenemos acceso a la información completa
+    de cada una de ellas. El cálculo de las \textit{features} es sencillo y directo, ya que
+    podemos acceder a la información de cada \textit{build} que se ha ejecutado y extraer las
+    características necesarias.\\
+    
+    \item \textbf{Cálculo de Features durante la predicción}: debemos recordar que, en el
+    enfoque que planteamos, a veces no se ejecutan todas las \textit{builds} que se han
+    programado. Por lo tanto, no siempre se tiene acceso a la información real (\textit{Ground
+    Truth}) de haber ejecutado las \textit{builds}. \textit{Features} como el \textit{performance
+    short}, el \textit{performance long} o el \textit{failure distance} deben ser calculadas
+    de forma diferente para poder simular un comportamiento práctico real.\\
+
+    \item \textbf{Normalización}: es importante normalizar las \textit{features} antes de
+    entrenar el modelo. La normalización es un proceso que ajusta los valores de las
+    \textit{features} para que tengan una escala común. Esto es importante porque muchos
+    algoritmos de aprendizaje automático son sensibles a la escala de las \textit{features} y
+    pueden dar resultados incorrectos si las \textit{features} tienen escalas muy diferentes.\\
+\end{itemize}
+
+\subsubsection*{Cáculo de \textit{features} durante la predicción}. Para comprender bien este
+punto, vamos a diferenciar dos conceptos fundamentales: la \textbf{\textit{build} propuesta} y la
+\textbf{\textit{build} ejecutada}. La \textit{build} propuesta es aquella que se desea predecir,
+independientemente de lo que prediga el algoritmo de predicción, y que por lo tanto todavía no ha
+sido ejecutada. La \textit{build} ejecutada es aquella que previamente era una \textit{build}
+propuesta (a predecir) y que ha sido ejecutada porque el algoritmo predijo que fallaría. Teniendo
+claros estos dos conceptos, pasemos a la explicación del cálculo de las \textit{features}
+mencionadas anteriormente:
+
+\begin{itemize}
+    \item \textbf{\textit{Performance Short} (PS)}: para calcular este porcentaje de \textit{builds}
+    exitosas en las últimas cinco \textit{builds}, cuando el algoritmo predice que la \textit{build}
+    propuesta pasará, se salta la ejecución de la \textit{build} y se asume que el algoritmo ha
+    acertado. Cuando el algoritmo predice que la \textit{build} propuesta fallará, la \textit{build}
+    se ejecutará y, podremos ver el resultado real de la \textit{CI}, considerando dicho valor.\\
+
+    \item \textbf{\textit{Performance Long} (PL)}: al igual que en el caso anterior, se calcula el
+    porcentaje de \textit{builds} exitosas de todas las \textit{builds} propuestas hasta el momento.
+    Si el algoritmo predice que la \textit{build} propuesta pasará, se asume que ha acertado y si
+    predice que fallará, se ejecuta la \textit{build} y se considera el resultado real.\\
+
+    \item \textbf{\textit{Failure Distance} (FD)}: se calculará como el número de \textit{builds}
+    exitosas desde la última \textit{build} fallida. Si el algoritmo predice que la \textit{build}
+    propuesta pasará, se asume que ha acertado y si predice que fallará, se ejecuta la
+    \textit{build} y se considera el resultado real.\\
+
+\end{itemize}
+
+\noindent A continuación, se representa de forma gráfica el cálculo de cada uno de ellos:
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.9]{images/PS.pdf}
+    \caption{Cáculo del \textit{Performance Short}.}
+    \label{fig:PL}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.9]{images/PL.pdf}
+    \caption{Cáculo del \textit{Performance Long}.}
+    \label{fig:PL}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.9]{images/FD.pdf}
+    \caption{Cáculo del \textit{Failure Distance}.}
+    \label{fig:PL}
+\end{figure}
 
 \subsection{Interfaz gráfica}
 
