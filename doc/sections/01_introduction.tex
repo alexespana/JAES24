@@ -4,7 +4,7 @@ La Integración Continua (\textit{Continuous Integration, CI}) es una práctica 
 donde cada integración es verificada mediante la ejecución automática de pruebas. Este proceso
 busca la detección temprana de errores y mejorar la calidad del software, permitiendo una
 integración más frecuente y rápida del trabajo de todos los desarrolladores. Las buenas prácticas
-de \textit{CI} \cite{8} permiten una rápida detección de errores y su resolución, un
+de CI \cite{8} permiten una rápida detección de errores y su resolución, un
 \textit{feedback} rápido, la reducción de errores que provienen de tareas manuales, unas tasas de
 \textit{commits} y \textit{pull requests} más altas, una calidad del \textit{software} mayor,
 reconocer errores en producción temprano antes del despliegue, etc. Numerosos son sus ámbitos
@@ -35,15 +35,15 @@ que se denomina comúnmente \textit{trigger}, que puede ser un:
     en un intervalo de tiempo regular, independendientemente de si hubo o no cambios en el código.
 \end{itemize}
 
-Existen numerosos sistemas de \textit{CI} en la actualidad, \textit{GitHub Actions},
+Existen numerosos sistemas de CI en la actualidad, \textit{GitHub Actions},
 \textit{Jenkins}, \textit{Travis CI}, \textit{CircleCI}, \textit{Azure DevOps}, entre otros, sin
 embargo, en este trabajo nos centraremos en \textit{GitHub Actions}. \textit{GitHub Actions} es
-el sistema de \textit{CI} más utilizado en la actualidad, y al cual muchos otros sistemas
+el sistema de CI más utilizado en la actualidad, y al cual muchos otros sistemas
 migraron debido a sus características, especialmente \textit{Travis CI}. En 2020, \textit{Travis
 CI} decidió imponer numerosas restricciones a su plan gratuito para proyectos \textit{software}
 de código abierto \cite{9}, siendo este uno de los principales motivos para su migración hacia
 \textit{GitHub Actions}. Además, existen otras razones para esta migración, como puede ser
-utilizar una herramienta de \textit{CI} más confiable, mejor integración con soluciones 
+utilizar una herramienta de CI más confiable, mejor integración con soluciones 
 \textit{self-hosted}, mejor soporte para múltiples plataformas, la reducción de la cantidad de
 uso compartido de la herramienta, tener más funcionalidades, etc.\\
 
@@ -51,7 +51,7 @@ El ciclo de vida de la Integración Continua, a pesar de ofrecer numerosas venta
 grandes costos asociados debido a los recursos computacionales \cite{10} necesarios para ejecutar
 las construcciones, comúnmente denominadas \textit{builds}. A lo largo de este trabajo,
 nos referiremos como costo computacional al hecho de ejecutar una \textit{build}, es decir, el
-proceso de construir el \textit{software} y ejecutar todas las pruebas cuando la \textit{CI} es
+proceso de construir el \textit{software} y ejecutar todas las pruebas cuando la CI es
 lanzada. Este costo asociado se acentúa en empresas de gran tamaño, donde el número de
 \textit{builds} que se ejecutan diariamente es muy elevado \cite{12,13}. Ahorrar en dicho costo
 computacional se convierte por tanto en un objetivo clave para las mismas. Optimizando la cantidad
@@ -62,33 +62,33 @@ elevado, pudiendo ralentizar el tiempo de respuesta ante problemas y ajustes rá
 desarrollo.\\
 
 En los últimos años, han surgido numerosos enfoques centrados en reducir el costo computacional
-asociado a la ejecución de \textit{CI} \cite{1,2,4,5,6,7}. La idea principal de estos enfoques es
+asociado a la ejecución de CI \cite{1,2,4,5,6,7}. La idea principal de estos enfoques es
 reducir el número de \textit{builds} que se ejecutan, prediciendo el resultado antes de su
-ejecución y, por lo tanto ahorrándose ese costo computacional. Las \textit{builds} predichas como
+ejecución y, por lo tanto, ahorrándose ese costo computacional. Las \textit{builds} predichas como
 construcciones exitosas (\textit{build pass}) no se ejecutan, mientras que las predichas como
 construcciones fallidas (\textit{build failure}) sí se ejecutan. De esta forma, se mantiene el
-valor conceptual de la \textit{CI}, que es la detección temprana de errores, pero reduciendo
+valor conceptual de la CI, que es la detección temprana de errores, pero reduciendo
 el costo computacional asociado en el proceso. Este estudio toma como punto de partida el
 algoritmo de \textit{Machine Learning} \textit{SmartBuildSkip} \cite{2}. La idea principal es
 realizar una contribución a este algoritmo, realizando un estudio de las \textit{features} que
 se usan para la predicción, y añadiendo nuevas \textit{features} más significativas que puedan
-mejorar estudios existentes. Además, se creará una aplicación web sencilla con la que el usuario
-pueda interactuar de forma directa a través de una interfaz gráfica, abstrayendo la complejidad
+mejorar estudios existentes. Además, se ha creado una aplicación web sencilla con la que el usuario
+puede interactuar de forma directa a través de una interfaz gráfica, abstrayendo la complejidad
 de los algoritmos de predicción y ofreciendo una forma intuitiva y sencilla de realizar
 predicciones basadas en un repositorio concreto. Por lo tanto, este estudio se enmarca en el
-desarrollo de software moderno, específicamente en el ámbito de la Integración Continua y la
-predicción automática del resultado de dicha integración.\\
+desarrollo de \textit{software} moderno, específicamente en el ámbito de la Integración Continua y
+la predicción automática del resultado de dicha integración.\\
 
 La memoria queda organizada de la siguiente forma: en primer lugar, se realiza un estudio del
 estado del arte que sitúa los antecedentes previos a la Integración Continua y la predicción
 automática de resultados de \textit{builds}. Posteriormente, se establecen los objetivos y
 preguntas de investigación que pretende este estudio responder. A continuación, se describe
 en detalle el problema a resolver, los principales obstáculos que se plantean y sus posibles
-soluciones. Acto seguido, se desarrolla con detalle nuestra enfoque al problema, describiendo
-las tecnologías usadas y el desarrollo de la solución. Después se presentarán las pruebas y
+soluciones. Acto seguido, se desarrolla con detalle nuestro enfoque al problema, describiendo
+las tecnologías usadas y el desarrollo de la solución. Después se presentan las pruebas y
 resultados obtenidos, comparando la solución con otras existentes, a modo de validar y verificar
-la aportación de nuestra solución. Seguidamente, se comentarán las amenazas a la validez, una
+la aportación de nuestra solución. Seguidamente, se comentan las amenazas a la validez, una
 parte esencial en cualquier trabajo de investigación. Este apartado nos permite identificar y
 discutir posibles limitaciones que podrían afectar a la validez de los resultados y a las
-conclusiones. Por último, se darán unas conclusiones sobre los resultados obtenidos y se
-propondrán posibles líneas de trabajo futuro.
+conclusiones. Por último, se dan unas conclusiones sobre los resultados obtenidos y se
+proponen posibles líneas de trabajo futuro.

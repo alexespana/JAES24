@@ -4,12 +4,12 @@ documento, así mismo como un repaso a las técnicas que existen en la literatur
 el problema tratado en este trabajo.\\
 \subsection{Antecedentes}
 Este trabajo se centra en la implementación, evaluación y mejora del algoritmo de predicción de
-\textit{CI} propuesto en \cite{2}. Para comprender mejor el contexto en el que se desarrolla,
-primero vamos a presentar algunos de los conceptos básicos de \textit{CI} y del problema que
-nos ocupa. En primer lugar, se describirá el ciclo de vida de \textit{CI}, junto a las dos
+CI propuesto en \cite{2}. Para comprender mejor el contexto en el que se desarrolla,
+primero vamos a presentar algunos de los conceptos básicos de CI y del problema que
+nos ocupa. En primer lugar, se describirá el ciclo de vida de CI, junto a las dos
 casuísticas que pueden darse en el proceso de integración. En segundo lugar, hablaremos sobre la
 extracción de características, un aspecto fundamental para algoritmos de predicción. Por último,
-se hablará del consumo de recursos computacionales que supone la implementación de \textit{CI},
+se hablará del consumo de recursos computacionales que supone la implementación de CI,
 de ahí la principal motivación de este trabajo, la reducción de dichos costes.
 
 
@@ -19,9 +19,9 @@ sobre un mismo código base añadiendo nuevas funcionalidades, para luego integr
 linea temporal de desarrollo, de forma controlada y automatizada. Cada integración se realiza
 a través de la compilación, construcción y ejecución de pruebas automatizadas sobre el código
 fuente \cite{10}. Aunque pueda parecerlo, la Integración Continua no es un proceso trivial, en
-\cite{12} se describen las buenas prácticas de \textit{CI} que deben seguirse para garantizar
-la calidad del software, algunas de las cuales han sido fuertemente adoptadas en el sector, como
-por ejemplo:
+\cite{12} se describen las buenas prácticas de CI que deben seguirse para garantizar
+la calidad del \textit{software}, algunas de las cuales han sido fuertemente adoptadas en el
+sector, como por ejemplo:
 
 \begin{enumerate}
       \item \textbf{Punto de código fuente único}: para faclitar la integración de cualquier
@@ -37,9 +37,9 @@ por ejemplo:
       procesos, llegando a analizar qué partes del código necesitan ser recompiladas, y gestionando
       dependencias para evitar recompilar innecesariamente.
       \item \textbf{Desarrollo de pruebas unitarias o de validación interna}: compilar el código
-      no es suficiente para asegurar que el código funciona correctamente, por lo que se
+      no es suficiente para asegurar que funciona correctamente, por lo que se
       implementan pruebas automatizadas. Normalmente, estas se dividen en pruebas unitarias, que
-      prueban partes específicas del código, y pruebas de aceptación, que prueban el sistema
+      prueban partes específicas del código; y pruebas de aceptación, que prueban el sistema
       completo. Aunque este proceso no puede garantizar la ausencia total de errores, ofrece un
       mecanismo efectivo de mejorar la calidad del \textit{software} mediante la detección y
       corrección continua de fallos.
@@ -48,7 +48,7 @@ por ejemplo:
 Sin embargo, en el mundo real, la forma de aplicar cada una de estas técnicas y la prioridad con
 la que se aplica puede estar fuertemente influenciada por la cultura empresarial donde
 se desarrolle. En \cite{8}, se realiza un caso de estudio con tres empresas donde se percibe
-que la adopción de las prácticas de \textit{CI} no es homogénea. Por ejemplo, con respecto a tener
+que la adopción de las prácticas de CI no es homogénea. Por ejemplo, con respecto a tener
 un único punto de código fuente, algunas prefieren minimizar los conflictos de fusión
 (\textit{merge conflicts}) que el beneficio poco claro de usar un único repositorio. Por otro
 lado, en cuanto a las pruebas unitarias, existen diferencias debido a limitaciones en las
@@ -59,9 +59,9 @@ externos).\\
 
 \textbf{Ejemplo práctico}: Un desarrollador hace un \textit{commit} (una
 instantánea de los cambios realizados) y mediante una acción de \textit{push}, lo envía al
-repositorio central. El servidor de \textit{CI} \cite{9} (Jenkins, Travis CI, GitHub Actions,
+repositorio central. El servidor de CI \cite{9} (Jenkins, Travis CI, GitHub Actions,
 etc.) detecta automáticamente este nuevo \textit{commit} y desencadena el \textit{pipeline} de
-\textit{CI}. El servidor extrae el nuevo código del repositorio y comienza a construir la
+CI. El servidor extrae el nuevo código del repositorio y comienza a construir la
 aplicación, lo que denominados la fase de construcción o \textit{build}. Esta parte puede incluir
 la compilación del código fuente, la instalación de dependencias, etc. Una vez que la aplicación
 está construida, se ejecutan una serie de pruebas automatizadas (\textit{Self-Testing code})
@@ -71,10 +71,10 @@ podemos encontrarnos dos casos:
 
 \begin{itemize}
     \item \textbf{La \textit{build} ha sido exitosa}: todas las pruebas han pasado con éxito. En
-          este caso, el servidor de \textit{CI} puede desplegar la aplicación en un entorno de
-          pruebas o producción.
+          este caso, el servidor de CI puede desplegar la aplicación en un entorno de
+          pruebas o producción.\\
     \item \textbf{La \textit{build} ha fallado}: alguna de las pruebas ha fallado. En este caso,
-          el servidor de \textit{CI} suele notificar a los desarrolladores y detiene el
+          el servidor de CI suele notificar a los desarrolladores y detiene el
           despliegue de la aplicación.
 \end{itemize}
 
@@ -89,7 +89,7 @@ TravisTorrent \cite{6}, sin embargo, estas características no son las mejores p
 hacen uso de características basadas en la \textit{build} actual, la \textit{build} anterior y
 el histórico ligado a todas las ejecuciones de \textit{builds} anteriores. Hassan et al. \cite{7}
 fue el primer estudio en utilizar técnicas de \textit{Machine Learning} para predecir el resultado
-de \textit{CI}. En su estudio, utilizó características basadas en la \textit{build} actual y la
+de CI. En su estudio, utilizó características basadas en la \textit{build} actual y la
 anterior, para la \textit{build} anterior usó:
 
 \begin{itemize}
@@ -129,7 +129,7 @@ relacionadas con el histórico de ejecuciones de \textit{builds}: tanto por cien
 fallidas, incremento del \textit{fail} ratio en la última \textit{build} con respecto al ratio
 de la penúltima, porcentaje de \textit{builds} exitosas desde la última \textit{build} fallida,
 etc. Como vemos, se utilizan un gran número de \textit{features} para la predicción, sin embargo,
-el objetivo no es la reducción de los costos de \textit{CI} ni la  importancia de cada una de
+el objetivo no es la reducción de los costos de CI ni la  importancia de cada una de
 ellas en relación con los \textit{build failures}. El hecho de que se utilicen tantas
 \textit{features} relacionadas con la \textit{build} anterior, hace que predecir una
 \textit{build} como fallida esté fuertemente relacionado con el resultado de la \textit{build}
@@ -159,7 +159,7 @@ que usan 16 métricas de la literatura y descubren lo siguiente:
       \item No existe evidencia que demuestre que trabajar en paralelo a un \textit{pull request}
       afecte al resultado de la \textit{build}.
       \item La mayoría de los errores se producen consecutivamente. Las fases más inestables de
-      compilación generan fallos en la \textit{CI}.
+      compilación generan fallos en la CI.
 \end{itemize}
 
 Todos estos resultados se obtuvieron a través de un estudio empírico con 14 proyectos de código
@@ -172,16 +172,16 @@ compilaciones fallidas.\\
 \subsubsection{El costo de la Integración Continua.}
 La implementación de la Integración Continua, a pesar de ofrecer numerosas ventajas, también
 supone un coste computacional y económico. Además del costo computacional que supone ejecutar
-la \textit{CI}, debemos sumarle el costo del tiempo no productivo de los desarrolladores si estos
+la CI, debemos sumarle el costo del tiempo no productivo de los desarrolladores si estos
 no saben como proceder sin saber el resultado de la integración. Hilton et al. \cite{10} estudiaron
-los beneficios y costes de aplicar \textit{CI} en proyectos de código abierto. En su estudio,
-observaron que entre los proyectos \textit{open-source} que no usaban \textit{CI}, el principal
+los beneficios y costes de aplicar CI en proyectos de código abierto. En su estudio,
+observaron que entre los proyectos \textit{open-source} que no usaban CI, el principal
 motivo no era el costo técnico, si no que los desarrolladores no estaban familiarizados con
-\textit{CI}. Otra de las razones de no usar \textit{CI} era la falta de \textit{tests} automáticos,
-un aspecto fundamental en \textit{CI}. Además, calcularon el costo de mantenimiento de la
-\textit{CI}, para lo que midieron el número de cambios en los archivos de configuración. Observaron
+CI. Otra de las razones de no usar CI era la falta de \textit{tests} automáticos,
+un aspecto fundamental en CI. Además, calcularon el costo de mantenimiento de la
+CI, para lo que midieron el número de cambios en los archivos de configuración. Observaron
 que el número medio de modificaciones en archivos de configuración se elevaba a 12, siendo
-frecuente que se realizaran cambios en la configuración de \textit{CI}. Una de las principales
+frecuente que se realizaran cambios en la configuración de CI. Una de las principales
 razones para estos cambios en archivos de configuración era la presencia de versiones obsoletas
 en las dependencias. Por último, observaron un hecho curioso con respecto al tiempo de ejecución
 medio de las \textit{builds}: las \textit{builds} exitosas son, en promedio, más rápidas que
@@ -190,41 +190,41 @@ interrumpir el proceso antes, aunque se necesita una mayor investigación para a
 razones.\\
 
 Klotins et al. \cite{18} realizaron un trabajo con múltiples casos de estudio en el que
-encontraron que la aplicación de \textit{CI} mejoraba notablemente los procesos de desarrollo
+encontraron que la aplicación de CI mejoraba notablemente los procesos de desarrollo
 internos en las empresas, sin embargo, se destaca la necesidad de evaluar las consecuencias de
 aplicar este tipo de desarrollo desde una perspectiva del cliente. El hecho de actualizar a los
 clientes a entregas continuas es un obstáculo importante ya que pueden existir acuerdos previos,
 y renegociar dichos acuerdos conlleva un riesgo de perder clientes y causar inestabilidad en la
-empresa. En el estudio se ha observado la necesidad de adoptar prácticas de \textit{CI} para
+empresa. En el estudio se ha observado la necesidad de adoptar prácticas de CI para
 mejorar los procesos de desarrollo \textit{software} en las empresas, sin embargo, estas se
 enfrentan a desafíos comunes en su implementación:
 
 \begin{enumerate}
 	\item \textbf{Beneficios internos vs. externos}: se reconocen los beneficios internos de
-      aplicar \textit{CI}, como la agilización de los procesos y la liberación de recursos. Sin
+      aplicar CI, como la agilización de los procesos y la liberación de recursos. Sin
       embargo, extender estos beneficios a los clientes y la adaptación de los modelos de negocio
       existentes representan un obstáculo mayor.
-	\item \textbf{Cultura organizacional}: la implementación de \textit{CI} requiere cambios
+	\item \textbf{Cultura organizacional}: la implementación de CI requiere cambios
       significativos en los procesos y en la cultura organizacional. Esto requiere compromiso por
       parte de los equipos de desarrollo y directivos.
 	\item \textbf{Clientes}: convencer a los clientes para aceptar entregas más frecuentes y
-      compartir más datos es fundamental para sacar partido a las ventajas de \textit{CI}. Sin
+      compartir más datos es fundamental para sacar partido a las ventajas de CI. Sin
       embargo, los clientes pueden ofrecer resistencia al cambio y esto puede poner en peligro
       las relaciones con los mismos.
 \end{enumerate}
 
 En \cite{17} se presenta un estudio en el que se preguntó a trabajadores de la empresa
-\textit{Atlassian} sobre sus percepciones sobre los fallos de \textit{CI}. Entre sus trabajadores,
+\textit{Atlassian} sobre sus percepciones sobre los fallos de CI. Entre sus trabajadores,
 una gran mayoría (46\%) consideraba como muy o extremadamente difícil resolver los fallos de
-\textit{CI}, una minoría (13\%) consideraba que no era difícil resolverlos, y el resto calificó
-la complejidad como moderada. Además, comentan que los fallos de \textit{CI} pueden afectar tanto
+CI, una minoría (13\%) consideraba que no era difícil resolverlos, y el resto calificó
+la complejidad como moderada. Además, comentan que los fallos de CI pueden afectar tanto
 al flujo de trabajo individual como a la empresa. Los trabajadores notan que estos fallos pueden
 aumentar el tiempo de trabajo e incluso interrumpir el flujo de desarrollo. Otro impacto posible
 es la reducción de la productividad, ya que alguien tiene que dedicar tiempo a investigar por qué
 falló la \textit{build} y solucionarlo. Este tipo de problemas pueden ocasionar que las revisiones
 o las correcciones rápidas tarden más tiempo de lo esperado, poniendo en peligro el tiempo de
 lanzamiento (\textit{release}). Además, se menciona que factores técnicos como humanos desempeñan
-un papel fundamental en la adopción de \textit{CI}.\\
+un papel fundamental en la adopción de CI.\\
 
 \subsection{Trabajos relacionados} \label{sec:related_work}
 Existen numerosos estudios que buscan reducir el costo asociado a la Integración Continua
@@ -238,7 +238,7 @@ el \textit{Information Gain (IG)}. Con ello seleccionan las más discriminativas
 \textit{features} (Sección \ref{sec:features}). Posteriormente, construyen un clasificador que usa
 \textit{random forest} para clasificar las \textit{builds} en exitosas y fallidas. Este estudio
 fue el primer enfoque en utilizar técnicas de \textit{Machine Learning} para predecir el resultado
-de la \textit{CI}, sin embargo, no estaba centrado en reducir los costos asociados a la misma ni
+de la CI, sin embargo, no estaba centrado en reducir los costos asociados a la misma ni
 a los \textit{build failures}, los casos positivos que más interés tienen.\\
 
 En \cite{5} se propone una solución novedosa que usa Programación Genética Multi-Objetivo, sin
@@ -246,7 +246,7 @@ utilizar técnicas de aprendizaje automático. Su enfoque consiste en recopilar 
 exitosas y fallidas de un proyecto, obtener información de \textit{TravisTorrent} que contiene
 información sobre \textit{builds} de \textit{Travis CI} y, a partir de ahí, se toman esos datos
 como entrada para generar un conjunto de reglas predictivas que anticipen el resultado de la
-compilación de \textit{CI} con la mayor precisión posible. Finalmente, entra en juego el 
+compilación de CI con la mayor precisión posible. Finalmente, entra en juego el 
 algoritmo de programación genética multiobjetivo, el cual va generando un conjunto de soluciones, 
 cada una de ellas con su conjunto de reglas de predicción, por ejemplo, una combinación de
 umbrales asignados a cada métrica. Dicha combinación de métricas-umbrales está conectada a
@@ -263,15 +263,15 @@ en proyectos con ratios de \textit{failures} bajos.\\
 
 La piedra angular de nuestro estudio se basa en el trabajo de \textbf{Servant et al.} \cite{2}. En
 este estudio, se propone un algoritmo que utiliza técnicas de \textit{Machine Learning}
-para la predicción de \textit{CI}, con el objetivo de reducir los costos asociados a la misma.
+para la predicción de CI, con el objetivo de reducir los costos asociados a la misma.
 Su teoría parte de dos hipótesis principales:
 
 \begin{itemize}
       \item \textit{$H_1$}: la mayoría de las \textit{builds} devuelven un resultado exitoso. Por
       lo general, las \textit{builds} exitosas son más numerosas que las fallidas. Es decir,
-      siempre habrá mayor ratio de \textit{builds} que pasan la \textit{CI} que \textit{builds}
+      siempre habrá mayor ratio de \textit{builds} que pasan la CI que \textit{builds}
       que fallan.
-      \item \textit{$H_2$}: muchas \textit{builds} fallidas en \textit{CI} ocurren
+      \item \textit{$H_2$}: muchas \textit{builds} fallidas en CI ocurren
       consecutivamente después de otra \textit{build} fallida.
 \end{itemize}
 
@@ -304,7 +304,7 @@ siguientes:
 \end{itemize}
 
 En cuanto a las \textit{project features}, estas son útiles cuando queremos predecir
-el resultado de la \textit{CI} en un proyecto que tiene un número escaso de \textit{builds}, bien
+el resultado de la CI en un proyecto que tiene un número escaso de \textit{builds}, bien
 porque sea reciente, no se hayan ejecutado en su duración gran número de \textit{builds}, etc. Este
 último problema es lo que suele denominarse en sistemas de información como el ``arranque en frío''
 (\textit{cold start}), cuando no se puede extraer información útil para los usuarios debido a
@@ -316,7 +316,7 @@ de otros proyectos entrenados con estas \textit{features}. En el estudio, se men
       \item \textbf{\textit{TD}}: el número medio de líneas en los casos de prueba por cada
       1000 líneas ejecutables de código de producción.
       \item \textbf{\textit{PS}}: el número medio de líneas de código fuente de producción
-      ejecutale en el repositorio a lo largo de la historia de uso de \textit{CI} en el proyecto.
+      ejecutale en el repositorio a lo largo de la historia de uso de CI en el proyecto.
       \item \textbf{\textit{PA}}: la duración entre la primera y la última \textit{build} del
       proyecto
 \end{itemize}
@@ -350,7 +350,7 @@ y en mejorar los resultados obtenidos en el estudio original, bien mediante la a
 Continuando con el orden cronológico del estado del arte, Saidani et al. \cite{15} propone un
 predictor que utiliza Redes Neuronales Recurrentes (\textit{RNN}) basadas en Memoria a Largo
 Plazo (\textit{LSTM}). Su estudio se realiza como es habitual con diez proyectos de código
-abierto que usan el sistema de \textit{CI} de \textit{Travis CI}, sumando un total de 91330
+abierto que usan el sistema de CI de \textit{Travis CI}, sumando un total de 91330
 \textit{builds}.Estos revelan que este tipo de técnicas ofrecen mejores resultados
 que las de \textit{Machine Learning}, obteniendo mejor rendimiento en términos de \textit{AUC},
 \textit{F1-Score} y \textit{accuracy} cuando se trata de validación entre proyectos. En \cite{6}
@@ -390,15 +390,15 @@ que:
       enfoque.
 \end{itemize}
 
-Por otro lado, no existen proyectos documentados que usen técnicas de predicción de \textit{CI}
+Por otro lado, no existen proyectos documentados que usen técnicas de predicción de CI
 para el ahorro de costos, por lo que es complicado evaluar el impacto económico real que estas
 pueden causar. Liu et al. \cite{19} utiliza simulación de procesos \textit{software} y
 experimentos basados en simulación para evaluar el impacto de estos \textit{predictors} de
-\textit{CI} en un entorno más realista. Entre sus descubrimientos, vieron que existe poca
+CI en un entorno más realista. Entre sus descubrimientos, vieron que existe poca
 diferencia entre los \textit{predictors} del esado del arte y las estrategias aleatorias en
 términos de ahorro de tiempo. Sin embargo, en casos donde el ratio de \textit{builds} fallidas
 es mayor, la estrategia aleatoria tendría un impacto negativo. Además, en proyectos donde la
-proporción de \textit{failures} es muy pequeña, el uso de \textit{CI} predictiva no es mucho
+proporción de \textit{failures} es muy pequeña, el uso de CI predictiva no es mucho
 mejor que saltar \textit{builds} de forma aleatoria. A pesar de esto, se demuestra que el uso
 de técnicas de \textit{predictive CI} puede ayudar a ahorrar el costo de tiempo para ejecutar
-\textit{CI}, así como el tiempo promedio de espera antes de ejecutar la \textit{CI}.
+CI, así como el tiempo promedio de espera antes de ejecutar la CI.
