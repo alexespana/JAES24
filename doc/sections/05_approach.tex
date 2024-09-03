@@ -131,7 +131,7 @@ más numerosas que las fallidas. Esto hace que nuestro algoritmo pueda saltarse 
 Consecuentemente, debido a la no ejecución de estas \textit{builds}, se estará logrando una
 optimización de recursos computacionales.
 
-\subsubsection{Hiperparámetros}
+\subsubsection{Hiperparámetros.}
 Cuando se define un algoritmo de clasificación, es importante seleccionar y ajustar con cuidado
 los hiperparámetros, ya que estos controlan aspectos clave del proceso de entrenamiento y pueden
 determinar la capacidad del modelo para generalizar a nuevos datos. Para la definición de nuestros
@@ -202,7 +202,7 @@ hemos seguido los siguientes pasos:
     mayor capacidad para separar correctamente las clases.
 \end{enumerate}
 
-\subsubsection{Validación Cruzada}
+\subsubsection{Validación Cruzada.}
 La validación cruzada (\textit{cross-validation}) es una técnica utilizada para la evaluación y
 selección de modelos, midiendo su rendimiento y capacidad de generalización. Su objetivo
 principal es evitar el sobreajuste (\textit{overfitting}), que ocurre cuando un modelo
@@ -247,7 +247,7 @@ A continuación, se presenta de forma gráfica el funcionamiento de nuestro algo
     \label{fig:confusion_matrix}
 \end{figure}
 
-\subsubsection{Umbral de decisión}
+\subsubsection{Umbral de decisión.}
 La evaluación de los modelos a distintos grados de sensibilidad es especialmente relevante cuando
 se consideran problemas de clasificación con clases desbalanceadas o cuando el costo de los
 errores varían entre clases. En el problema que nos ocupa, se dan ambas condiciones: por lo
@@ -255,7 +255,15 @@ general, el número de \textit{builds} exitosas es muy superior al de \textit{bu
 el costo de predecir un falso negativo no es el mismo que el de predecir un falso positivo. Al
 ajustar la sensibilidad del modelo, se balancean las tasas de verdaderos positivos
 (\textit{recall}) y falsos positivos, lo que permite optimizar el rendimiento del modelo para
-diferentes contextos y necesidades.\\
+diferentes contextos y necesidades. El hecho de variar el umbral de decisión permite al
+desarrollador decidir hasta qué punto está dispuesto a obtener falsos positivos en las
+predicciones. Por ejemplo, si se asigna un umbral de decisión bajo, se aumentarán las tasas de
+verdaderos positivos, pero también aumentará el número de falsos positivos, es decir, el algoritmo
+predecirá un mayor número de veces que la \textit{build} falla, haciendo al desarrollador ejecutar
+\textit{builds} que realmente no fallaban. Por otro lado, si se asigna un umbral de decisión más
+conservador, se reducirán los falsos positivos, pero también con el riesgo de predecir alguna
+\textit{build} como exitosa cuando realmente no lo es, teniendo el caso del falso negativo.\\
+
 
 Muchos algoritmos de aprendizaje automático pueden predecir una probabilidad de
 pertenencia a una clase. Esto es útil porque proporciona una medida de la certeza o incertidumbre
@@ -272,8 +280,8 @@ En nuestra implementación, hemos evaluado el rendimiento de todos los modelos y
 mismo para valores del umbral de decisión comprendidos en el intervalo $[0, 1]$. Para ello, se
 han calculado las métricas de evaluación para cada valor del umbral y se han representado en
 gráficos para poder comparar el rendimiento de los modelos en función del umbral de decisión. De
-esta forma, se ha podido determinar cuál de ellos es el que mejor rendimiento ofrece y cuál de
-las implementaciones es la que mejor resultado proporciona.
+esta forma, se ha podido determinar cuál de los modelos es el que mejor rendimiento ofrece y cuál
+de las implementaciones es la que mejor resultado proporciona.
 
 
 \subsection{\textit{Features} empleadas}
@@ -294,58 +302,57 @@ de las \textit{features}, hay que tener en cuenta lo siguiente:
     rendimiento bajo y a modelos menos generalizables
 \end{itemize}
 
-\noindent A continuación, se presentan las features empleadas en nuestro problema.
+\noindent A continuación, se presentan las features estudiadas en nuestro problema.
 
-\begin{table}[h]
+\begin{table}[H]
     \centering
-    \caption{\textit{Build features} empleadas.}
+    \caption{\textit{Build features}.}
     \label{tab:features}
 
-    \begin{tabular}{|>{\centering\arraybackslash}m{4cm}|>{\centering\arraybackslash}m{8cm}|} % Encabezados centrados
+    \begin{tabular}{|>{\centering\arraybackslash}m{3cm}|>{\centering\arraybackslash}m{4cm}|>{\centering\arraybackslash}m{7cm}|} % Encabezados centrados
         \hline
-        \textbf{\textit{Feature}} & \textbf{Descripción breve} \\
+        \textbf{\textit{Clasificación}} &\textbf{\textit{Feature}} & \textbf{Descripción breve} \\
         \hline
     \end{tabular}
-    \begin{tabular}{|>{\raggedright\arraybackslash}m{4cm}|>{\raggedright\arraybackslash}m{8cm}|} % Contenido alineado a la izquierda en la esquina superior
+    \begin{tabular}{|>{\raggedright\arraybackslash}m{3cm}|>{\raggedright\arraybackslash}m{4cm}|>{\raggedright\arraybackslash}m{7cm}|} % Contenido alineado a la izquierda en la esquina superior
         \hline
-        \textbf{\textit{Performance Short} (PS)\footnote{\textit{Build feature propuesta en \cite{2} pero que finalmente no se usó en el mismo.}}} & La proporción de \textit{builds} exitosas en las últimas cinco \textit{builds}.\\
-        \hline
-        \textbf{\textit{Performance Long} (PL)\footnotemark[1]} & La proporción de \textit{builds} exitosas de todas las \textit{builds} previas.\\
-        \hline
-        \textbf{\textit{Time Frequency} (TF)\footnotemark[1]} & El intervalo de tiempo en horas desde la última \textit{build}.\\
-        \hline
-        \textit{Number Commits} (NC) & El número de \textit{commits desde la última \textit{build}.}\\
-        \hline
-        \textit{Files Changed} (FC) & El número de archivos modificados desde la última \textit{build}, incluyendo archivos añadidos, modificados y eliminados.\\
-        \hline
-        \textbf{\textit{Files Added} (FA)} & El número de archivos añadidos desde la última \textit{build}.\\
-        \hline
-        \textbf{\textit{Files Modified} (FM)} & El número de archivos modificados desde la última \textit{build}.\\
-        \hline
-        \textbf{\textit{Files Removed} (FR)} & El número de archivos modificados desde la última \textit{build}.\\
-        \hline
-        \textit{Source Lines Changed} (LC) & El número de líneas de código modificadas desde la última \textit{build}, incluyendo líneas añadidas y eliminadas.\\
-        \hline
-        \textbf{\textit{Source Lines Added} (LA)} & El número de líneas de código añadidas desde la última \textit{build}.\\
-        \hline
-        \textbf{\textit{Source Lines Removed} (LR)} & El número de líneas de código eliminadas desde la última \textit{build}.\\
-        \hline
-        \textit{Test Lines Changed} (LT) & El número de líneas de código de \textit{test} modificadas desde la última \textit{build}, incluyendo líneas añadidas y eliminadas.\\
-        \hline
-        \textbf{\textit{Unit Tests} (UT)} & Si se han escrito pruebas unitarias desde la última \textit{build}.\\
-        \hline
-        \textbf{\textit{Failure Distance} (FD)\footnotemark[1]} & El número de \textit{builds} exitosas desde la última \textit{build} fallida.\\
-        \hline
-        \textbf{\textit{Week Day} (WD)\footnotemark[1]} & El día de la semana en el que se ha ejecutado la \textit{build}.\\
-        \hline
-        \textbf{\textit{Day Hour} (DH)\footnotemark[1]} & La hora del día en la que se ha ejecutado la \textit{build}.\\
-        \hline
-        \textbf{\textit{Commit Delay} (CD)} & El tiempo transcurrido en horas entre \textit{commits} de una misma \textit{build}.\\
+        \multirow{4}{=}{Consideradas en SmartBuildSkip} & \textit{Number Commits} (NC) & El número de \textit{commits desde la última \textit{build}.} \\
+        \cline{2-3}
+        & \textit{Files Changed} (FC) & El número de archivos modificados desde la última \textit{build}, incluyendo archivos añadidos, modificados y eliminados.\\
+        \cline{2-3}
+        & \textit{Source Lines Changed} (LC) & El número de líneas de código modificadas desde la última \textit{build}, incluyendo líneas añadidas y eliminadas.\\
+        \cline{2-3}
+        & \textit{Test Lines Changed} (LT) & El número de líneas de código de \textit{test} modificadas desde la última \textit{build}, incluyendo líneas añadidas y eliminadas.\\
+        \Xhline{1pt}
+        \multirow{6}{=}{Consideradas en SmartBuildSkip pero no utilizadas} & \textit{Performance Short} (PS) & La proporción de \textit{builds} exitosas en las últimas cinco \textit{builds}.\\
+        \cline{2-3}
+        & \textit{Performance Long} (PL) & La proporción de \textit{builds} exitosas de todas las \textit{builds} previas.\\
+        \cline{2-3}
+        & \textit{Time Frequency (TF)} & El intervalo de tiempo en horas desde la última \textit{build}.\\
+        \cline{2-3}
+        & \textit{Failure Distance (FD)} & El número de \textit{builds} exitosas desde la última \textit{build} fallida.\\
+        \cline{2-3}
+        & \textit{Week Day} (WD) & El día de la semana en el que se ha ejecutado la \textit{build}.\\
+        \cline{2-3}
+        & \textit{Day Hour} (DH) & La hora del día en la que se ha ejecutado la \textit{build}.\\
+        \Xhline{1pt}
+        \multirow{7}{=}{Nuevas consideradas en este estudio}& \textit{Files Added} (FA) & El número de archivos añadidos desde la última \textit{build}.\\
+        \cline{2-3}
+        & \textit{Files Modified} (FM) & El número de archivos modificados desde la última \textit{build}.\\
+        \cline{2-3}
+        & \textit{Files Removed} (FR) & El número de archivos modificados desde la última \textit{build}.\\
+        \cline{2-3}
+        & \textit{Source Lines Removed} (LR) & El número de líneas de código eliminadas desde la última \textit{build}.\\
+        \cline{2-3}
+        & \textit{Source Lines Added} (LA) & El número de líneas de código añadidas desde la última \textit{build}.\\
+        \cline{2-3}
+        & \textit{Unit Tests} (UT) & Si se han escrito pruebas unitarias desde la última \textit{build}.\\
+        \cline{2-3}
+        & \textit{Commit Delay} (CD) & El tiempo transcurrido en horas entre \textit{commits} de una misma \textit{build}.\\
         \hline
         % Añade más filas según sea necesario
     \end{tabular}
 \end{table}
-\footnotetext{\textit{Build feature propuesta en SmartBuildSkip pero que finalmente no se usó para el entrenamiento del modelo \cite{2}}.}
 
 Las \textit{features} marcadas en negrita son \textit{features} nuevas propuestas en este trabajo
 para realizar el entrenamiento de los modelos, mientras las que no están marcadas en negrita son
@@ -375,7 +382,7 @@ debemos tener en cuenta los siguientes aspectos:
     pueden dar resultados incorrectos si las \textit{features} tienen escalas muy diferentes.\\
 \end{itemize}
 
-\subsubsection*{Cáculo de \textit{features} durante la predicción}. Para comprender bien este
+\subsubsection{Cáculo de \textit{features} durante la predicción.} Para comprender bien este
 punto, vamos a diferenciar dos conceptos fundamentales: la \textbf{\textit{build} propuesta} y la
 \textbf{\textit{build} ejecutada}. La \textit{build} propuesta es aquella que se desea predecir,
 independientemente de lo que prediga el algoritmo de predicción, y que por lo tanto todavía no ha
@@ -409,7 +416,7 @@ mencionadas anteriormente:
     \centering
     \includegraphics[scale=0.9]{images/PS.pdf}
     \caption{Cáculo del \textit{Performance Short}.}
-    \label{fig:PL}
+    \label{fig:PS}
 \end{figure}
 
 \begin{figure}[H]
@@ -423,7 +430,7 @@ mencionadas anteriormente:
     \centering
     \includegraphics[scale=0.9]{images/FD.pdf}
     \caption{Cáculo del \textit{Failure Distance}.}
-    \label{fig:PL}
+    \label{fig:FD}
 \end{figure}
 
 \subsection{Interfaz gráfica}
