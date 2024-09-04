@@ -493,7 +493,8 @@ def predict(model_path, x_test, y_test, with_accumulation, transformer = None) -
 
     number_last_builds = 5
     performance_short_queue = deque(maxlen=number_last_builds)
-    performance_long = np.full(len(x_test), -1)
+    performance_long = []
+    failure_distance = []
 
     predictions = np.zeros(len(x_test))
     predictions_prob = np.zeros(len(x_test))
@@ -508,7 +509,8 @@ def predict(model_path, x_test, y_test, with_accumulation, transformer = None) -
             # Update the performance short feature
             if 'PS' in row:
                 row['PS'] = (performance_short_queue.count(1) / number_last_builds) * 100
-                row['PL'] = (np.sum(performance_long == 1) / (index+1)) * 100
+                row['PL'] = ( performance_long.count(1) / max(len(performance_long), 1) ) * 100
+                row['FD'] = len(''.join(map(str, failure_distance)).split('0')[-1])
 
             build_features.iloc[0] = row
 
@@ -526,10 +528,8 @@ def predict(model_path, x_test, y_test, with_accumulation, transformer = None) -
 
             if prediction_i == 0:
                 performance_short_queue.append(y_test.iloc[index])
-                performance_long[index] = y_test.iloc[index]
-            else:
-                performance_short_queue.append(1)
-                performance_long[index] = 1
+                performance_long.append(y_test.iloc[index])
+                failure_distance.append(y_test.iloc[index])
     else:
         # Cumulative predictions
         last_prediction = None
@@ -540,7 +540,8 @@ def predict(model_path, x_test, y_test, with_accumulation, transformer = None) -
             # Update the performance short feature
             if 'PS' in row:
                 row['PS'] = (performance_short_queue.count(1) / number_last_builds) * 100
-                row['PL'] = (np.sum(performance_long == 1) / (index+1)) * 100
+                row['PL'] = ( performance_long.count(1) / max(len(performance_long), 1) ) * 100
+                row['FD'] = len(''.join(map(str, failure_distance)).split('0')[-1])
 
             if in_failure_sequence:     # Subsequent failures
                 # Predict automatically a failure
@@ -555,7 +556,8 @@ def predict(model_path, x_test, y_test, with_accumulation, transformer = None) -
                 # When it is predicted to fail, we always record the actual 
                 # result because we can see it.
                 performance_short_queue.append(y_test.iloc[index])
-                performance_long[index] = y_test.iloc[index]
+                performance_long.append(y_test.iloc[index])
+                failure_distance.append(y_test.iloc[index])
             else:
                 build_features.iloc[0] = row
 
@@ -586,11 +588,8 @@ def predict(model_path, x_test, y_test, with_accumulation, transformer = None) -
                     # When it is predicted to fail, we always record the actual 
                     # result because we can see it.
                     performance_short_queue.append(y_test.iloc[index])
-                    performance_long[index] = y_test.iloc[index]
-                else:
-                    # We assume it is true because the build does not run
-                    performance_short_queue.append(1)
-                    performance_long[index] = 1
+                    performance_long.append(y_test.iloc[index])
+                    failure_distance.append(y_test.iloc[index])
 
     return predictions, predictions_prob
 
