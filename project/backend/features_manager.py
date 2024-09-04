@@ -386,7 +386,7 @@ def process_repository(repository_url: str, branch: str, features_file: str, pic
     # Train all models with the features extracted
     features = pd.read_csv(get_features_folder(repo_name, branch) + features_file)
     features = features.iloc[::-1]
-    features = features.drop(columns=['ID'])
+    features = features.drop(columns=['ID', 'PS', 'PL', 'FD', 'FA', 'FM', 'FR', 'UT', 'CD'])
     
     if evaluate:
         train_and_evaluate_all_models(features, pickle_pattern, with_accumulation)
