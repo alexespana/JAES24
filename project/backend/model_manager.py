@@ -106,14 +106,20 @@ def predict_and_calculate_metrics(pickle_pattern: str, x_test: pd.DataFrame,
         
         return predictions, predictions_prob
     elif sensitivity_threshold is not None:
-        df = pd.DataFrame(columns=['sensitivity', 'recall_dt', 'recall_rf', 'recall_lr', 'recall_svm', 'recall_knn', 'recall_nn'])
+        df = pd.DataFrame(columns=['sensitivity', 'recall_dt', 'recall_rf', 'recall_lr', 'recall_svm', 'recall_knn', 'recall_nn', 'precision_dt', 'precision_rf', 'precision_lr', 'precision_svm', 'precision_knn', 'precision_nn'])
         df.loc[0] = [sensitivity_threshold, 
                      recall_score(y_test, predictions_dt, pos_label=0, zero_division=0),
                      recall_score(y_test, predictions_rf, pos_label=0, zero_division=0),
                      recall_score(y_test, predictions_lr, pos_label=0, zero_division=0),
                      recall_score(y_test, predictions_svm, pos_label=0, zero_division=0),
                      recall_score(y_test, predictions_knn, pos_label=0, zero_division=0),
-                     recall_score(y_test, predictions_nn, pos_label=0, zero_division=0)
+                     recall_score(y_test, predictions_nn, pos_label=0, zero_division=0),
+                     precision_score(y_test, predictions_dt, pos_label=0, zero_division=0),
+                     precision_score(y_test, predictions_rf, pos_label=0, zero_division=0),
+                     precision_score(y_test, predictions_lr, pos_label=0, zero_division=0),
+                     precision_score(y_test, predictions_svm, pos_label=0, zero_division=0),
+                     precision_score(y_test, predictions_knn, pos_label=0, zero_division=0),
+                     precision_score(y_test, predictions_nn, pos_label=0, zero_division=0)
                     ]
         try:
             with open(AIMODELS_FOLDER + pickle_pattern + '/Sensitivity/results.csv', 'x') as f:
@@ -231,10 +237,10 @@ def train_all_models(data: pd.DataFrame, pickle_pattern: str, seed = 42, sensiti
     x_train_min_max = ndarray_to_dataframe(x_train.columns, x_train_min_max)
 
     # Create models
-    dt = DecisionTreeClassifier(random_state=seed)
+    dt = DecisionTreeClassifier(random_state=seed, class_weight={0: 20, 1: 1})
     rf = RandomForestClassifier(random_state=seed, class_weight={0: 20, 1: 1})
-    lr = LogisticRegression(random_state=seed, max_iter=15000)
-    svc = SVC(random_state=seed, probability=True)
+    lr = LogisticRegression(random_state=seed, max_iter=15000, class_weight={0: 20, 1: 1})
+    svc = SVC(random_state=seed, probability=True, class_weight={0: 20, 1: 1})
     knn = KNeighborsClassifier()
     nn = MLPClassifier(random_state=seed, max_iter=15000)
 
@@ -319,13 +325,14 @@ def train_and_evaluate_all_models(data: pd.DataFrame, pickle_pattern: str, test_
                                   output_file = 'Standard_evaluation.txt',
                                   sensitivity_threshold = sensitivity_threshold)
 
-def get_sensitivity_results(data: pd.DataFrame, pickle_pattern: str, test_percentage: float = 0.2, with_accumulation: bool = False, seed: int = 42):
+def get_sensitivity_results(data: pd.DataFrame, pickle_pattern: str, thresholds: list, test_percentage: float = 0.2, with_accumulation: bool = False, seed: int = 42):
     """
     Get the recall values for different sensitivity thresholds.
 
     Args:
     data: features and target values
     pickle_pattern: the base pattern to save the models
+    thresholds: the list of sensitivity thresholds
     test_percentage: the percentage of the data to be used for testing
     with_accumulation: whether to accumulate the predictions
     seed: the seed for the random number generator
@@ -333,8 +340,6 @@ def get_sensitivity_results(data: pd.DataFrame, pickle_pattern: str, test_percen
     Returns:
     None
     """
-    thresholds = [round(i * 0.05, 2) for i in range(21)]
-
     # Save results in a folder (csv files)
     shutil.rmtree(AIMODELS_FOLDER + pickle_pattern + '/k-Fold Cross-Validation', ignore_errors=True)
     shutil.rmtree(AIMODELS_FOLDER + pickle_pattern + '/Sensitivity', ignore_errors=True)  
