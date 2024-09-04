@@ -354,9 +354,12 @@ de las \textit{features}, hay que tener en cuenta lo siguiente:
     \end{tabular}
 \end{table}
 
-Las \textit{features} marcadas en negrita son \textit{features} nuevas propuestas en este trabajo
-para realizar el entrenamiento de los modelos, mientras las que no están marcadas en negrita son
-\textit{features} propuestas y utilizadas en estudios previos \cite{2}.\\
+Como vemos en la Tabla \ref{tab:features}, las \textit{features} que se encuentran en la primera
+clasificación, son aquellas que realmente se han utilizado para el entrenamiento de los modelos
+en estudios previos \cite{2}. Las \textit{features} que se encuentran en la segunda clasificación
+son aquellas que se han considerado en SmartBuildSkip, pero que no se han llegado a utilizar para
+el entrenamiento de los modelos. Por último, las que se encuentran en la tercera clasificación son
+\textit{features} nuevas propuestas en este estudio.\\
 
 \noindent Para el cálculo de las \textit{features} mencionadas en la Tabla \ref{tab:features},
 debemos tener en cuenta los siguientes aspectos:
@@ -379,7 +382,36 @@ debemos tener en cuenta los siguientes aspectos:
     entrenar el modelo. La normalización es un proceso que ajusta los valores de las
     \textit{features} para que tengan una escala común. Esto es importante porque muchos
     algoritmos de aprendizaje automático son sensibles a la escala de las \textit{features} y
-    pueden dar resultados incorrectos si las \textit{features} tienen escalas muy diferentes.\\
+    pueden dar resultados incorrectos si las \textit{features} tienen escalas muy diferentes.
+    En nuestra implementación, hemos utilizado dos métodos de normalización:
+
+    \begin{enumerate}
+        \item Normalización \textit{Min-Max}: como comentamos, es una técnica de escalado de datos
+        que transforma los valores de un conjunto de datos dentro de un rango específico,
+        normalmente en el intervalo $[0, 1]$, como en nuestro caso. La fórmula para la
+        normalización \textit{Min-Max} es la siguiente:
+
+        \begin{equation}
+            N_{i} = \frac{X_{i} - X_{min}}{X_{max} - X_{min}}
+        \end{equation}
+
+        \item Normalización \textit{Z-score} o estandarización: esta técnica transforma los
+        valores de un conjunto de datos a una distribución con media $0$ y desviación estándar $1$.
+        Para ello, se resta a cada valor la media de los datos y se divide por la desviación
+        estándar. La fórmula para la normalización \textit{Z-score} es la siguiente:
+
+        \begin{equation}
+            N_{i} = \frac{X_{i} - \mu}{\sigma}
+        \end{equation}
+    \end{enumerate}
+
+    En nuestro caso, hemos utilizado un tipo de normalización u otro en función del modelo de
+    clasificación que estemos utilizando. Por ejemplo, hemos usado normalización \textit{Min-Max}
+    para $k$ vecinos más cercanos y para redes neuronales, y normalización \textit{Z-score} para
+    regresión logística y máquinas de soporte vectorial. Además, añadir que no se ha utilizado
+    normalización en árboles de decisión ni en bosques aleatorios, ya que estos modelos crean
+    reglas basadas en comparaciones entre valores de las características y no en sus magnitudes,
+    lo que hace que la escala de las características no afecte a su rendimiento.
 \end{itemize}
 
 \subsubsection{Cáculo de \textit{features} durante la predicción.} Para comprender bien este
@@ -396,7 +428,7 @@ mencionadas anteriormente:
     exitosas en las últimas cinco \textit{builds}, cuando el algoritmo predice que la \textit{build}
     propuesta pasará, se salta la ejecución de la \textit{build} y se asume que el algoritmo ha
     acertado. Cuando el algoritmo predice que la \textit{build} propuesta fallará, la \textit{build}
-    se ejecutará y, podremos ver el resultado real de la \textit{CI}, considerando dicho valor.\\
+    se ejecutará y, podremos ver el resultado real de la CI, considerando dicho valor.\\
 
     \item \textbf{\textit{Performance Long} (PL)}: al igual que en el caso anterior, se calcula el
     porcentaje de \textit{builds} exitosas de todas las \textit{builds} propuestas hasta el momento.
@@ -437,4 +469,53 @@ mencionadas anteriormente:
 
 
 \subsection{Detalles técnicos de la implementación}
+En esta sección, se detallarán detalles técnicos de la implementación. Se explicarán las
+tecnologías empleadas y las características que estas nos proporcionan para la resolución
+de nuestro problema, los recursos que utilizamos para extraer las \textit{builds} de los
+repositorios, cómo se realiza la extracción de las \textit{features} a partir de estas
+\textit{builds} y, finalmente, la estructura básica de nuestro proyecto.
 
+\subsubsection{Tecnologías empleadas.}
+Para la resolución de nuestro problema, hemos decidido utilizar las siguientes tecnologías:
+
+\begin{itemize}
+    \item \textbf{\textit{Docker}}: es una plataforma de código abierto que nos permite crear, desplegar
+    y ejecutar aplicaciones en contenedores. Los contenedores son entornos de ejecución que por
+    lo general son ligeros y portátiles, conteniendo todo lo necesario para que una aplicación
+    pueda ejecutarse. En nuestra implementación, hemos creado tres contenedores: uno para albergar
+    la base de datos, otro para el servidor \textit{Flask} que contiene toda la lógica de nuestra
+    aplicación y, por último, un contenedor para el cliente \textit{Angular} donde residirá la
+    interfaz gráfica.\\
+
+    \item \textbf{\textit{Docker Compose}}: es una herramienta que nos permite definir y ejecutar
+    aplicaciones \textit{Docker} de múltiples contenedores. Nos permite orquestar la comunicación
+    y ejecución de los contenedores de forma sencilla y eficiente. Para ello, se utiliza un archivo
+    de configuración con extensión \textit{.yml} donde se definen los servicios, redes, puertos,
+    variables de entorno, volúmenes que se van a utilizar, etc. Concretamente, se han definido
+    tres servicios, uno para la aplicación \textit{Flask}, otro para \textit{Angular} y otro para
+    la base de datos.\\
+
+    \item \textbf{\textit{Flask}}: es un ``microframework'' de \textit{Python} para el desarrollo
+    de aplicaciones web. Se ha elegido porque es bastante ligero y fácil de usar, lo que nos
+    permite centrarnos en la lógica de la aplicación sin tener que preocuparnos de detalles de la
+    configuración. Además, nos permite una fácil gestión de las dependencias, algo fundamental
+    para el uso de librerías como \textit{Scikit-learn}, \textit{Pandas} o \textit{Matplotlib}.\\
+
+    \item \textbf{\textit{Angular}}: es un framework de desarrollo de aplicaciones web desarrollado
+    por \textit{Google}. Se ha elegido por su arquitectura modular y porque permite crear
+    interfaces reutilizables.\\
+
+    \item \textbf{\textit{PostgreSQL}}: es un sistema de gestión de bases de datos relacional
+    (RDBMS) de código abierto. Se ha elegido por su fiabilidad, escalabilidadd y por ser muy
+    eficiente en la gestión de grandes volúmenes de datos. En nuestro caso, únicamente es
+    usado para almacenar los valores de aquellos repositorios que han sido introducidos en la
+    aplicación.\\
+\end{itemize}
+
+
+
+\subsubsection{\textit{GitHub} REST API.}
+
+\subsubsection{Procesamiento de \textit{builds}.}
+
+\subsubsection{Estructura del proyecto.}
