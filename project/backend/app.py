@@ -5,6 +5,7 @@ from flask import Flask, request
 from concurrent.futures import ThreadPoolExecutor
 from models import db, RepositoryMetadata, init_db
 from sklearn.model_selection import train_test_split
+from flask_marshmallow import Marshmallow
 from utils import (
     get_repo_name, is_repository_url, 
     normalize_branch_name, is_csv_available, 
@@ -97,7 +98,7 @@ def predict():
         else:
             return 'We are still gathering information from your repository. Please check back in a few minutes.'
 
-@app.route('/repository_metadata/create', methods=['POST'])
+@app.route('/api/repository', methods=['POST'])
 def save_builds():
 
     if request.method == 'POST':
@@ -112,7 +113,7 @@ def save_builds():
             # Search the repository in the database
             repository_metadata = RepositoryMetadata.query.filter_by(repository=repo_name, branch=branch).first()
             if repository_metadata:
-                return 'The repository and branch you have entered already exist.'
+                return jsonify({'message': 'The repository and branch you have entered already exist.'}), 200
             else:
                 repo_metadata = RepositoryMetadata(
                     repository = repo_name,
@@ -131,6 +132,23 @@ def save_builds():
                 # Async call to fetch information from the specified repository and branch
                 executor.submit(process_repository, repository_url, branch, features_file, pickle_pattern)   
 
-                return 'Repository metadata created'
+            return jsonify({'message': 'The repository and branch have been saved successfully.'}), 201
         else:
-            return 'Invalid GitHub URL'
+            return jsonify({'error': 'Invalid repository URL'}), 400
+
+@app.route('/api/available-models', methods=['GET'])
+def available_models():
+    models = RepositoryMetadata.query.all()
+    schema = RepositoryMetadataSchema(many=True)
+
+    # Go throuh them and check if the last model which is created is available
+    for model in models:
+        available = is_model_available(model.pickle_pattern, NN_CLASSIFIER)
+        model.available = 'Yes' if available else 'No'
+
+    models = RepositoryMetadata.query.all()
+    result = schema.dump(models)
+    if models:
+        return jsonify(result), 200
+    else:
+        return jsonify({'message': 'No models available.'}), 200
