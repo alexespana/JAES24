@@ -10,7 +10,7 @@ Finalmente, procederemos a explicar detalles técnicos de la implementación, co
 y recursos empleados, el procedimiento de extracción de datos, el entorno de ejecución, etc. En
 los siguientes apartados se describe con detalle cada uno de estos puntos.
 
-\subsection{Construcción del modelo}
+\subsection{Construcción del modelo} \label{sec:model_construction}
 
 El Aprendizaje Automático (\textit{Machine Learning, ML})
 es un campo de la Inteligencia Artificial que se centra en desarrollar algoritmos y modelos que
@@ -466,7 +466,72 @@ mencionadas anteriormente:
 \end{figure}
 
 \subsection{Interfaz gráfica}
+En nuestro proyecto, hemos implementado una interfaz gráfica simple que permite a los usuarios
+interactuar con la aplicación de forma intuitiva y sencilla, reduciendo así la interacción a
+bajo nivel con la aplicación. La interfaz se ha desarrollado con \textit{Angular}, un framework
+de desarrollo de aplicaciones web desarrollado por \textit{Google}. La interfaz consta de dos
+partes fundamentales, por un lado, un formulario que permite a los usuarios introducir la URL
+de un repositorio concreto de \textit{GitHub} y la rama sobre la que desea predecir, y por otro
+lado, una tabla que muestra los datos de cada uno de los repositorios indicando si se encuentran
+disponibles sus modelos de predicción o no. \\
 
+Cuando un usuario introduce la URL de un repositorio y la rama sobre la que desea predecir,
+nuestra aplicación internamente realiza los siguientes pasos:
+
+\begin{enumerate}
+    \item Comprueba que la URL tiene un formato válido de acuerdo a las URLs de \textit{GitHub}.\\
+    \item Comprueba si el repositorio y rama introducidos ya eran conocidos anteriormente por la
+    aplicación. Si estos se encuentran en la base de datos, se devuelve un mensaje informativo y
+    se detiene la ejecución. Si el repositorio no existe en la aplicación, se crea la estructura
+    de directorios necesaria para el almacenamiento de los datos relativos a ese repositorio:
+    \textit{builds}, \textit{features}, \textit{modelos}, \textit{gráficos de evaluación}, etc.\\
+    \item Si se continúa con la ejecución, se procede a la extracción de las \textit{builds} del 
+    repositorio.\\
+    \item Una vez se han extraído las \textit{builds}, se procede automáticamente a la extracción
+    de \textit{features} a partir de estas \textit{builds}.\\
+    \item Finalmente, se procede automáticamente al entrenamiento de los modelos de acuerdo a las
+    \textit{features} seleccionadas en nuestro enfoque. Esto genera unos modelos de predicción
+    listos para predecir.\\
+\end{enumerate}
+
+Es importante mencionar que, todos los pasos anteriormente descritos se realizan de forma
+asíncrona, es decir, el usuario no tiene que esperar a que se complete un paso para poder seguir
+con el siguiente. Esto ofrece la posibilidad de introducir varios repositorios a analizar de
+forma simultánea. Además, cuando se ha realizado la extracción de \textit{features}, el programa
+genera automáticamente los modelos de predicción para todos los algoritmos de clasificación
+estudiados en la Sección \ref{sec:model_construction}. Esto hace que el usuario no tenga que
+preocuparse de seleccionar un algoritmo de clasificación en concreto, ya que la aplicación
+automáticamente generará el modelo asociado.\\
+
+\noindent A continuación, se muestra el formulario de entrada:
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.3]{images/input-form.pdf}
+    \caption{Formulario de entrada.}
+    \label{fig:input_form}
+\end{figure}
+
+Como es lógico, la extracción de las \textit{builds}, las \textit{features} y el entrenamiento
+de los modelos, puede llevar un tiempo considerable. Este depende de la cantidad de \textit{builds}
+a extraer y de la semántica de cada una de ellas, es decir, del tipo de evento que las origina
+y la complejidad interna de cada una. No es similar extraer \textit{builds} originadas por un 
+\textit{pull request}, que probablemente contenga mayor número de \textit{commits} y archivos 
+modificados, que extraer \textit{builds} originadas por un \textit{push} simple. Por lo tanto,
+se ha diseñado una pequeña tabla que recoge información sobre el estado de cada uno de los
+repositorios introducidos. En ella, se muestra el nombre del repositorio, la rama sobre la que
+se desea predecir, el archivo donde se almacenan las \textit{features} del repositorio, el
+patrón del nombre que seguirán los modelos generados y, la última y más importante, si el modelo
+se encuentra disponible o no.\\
+
+\noindent A continuación, se muestra la tabla de repositorios:
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.3]{images/available-models.pdf}
+    \caption{Tabla de repositorios disponibles y el estado de sus modelos.}
+    \label{fig:available_models}
+\end{figure}
 
 \subsection{Detalles técnicos de la implementación}
 En esta sección, se detallarán detalles técnicos de la implementación. Se explicarán las
