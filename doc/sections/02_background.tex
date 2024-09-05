@@ -87,9 +87,9 @@ La mayoría de estudios utilizan catacteríticas extraídas directamente de la b
 TravisTorrent \cite{6}, sin embargo, estas características no son las mejores para predecir
 \textit{builds} que fallan, es decir, \textit{builds failures}. Algunos enfoques \cite{6,7}
 hacen uso de características basadas en la \textit{build} actual, la \textit{build} anterior y
-el histórico ligado a todas las ejecuciones de \textit{builds} anteriores. Hassan et al. \cite{7}
-fue el primer estudio en utilizar técnicas de \textit{Machine Learning} para predecir el resultado
-de CI. En su estudio, utilizó características basadas en la \textit{build} actual y la
+el histórico ligado a todas las ejecuciones de \textit{builds} anteriores. El primer estudio en
+utilizar técnicas de \textit{Machine Learning} para predecir el resultado de CI fue realizado por
+Hassan et al. \cite{7}. En su estudio, utilizó características basadas en la \textit{build} actual y la
 anterior, para la \textit{build} anterior usó:
 
 \begin{itemize}
@@ -138,15 +138,15 @@ primeros \textit{build failures} \cite{2}, ya que estos dependen mucho del resul
 \textit{build} anterior y, por definición, estarán siempre precedidos por una \textit{build}
 exitosa.\\
 
-Los \textit{build failures} pueden categorizarse en una serie de tipos. \textit{Rausch et al.}
-\cite{13} muestra una categorización de las \textit{build failures} según el tipo de error
-que las origina, identificándose un total de 14 categorías. En el estudio se demostró que más
+Los \textit{build failures} pueden categorizarse en una serie de tipos. Se ha identificado un
+total de 14 categorías de build failures, clasificadas según el tipo de error que las origina
+\cite{13}. En el estudio se demostró que más
 del 80\% de los errores se producían en la fase de ejecución de pruebas o \textit{tests}. En
 el estudio se pretende identificar las causas que originan los \textit{build failures}, para lo
-que usan 16 métricas de la literatura y descubren lo siguiente:
+que se usan $16$ métricas de la literatura y se descubre lo siguiente:
 
 \begin{itemize}
-      \item Respaldan la hipótesis de que los \textit{build failures} pueden aumentar con la 
+      \item Se respalda la hipótesis de que los \textit{build failures} pueden aumentar con la 
       complejidad de los cambios.
       \item Cambios objetivamente insignificantes pueden romper la \textit{build}.
       \item Hay poca evidencia de que la fecha y hora de un cambio tenga un aspecto negativo o
@@ -154,7 +154,7 @@ que usan 16 métricas de la literatura y descubren lo siguiente:
       \item Los autores que \textit{commitean} menos frecuentemente tienden a causar menos
       \textit{build failures}.
       \item Normalmente, las \textit{builds} lanzadas a través de \textit{pull requests} fallan
-      más frecuentemente que las lanzadas por cambios directamente subidos a través de
+      con mayor frecuencia que las lanzadas por cambios directamente subidos a través de
       \textit{push} a la rama principal.
       \item No existe evidencia que demuestre que trabajar en paralelo a un \textit{pull request}
       afecte al resultado de la \textit{build}.
@@ -194,7 +194,7 @@ encontraron que la aplicación de CI mejoraba notablemente los procesos de desar
 internos en las empresas, sin embargo, se destaca la necesidad de evaluar las consecuencias de
 aplicar este tipo de desarrollo desde una perspectiva del cliente. El hecho de actualizar a los
 clientes a entregas continuas es un obstáculo importante ya que pueden existir acuerdos previos,
-y renegociar dichos acuerdos conlleva un riesgo de perder clientes y causar inestabilidad en la
+y renegociar dichos acuerdos conlleva el riesgo de perder clientes y causar inestabilidad en la
 empresa. En el estudio se ha observado la necesidad de adoptar prácticas de CI para
 mejorar los procesos de desarrollo \textit{software} en las empresas, sin embargo, estas se
 enfrentan a desafíos comunes en su implementación:
@@ -214,14 +214,14 @@ enfrentan a desafíos comunes en su implementación:
 \end{enumerate}
 
 En \cite{17} se presenta un estudio en el que se preguntó a trabajadores de la empresa
-\textit{Atlassian} sobre sus percepciones sobre los fallos de CI. Entre sus trabajadores,
+\textit{Atlassian} sobre sus percepciones sobre los fallos de CI. Entre los trabajadores,
 una gran mayoría (46\%) consideraba como muy o extremadamente difícil resolver los fallos de
 CI, una minoría (13\%) consideraba que no era difícil resolverlos, y el resto calificó
-la complejidad como moderada. Además, comentan que los fallos de CI pueden afectar tanto
-al flujo de trabajo individual como a la empresa. Los trabajadores notan que estos fallos pueden
+la complejidad como moderada. Además, comentaban que los fallos de CI podían afectar tanto
+al flujo de trabajo individual como a la empresa. Los trabajadores notaban que estos fallos podían
 aumentar el tiempo de trabajo e incluso interrumpir el flujo de desarrollo. Otro impacto posible
 es la reducción de la productividad, ya que alguien tiene que dedicar tiempo a investigar por qué
-falló la \textit{build} y solucionarlo. Este tipo de problemas pueden ocasionar que las revisiones
+falló la \textit{build} y solucionarlo. Este tipo de problemas puede ocasionar que las revisiones
 o las correcciones rápidas tarden más tiempo de lo esperado, poniendo en peligro el tiempo de
 lanzamiento (\textit{release}). Además, se menciona que factores técnicos como humanos desempeñan
 un papel fundamental en la adopción de CI.\\
@@ -253,7 +253,7 @@ umbrales asignados a cada métrica. Dicha combinación de métricas-umbrales est
 operadores lógicos. Todas las muestras generadas en la solución son evaluadas usando dos
 objetivos: maximizar la tasa de verdaderos positivos y, minimizar la tasa de falsos positivos.
 En cada iteración se van cambiando los operadores, generando nuevas soluciones, hasta llegar a
-una condiciones de parada y devolviendo la solución óptima. En el estudio encontraron que
+una condición de parada y devolviendo la solución óptima. En el estudio encontraron que
 características como el tamaño del equipo, la información de la última \textit{build} o el tipo
 de archivos cambiados, pueden indicar el potencial fallo de una \textit{build}. A pesar de
 obtener buenos resultados, solo se centran en 10 proyectos de lenguajes Java y Ruby, haciendo
@@ -275,9 +275,9 @@ Su teoría parte de dos hipótesis principales:
       consecutivamente después de otra \textit{build} fallida.
 \end{itemize}
 
-Teniendo en cuenta estas dos hipótesis, tenemos que si la primera es cierta, al saltarse todas
+Teniendo en cuenta estas dos hipótesis encontramos que, si la primera es cierta, al saltarse todas
 aquellas \textit{builds} que se predigan como exitosas, se reducirá el coste considerablemente.
-Si la segunda es cierta, entonces si se predice que las \textit{builds} subsecuentes a una
+En caso de que la segunda sea cierta, entonces si se predice que las \textit{builds} subsecuentes a una
 \textit{build} fallida también fallarán, se predecirán correctamente una buena parte de las
 \textit{builds} fallidas. En el estudio se introduce por primera vez el término de \textit{first
 failures}, que hace referencia a las primeras \textit{builds} que fallan en una subsecuencia de
@@ -351,7 +351,7 @@ Continuando con el orden cronológico del estado del arte, Saidani et al. \cite{
 predictor que utiliza Redes Neuronales Recurrentes (\textit{RNN}) basadas en Memoria a Largo
 Plazo (\textit{LSTM}). Su estudio se realiza como es habitual con diez proyectos de código
 abierto que usan el sistema de CI de \textit{Travis CI}, sumando un total de 91330
-\textit{builds}.Estos revelan que este tipo de técnicas ofrecen mejores resultados
+\textit{builds}. Estos revelan que este tipo de técnicas ofrecen mejores resultados
 que las de \textit{Machine Learning}, obteniendo mejor rendimiento en términos de \textit{AUC},
 \textit{F1-Score} y \textit{accuracy} cuando se trata de validación entre proyectos. En \cite{6}
 se propone una nueva solución en la que se usa un predictor que es dependiente del histórico de
@@ -363,7 +363,7 @@ Sin embargo, en el estudio, solo se tiene en cuenta el estudio \cite{7} comentad
 obviando todas las implementaciones posteriores y teniendo una clara amenaza a la validez del
 mismo. Además, dada la arquitectura presentada, podemos apreciar que para la extracción de
 \textit{features}, se utiliza un parseador de \textit{HTML} con \textit{Jsoup} y \textit{Selenium},
-lo cuál hace poca duradera el enfoque, ya que está fuertemente acoplado a la estructura
+lo cuál hace poco duradero el enfoque, ya que está fuertemente acoplado a la estructura
 \textit{HTML} de \textit{GitHub} y sus cambios. \\
 
 Jin et al. \cite{4} propone un nuevo predictor, \textit{PreciseBuildSkip}, que mejora el ahorro
