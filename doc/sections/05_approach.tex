@@ -472,8 +472,8 @@ mencionadas anteriormente:
 En esta sección, se detallarán detalles técnicos de la implementación. Se explicarán las
 tecnologías empleadas y las características que estas nos proporcionan para la resolución
 de nuestro problema, los recursos que utilizamos para extraer las \textit{builds} de los
-repositorios, cómo se realiza la extracción de las \textit{features} a partir de estas
-\textit{builds} y, finalmente, la estructura básica de nuestro proyecto.
+repositorios y, finalmente, cómo se realiza la extracción de las \textit{features} a partir de
+estas \textit{builds}.
 
 \subsubsection{Tecnologías empleadas.}
 Para la resolución de nuestro problema, hemos decidido utilizar las siguientes tecnologías:
@@ -512,10 +512,113 @@ Para la resolución de nuestro problema, hemos decidido utilizar las siguientes 
     aplicación.\\
 \end{itemize}
 
-
-
 \subsubsection{\textit{GitHub} REST API.}
+La \textit{GitHub} REST API \cite{20} es una interfaz de programación de aplicaciones (API) que permite a
+los desarrolladores interactuar de forma programática con los servicios de \textit{GitHub}. Esta
+API da un soporte completo para realizar operaciones como:
+
+\begin{itemize}
+	\item \textbf{Gestión de repositorios}: crear, modificar, y eliminar repositorios.\\
+	\item \textbf{Administración de \textit{issues} y \textit{pull requests}}: crear, modificar, comentar,
+    y cerrar \textit{issues} o \textit{pull requests}.\\
+	\item \textbf{Gestión de usuarios y organizaciones}: obtener información de usuarios, modificar
+    ajustes de la cuenta, manejar miembros de organizaciones o 	equipos de trabajo, etc.\\
+	\item \textbf{Automatización de flujos de trabajo}: permite la integración de \textit{GitHub} con otras
+    aplicaciones y servicios, permitiendo lanzar flujos de trabajo de forma automática.
+\end{itemize}
+
+
+Todas estas operaciones lógicamente se podrán realizar siempre y cuando los usuarios estén
+correctamente autenticados y tengan los permisos necesarios sobre los recursos sobre los que desea
+realizar la operación.\\
+
+En nuestra solución, hemos realizado peticiones a esta API a través del uso de la librería
+\textit{requests} de \textit{Python}. Esta nos proporciona todo lo necesario para realizar
+peticiones HTTP de forma sencilla y eficiente. Además, para permitir un mayor número de peticiones
+por minuto a esta API, hemos utilizado un \textit{token} de autenticación, que va incluido en la
+cabecera de cada petición que realizamos.\\
+
+\begin{table}[H]
+    \centering
+    \caption{\textit{\textit{\textit{Endpoints} de GitHub API REST usados}}.}
+    \label{tab:API_endpoints}
+
+    \begin{tabular}{|>{\centering\arraybackslash}m{11cm}|>{\centering\arraybackslash}m{5cm}|} % Encabezados centrados
+        \hline
+        \textbf{\textit{Endpoint}} & \textbf{Descripción} \\
+        \hline
+    \end{tabular}
+    \begin{tabular}{|>{\raggedright\arraybackslash}m{11cm}|>{\raggedright\arraybackslash}m{5cm}|} % Contenido alineado a la izquierda en la esquina superior
+        \hline
+        \texttt{https://api.github.com/repos/OWNER/REPO/pulls} & Lista todos los \textit{pull requests} de un repositorio específico.\\
+        \hline
+        \texttt{https://api.github.com/repos/OWNER/REPO/pulls/PULL\_NUMBER} & Lista los detalles de un \textit{pull request} dado su identificador numérico.\\
+        \hline
+        \texttt{https://api.github.com/repos/OWNER/REPO/pulls/PULL\_NUMBER/commits} & Lista los \textit{commits} de un \textit{pull} request concreto.\\
+        \hline
+        \texttt{https://api.github.com/repos/OWNER/REPO/pulls/PULL\_NUMBER/files} & Lista los archivos modificados en un \textit{pull request} concreto.\\
+        \hline         
+        \texttt{https://api.github.com/repos/OWNER/REPO/actions/runs} & Lista todas las \textit{builds} ejecutadas en un repositorio.\\
+        \hline
+        \texttt{https://api.github.com/repos/OWNER/REPO/actions/runs/RUN\_ID} & Lista una \textit{build} específica dado su \textit{run id}.\\
+        \hline
+        \texttt{https://api.github.com/repos/OWNER/REPO/commits/COMMIT\_SHA} & Lista un \textit{commit} específico dado su valor SHA. \\
+        \hline
+        % Añade más filas según sea necesario
+    \end{tabular}
+\end{table}
+
+En la Tabla \ref{tab:API_endpoints}, se muestran todos los \textit{endpoints} de la API de
+\textit{GitHub} que hemos utilizado en nuestra implementación. Si nos fijamos, existen partes
+en las urls que están marcadas con \texttt{OWNER}, \texttt{REPO}, \texttt{PULL\_NUMBER},
+\texttt{RUN\_ID} y \texttt{COMMIT\_SHA}. Estos valores son parámetros que se deben sustituir por
+los valores reales de los recursos sobre los que se quiere realizar la operación y que significan
+lo siguiente: \texttt{OWNER}, nombre del propietario del repositorio, ya sea una persona o una
+organización; \texttt{REPO}, nombre del repositorio del que se quiere obtener información;
+\texttt{PULL\_NUMBER}, número identificador de un \textit{pull request}; \texttt{RUN\_ID},
+identificador numérico de una \textit{build}; \texttt{COMMIT\_SHA}, valor SHA de un
+\textit{commit}.\\
+
+Obtener todas las \textit{builds} que se han ejecutado en un repositorio es una tarea que puede
+parecer sencilla, ya que tenemos el quinto \textit{endpoint} que se muestra en la Tabla
+\ref{tab:API_endpoints}, sin embargo, no es tan trivial como parece. Existen algunas restricciones
+como el límite máximo de resultados que la API puede devolver, el número de peticiones por minuto
+que se pueden realizar, la paginación de los resultados, etc., que hacen este proceso más
+complejo. En nuestra implementación, se utiliza lo que se denomina un \textit{fine-grained
+personal access token}, que nos permite aumentar el número de peticiones por minuto a la API.
+Además, se ha implementado paginación para realizar las peticiones, ya que únicamente se pueden
+obtener un máximo de $100$ \textit{builds} por página y, además, al llegar a un límite de $1000$
+\textit{builds}, la API no permite obtener más \textit{builds} de forma directa. Finalmente, se
+ha considerado la posibilidad de que \textit{GitHub} nos deniegue el acceso a la API por superar
+el límite diario de peticiones, para lo cual guardamos el estado de ejecución del programa, para
+reintentar pasado un tiempo definido la misma petición.
 
 \subsubsection{Procesamiento de \textit{builds}.}
+El procesamiento de las \textit{builds} es el paso en el que se extraen las \textit{features} de
+cada una de las \textit{builds} extraídas en el paso anterior. Para ello, una vez las
+\textit{builds} han sido extraídas del repositorio, estas se encuentran organizadas en un formato
+JSON y por ficheros correspondientes a cada uno de los meses en los que se han ejecutado. Por
+ejemplo, para un proyecto llamado \textit{junit5}, sus \textit{builds} quedarían organizadas de la
+siguiente forma:
 
-\subsubsection{Estructura del proyecto.}
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.8]{images/Builds junit5.pdf}
+    \caption{Organización de las \textit{builds} de un proyecto.}
+    \label{fig:builds_junit5}
+\end{figure}
+
+Como vemos, por cada mes en el que se han ejecutado \textit{builds}, se ha creado un fichero
+JSON conteniendo la información de todas las \textit{builds} ejecutadas en ese mes. Además, por
+formato y organización, cada archivo está nombrado con el día de inicio y fin del mes concreto
+al que pertenece.\\
+
+A pesar de tener extraída la información de las \textit{builds}, muchos de los datos necesarios
+para el cálculo de algunas \textit{features} no se encuentran disponibles directamente en la
+información extraída. \textit{Features} como el  número de \textit{commits} (NC), el número de
+archivos modificados (FC), el número de líneas de código modificadas (LC), el número de líneas de
+código de \textit{test} modificadas (LT), el número de archivos añadidos (FA), el número de
+archivos modificados (FM), el número de archivos eliminados (FR), el número de líneas de código
+eliminadas (LR), el número de líneas de código añadidas (LA), si se han escrito pruebas unitarias
+(UT) o el tiempo transcurrido entre \textit{commits} de una misma \textit{build} (CD), son
+necesarias inferirlas a partir de la información que se tiene.\\
