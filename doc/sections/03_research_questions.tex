@@ -2,7 +2,7 @@
 En un estudio de carácter exploratorio como el que se propone, definir unos objetivos y preguntas
 de investigación se convierte en una tarea fundamental para la correcta orientación del trabajo.
 En este sentido, los objetivos nos permiten establecer una serie de metas a alcanzar, mientras
-que las preguntas de investigación nos ayudan a centrar el estudio en aspectos concretos que
+que, las preguntas de investigación nos ayudan a centrar el estudio en aspectos concretos que
 queremos responder. Los objetivos de la investigación son los siguientes:
 
 \begin{itemize}
@@ -20,19 +20,19 @@ queremos responder. Los objetivos de la investigación son los siguientes:
           obtenidos.
 \end{itemize}
 
-Antes de introducir las preguntas de investigación, es importante definir el significado de
-algunos términos clave para evaluar el desempeño de los modelos de predicción y qué tan bien
-están desempeñando su función. Cuando un algoritmo realiza una predicción, podemos encontrarnos
+Antes de introducir las preguntas de investigación, es importante definir el significado de 
+algunos términos clave para evaluar el desempeño de los modelos de predicción y la eficacia con
+la que cumplen su función. Cuando un algoritmo realiza una predicción, podemos encontrarnos
 con cuatro casos:
 
 \begin{itemize}
-      \item \textit{True Positive (TP)}: el modelo predice que la \textit{build} fallará y
-            efectivamente falla.\\
-      \item \textit{True Negative (TN)}: el modelo predice que la \textit{build} pasará y
-            efectivamente pasa.\\
-      \item \textit{False Positive (FP)}: el modelo predice que la \textit{build} fallará pero
+      \item \textit{True Positive (TP)}: el modelo predice que la \textit{build} fallará y,
+            efectivamente, falla.\\
+      \item \textit{True Negative (TN)}: el modelo predice que la \textit{build} pasará y,
+            efectivamente, pasa.\\
+      \item \textit{False Positive (FP)}: el modelo predice que la \textit{build} fallará, pero
             en realidad pasa.\\
-      \item \textit{False Negative (FN)}: el modelo predice que la \textit{build} pasará pero
+      \item \textit{False Negative (FN)}: el modelo predice que la \textit{build} pasará, pero
             en realidad falla.
 \end{itemize}
 
@@ -49,18 +49,18 @@ Con estos conceptos en mente, podemos definir las siguientes métricas de evalua
 \begin{itemize}
     \item \textit{Accuracy}: mide la proporción de predicciones correctas realizadas por el
           modelo. Se calcula como la suma de los verdaderos positivos y verdaderos negativos
-          dividida por el total de predicciones realizadas.
+          dividida entre el total de predicciones realizadas.
             \begin{equation}
                   ACC = \frac{TP + TN}{TP + TN + FP + FN}
             \end{equation}
     \item \textit{Precision}: mide la proporción de predicciones positivas correctas realizadas
-          por el modelo. Se calcula como la suma de los verdaderos positivos dividida por la
+          por el modelo. Se calcula como la suma de los verdaderos positivos dividida entre la
           suma de los verdaderos positivos y falsos positivos.
             \begin{equation}
                   P = \frac{TP}{TP + FP}
             \end{equation}
     \item \textit{Recall}: mide la proporción de instancias positivas que el modelo predice
-          correctamente. Se calcula como la suma de los verdaderos positivos dividida por la
+          correctamente. Se calcula como la suma de los verdaderos positivos dividida entre la
           suma de los verdaderos positivos y falsos negativos.
             \begin{equation}
                   R = \frac{TP}{TP + FN}
@@ -76,7 +76,7 @@ aspectos específicos del tema a investigar, evitando que nos desviemos hacia ot
 relevantes. Ayudan a clarificar qué se quiere lograr con la investigación y guían en el proceso
 metodológico, es decir, dependiendo de las preguntas de investigación, podremos determinar
 si necesitamos una metodología cuantitativa, cualitativa o mixta. Además, estas tienen una
-función estructutural, ya que las secciones y capítulos siempre irán horientados a responder
+función estructutural, ya que las secciones y capítulos siempre irán orientados a responder
 estas preguntas. A continuación se detallan las preguntas de investigación junto a las
 métricas usadas para su evaluación:
 
@@ -98,7 +98,7 @@ métricas usadas para su evaluación:
           \end{itemize}
 \end{itemize}
 
-Finalmente, mencionar que en un modelo entrenado con una serie de \textit{features}, los
+Finalmente, queda mencionar que en un modelo entrenado con una serie de \textit{features}, los
 coeficientes del modelo representan la relación cuantitativa entre cada \textit{feature} y la
 variable objetivo, en este caso, la predicción del resultado de la \textit{build}. Por tanto, los
 coeficientes indican cómo se espera que cambie el valor de la predicción cuando la correspondiente

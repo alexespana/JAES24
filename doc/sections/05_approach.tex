@@ -1,9 +1,9 @@
 \section{Detalles de la propuesta}
 En este apartado, se dará una visión global del contenido y funcionamiento de nuestra propuesta.
-Se realizará una descripción completa de nuestro enfoque, desde los conceptos de \textit{IA}
+Se realizará una descripción completa de nuestro enfoque, desde los conceptos de IA
 empleados hasta las herramientas y tecnologías empleadas para su resolución. En primer lugar, se
-detallará cómo se ha realizado la generación de los modelos, los tipos utilizados y sus
-características, así como cualquier concepto relacionado. Posteriormente, se describirán las
+detalla cómo se ha realizado la generación de los modelos, los tipos utilizados y sus
+características, así como cualquier concepto relacionado. Posteriormente, se describen las
 técnicas empleadas para evaluar el rendimiento de los modelos. Continuaremos con la explicación
 en detalle de las \textit{features} empleadas, qué representan y cómo se ha realizado su cálculo.
 Finalmente, procederemos a explicar detalles técnicos de la implementación, como las tecnologías
@@ -12,10 +12,10 @@ los siguientes apartados se describe con detalle cada uno de estos puntos.
 
 \subsection{Construcción del modelo} \label{sec:model_construction}
 
-El Aprendizaje Automático (\textit{Machine Learning, ML})
+El Aprendizaje Automático (\textit{Machine Learning}, ML)
 es un campo de la Inteligencia Artificial que se centra en desarrollar algoritmos y modelos que
 sean capaces de aprender y mejorar su desempeño en tareas específicas a partir de datos, sin la
-necesidad de ser explícitamente programadas. Los sistemas de \textit{ML} identifican patrones en
+necesidad de ser explícitamente programadas. Los sistemas de ML identifican patrones en
 los datos y utilizan estos patrones para hacer predicciones o tomar decisiones sobre los datos.
 Podemos encontrarnos con dos tipos de aprendizaje automático:
 
@@ -34,7 +34,7 @@ Podemos encontrarnos con dos tipos de aprendizaje automático:
 
 Teniendo esto en cuenta, nos encontramos claramente ante un problema de aprendizaje supervisado,
 ya que tenemos las características propias de cada \textit{build}, que sería el conjunto de
-entrada que proporcionamos al modelo, y por otro lado, los resultados de las ejecuciones, que
+entrada que proporcionamos al modelo y, por otro lado, los resultados de las ejecuciones, que
 conformarían las etiquetas o valores objetivo de nuestro problema.\\
 
 Para poder responder a la pregunta de investigación \textbf{PI-1}, debemos explorar los
@@ -53,39 +53,39 @@ Por lo tanto, dado que nos encontramos con este tipo de problema, se ha decidido
 algoritmos de clasificación supervisada, entre los que nos encontramos:
 
 \begin{enumerate}
-    \item \textbf{Árboles de Decisión (\textit{Decision Trees, DT})}. Dividen el conjunto de datos
+    \item \textbf{Árboles de Decisión (\textit{Decision Trees}, DT)}. Dividen el conjunto de datos
     en subconjuntos más pequeños y más simples, basándose en ciertas características o condiciones,
     que están representadas en un gráfico similar a un árbol. Cada nodo interno del árbol
     representa una característica (o atributo), y cada rama representa el resultado de la
     partición de los datos en función de esa característica. Las hojas del árbol contienen las
     etiquetas o valores objetivo.\\
-    \item \textbf{Bosques Aleatorios (\textit{Random Forest, RF})}. Es un algoritmo de aprendizaje
+    \item \textbf{Bosques Aleatorios (\textit{Random Forest}, RF)}. Es un algoritmo de aprendizaje
     supervisado que crea un conjunto de árboles de decisión durante el entrenamiento y realiza
     la predicción promediando las predicciones de cada árbol individual. Es una técnica de
     ensamblaje que combina múltiples modelos de aprendizaje para mejorar la precisión y la
     estabilidad del modelo.\\
-    \item \textbf{Regresión Logística (\textit{Logistic Regression, LR})}. Es un algoritmo de
+    \item \textbf{Regresión Logística (\textit{Logistic Regression}, LR)}. Es un algoritmo de
     clasificación que se utiliza para predecir la probabilidad de que una variable dependiente
     pertenezca a una categoría particular. Aunque se llama regresión, en realidad es un algoritmo
     de clasificación binaria.\\
-    \item \textbf{Máquinas de Soporte Vectorial (\textit{Support Vector Machines, SVM})}. Es un
+    \item \textbf{Máquinas de Soporte Vectorial (\textit{Support Vector Machines}, SVM)}. Es un
     algoritmo de clasificación que busca encontrar el hiperplano que mejor divide un conjunto de
     datos en dos clases. El hiperplano es la línea que maximiza el margen entre las dos clases. Si
     los datos no son linealmente separables, se puede utilizar un truco matemático llamado
     \textit{kernel trick} para transformar los datos en un espacio de mayor dimensión donde sí
     sean separables.\\
-    \item \textbf{Vecinos más Cercanos (\textit{K-Nearest Neighbors, KNN})}. Es un algoritmo de
+    \item \textbf{Vecinos más Cercanos (\textit{K-Nearest Neighbors}, KNN)}. Es un algoritmo de
     clasificación que se basa en la idea de que los puntos de datos que son similares deben
     pertenecer a la misma clase. Para predecir la clase de un nuevo punto de datos, el algoritmo
     busca los $k$ puntos de datos más cercanos en el conjunto de entrenamiento y asigna la clase
     más común entre esos vecinos.\\
-    \item \textbf{Redes Neuronales (\textit{Neural Networks, NN})}. Son un conjunto de algoritmos
+    \item \textbf{Redes Neuronales (\textit{Neural Networks}, NN)}. Son un conjunto de algoritmos
     de aprendizaje automático que intentan imitar el funcionamiento del cerebro humano. Consiste en
     una red de nodos interconectados, llamados neuronas, que se organizan en capas. Está formada
-    por una capa de entrada, una  varias capas ocultas y una capa de salida. Cada nodo está
+    por una capa de entrada, una o varias capas ocultas y una capa de salida. Cada nodo está
     conectado a los demás y tiene su propia ponderación y umbral asociados. Concretamente, se ha
     utilizado un Perceptrón Multicapa, que es un tipo de red neuronal utilizado para tareas de
-    clasificación. Cada neurona en un \textit{MLP} se conecta a las de la capa anterior con pesos
+    clasificación. Cada neurona en un MLP se conecta a las de la capa anterior con pesos
     y aplica una función de activación a su suma ponderada.
 \end{enumerate}
 
