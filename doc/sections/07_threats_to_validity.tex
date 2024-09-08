@@ -1,1 +1,83 @@
 \section{Amenazas a la validez}
+En cualquier trabajo de investigación, es crucial reconocer los factores que pueden comprometer
+la validez de los resultados obtenidos. Estos factores, comúnmente conocidos como amenazas a la
+validez, representan posibles fuentes de sesgo o error que pueden afectar a la precisión y
+generalización de las conclusiones del estudio. Al identificar y discutir estas amenazas, no solo
+hacemos más transparente nuestro estudio, sino que también proporcionamos una base crítica para
+que los lectores evalúen la fiabilidad de los hallazgos. En este apartado se examinan las
+principales amenazas que podrían afectar a la validez de constructo, validez interna y validez
+externa del presente estudio, con el fin de contextualizar los resultados y ofrecer una
+interpretación más solida y matizada.\\
+
+Concretamente, se consideran tres tipos de amenazas a la validez: validez de constructo, validez
+interna y validez externa. A continuación, explicamos en qué consiste cada una de ellas:
+
+\begin{itemize}
+    \item \textbf{Validez de Constructo}: son aquellos factores que ponen en duda si el estudio
+    está realmente midiendo lo que pretende medir, es decir, si los conceptos definidos en la
+    investigación son evaluados correctamente. Estas amenazas pueden afectar la interpretación
+    de los resultados en relación con los constructos teóricos.\\
+
+    \item \textbf{Validez Interna}: se refiere a las amenazas que pueden afectar la relación
+    causal entre las variables independientes y dependientes. En otras palabras, se trata de
+    factores que pueden distorsionar la interpretación de la relación entre las variables
+    manipuladas y las variables de respuesta.\\
+
+    \item \textbf{Validez Externa}: son aquellas amenazas que pueden afectar la generalización de
+    los resultados obtenidos en el estudio. Estas amenazas se refieren a la capacidad de
+    generalizar los resultados a otros contextos, poblaciones o situaciones distintas a las
+    evaluadas en el estudio.
+\end{itemize}
+
+A continuación, se detallan las amenazas a la validez identificadas en el presente estudio y se
+discuten las estrategias utilizadas para mitigar su impacto en los resultados obtenidos.
+
+\subsection{Validez de Constructo}
+En nuestro estudio, utilizamos métricas como indicadores para representar la cantidad de
+\textit{build failures} detectados en CI. Algunas métricas, como el \textit{accuracy}, puede ser
+engañosa en conjuntos de datos que están muy desbalanceados, ya que puede reflejar un alto
+valor incluso cuando el modelo falla en identificar los \textit{build failures}. Para mitigar
+este problema, hemos utilizado métricas como \textit{precision}, \textit{recall} y \textit{F1-score},
+que proporcionan una visión más equilibrada del rendimiento del modelo. Además, debemos
+recordar que nuestro enfoque persigue reducir el costo computacional asociado a la CI mediante
+la detección de \textit{build failures}, sin embargo, no hemos considerado valores 
+económicos específicos asociadas a la ejecución de CI o a la reparación de errores en el conjunto
+específico que hemos usado para la experimentación.
+
+
+\subsection{Validez Interna}
+Para salvaguardar la validez interna, hemos realizado pruebas exhaustivas de nuestros
+procedimientos de evaluación en subconjutos del \textit{dataset} empleado durante el desarrollo.
+Nuestro análisis puede estar influenciado por información incorrecta en nuestro dataset. Por
+esto, siempre hemos considerado ramas principales de los proyectos, filtrando así
+valores atípicos más comunes en ramas secundarias o de desarrollo. Además, nuestros resultados
+podrían verse afectados por pruebas inestables (\textit{flaky tests}) que causan fallos
+de manera errática o falsa.\\
+
+Por último, la validación cruzada cronológica ha sido empleada para preservar el orden temporal
+de los datos y evitar que futuras \textit{builds} se incluyan en el conjunto de entrenamiento. Esto
+garantiza que los resultados sean más representativos de cómo el modelo funcionaría en
+condiciones reales, donde el entrenamiento se realiza con datos pasados y la prueba se realiza
+con datos futuros. Aunque la validación cruzada cronológica es una alternativa adecuada a la
+validación cruzada estándar, la decisión de utilizar este enfoque ha sido alineada con el objetivo
+de evaluar las técnicas en un escenario que respete la secuencia temporal.
+
+
+\subsection{Validez Externa}
+Para aumentar la validez externa, hemos seleccionado $20$ proyectos ampliamente conocidos de
+\textit{GitHub}. Todos son proyectos de código abierto y que tienen un número considerable de
+\textit{forks} y estrellas. Como dato objetivo, el proyecto que menos \textit{forks} y estrellas
+tiene es \textit{coherence}, de \textit{Oracle}, con $70$ \textit{forks} y $427$ estrellas, y el
+que más, \textit{spring-boot}, con $40,500$ \textit{forks} y $74,400$ estrellas. Los proyectos
+seleccionados son todos proyectos \textit{Java}, ya que necesitamos hacer una evaluación justa
+con otras técnicas. A pesar de que este lenguaje de programación es uno de los más utilizados 
+en la actualidad, lenguajes de programación diferentes pueden tener hábitos de Integración
+Continua distintos, pudiendo provocar resultados ligeramente diferentes a los obtenidos en este
+estudio. \\
+
+Finalmente, haber elegido proyectos de empresas muy conocidas puede haber limitado la
+diversidad del conjunto de datos, ya que estos proyectos suelen seguir procesos de desarrollo de
+\textit{software} altamente estructurados. Esto podría no reflejar la realidad de proyectos más
+pequeños o menos formales, pudiendo limitar la aplicabilidad de los resultados a repositorios
+menos formales o con menos recursos.
+

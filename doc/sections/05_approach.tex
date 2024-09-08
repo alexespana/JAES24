@@ -169,8 +169,8 @@ reproducibilidad, que garantiza que los resultados sean reproducibles.
 
 \subsection{Evaluación del modelo}
 La evaluación de los modelos de clasificación tiene como objetivo medir y analizar el rendimiento
-de los modelos en la tarea de clasificación. Esta evaluación permite determinar qué tan bien el
-modelo puede predecir o clasificar nuevas instancias no vistas anteriormente, es decir, basándose
+de los modelos en la tarea de clasificación. Esta evaluación permite identificar con qué precisión
+el modelo puede predecir o clasificar nuevas instancias no vistas anteriormente, es decir, basándose
 en un conjunto de datos de prueba. Para realizar la evaluación de los modelos en nuestro problema,
 hemos seguido los siguientes pasos:
 
@@ -184,7 +184,7 @@ hemos seguido los siguientes pasos:
     sobre una instancia antigua basándonos en \textit{builds} que se hayan ejecutado recientemente.
     Por lo tanto, en nuestro caso se ha dividido el conjunto de datos igualmente en dos partes,
     pero siendo el conjunto de entrenamiento más antiguo en su conjunto que el conjunto de prueba,
-    que es más reciente. Por ejemplo si se dividen los datos de entrenamiento y test en un 80\% y
+    que es más reciente. Por ejemplo, si se dividen los datos de entrenamiento y test en un 80\% y
     20\% respectivamente, el conjunto de entrenamiento contendrá el 80\% de las \textit{builds}
     más antiguas, mientras que el de prueba contendrá el 20\% de \textit{builds} más reciente.\\
     \item \textbf{Predicción}: una vez entrenado el modelo con el conjunto de entrenamiento, se
@@ -220,7 +220,7 @@ utilizando para el entrenamiento instancias más recientes. Es decir, en nuestro
 una dependencia temporal y, por tanto, la secuencia y el orden de los datos son críticos para la
 validez de las predicciones. Los resultados y características de las \textit{builds} están
 influenciados por las \textit{builds} anteriores. Esto se debe a que cada \textit{build} puede
-depender de cambios de código, configuraciones, y otros factores que se acumulen o evolucionen
+depender de cambios de código, configuraciones y otros factores que se acumulen o evolucionen
 con el tiempo. Por lo tanto, si se permite que las \textit{builds} más antiguas predigan utilizando
 información de \textit{builds} más recientes, se introduciría un sesgo temporal que no reflejaría
 el comportamiento real del sistema. Además de esto, usar datos de \textit{builds} futuras para
@@ -250,7 +250,7 @@ A continuación, se presenta de forma gráfica el funcionamiento de nuestro algo
 \subsubsection{Umbral de decisión.}
 La evaluación de los modelos a distintos grados de sensibilidad es especialmente relevante cuando
 se consideran problemas de clasificación con clases desbalanceadas o cuando el costo de los
-errores varían entre clases. En el problema que nos ocupa, se dan ambas condiciones: por lo
+errores varía entre clases. En el problema que nos ocupa, se dan ambas condiciones: por lo
 general, el número de \textit{builds} exitosas es muy superior al de \textit{builds} fallidas y,
 el costo de predecir un falso negativo no es el mismo que el de predecir un falso positivo. Al
 ajustar la sensibilidad del modelo, se balancean las tasas de verdaderos positivos
@@ -328,9 +328,9 @@ de las \textit{features}, hay que tener en cuenta lo siguiente:
         \cline{2-3}
         & \textit{Performance Long} (PL) & La proporción de \textit{builds} exitosas de todas las \textit{builds} previas.\\
         \cline{2-3}
-        & \textit{Time Frequency (TF)} & El intervalo de tiempo en horas desde la última \textit{build}.\\
+        & \textit{Time Frequency} (TF) & El intervalo de tiempo en horas desde la última \textit{build}.\\
         \cline{2-3}
-        & \textit{Failure Distance (FD)} & El número de \textit{builds} exitosas desde la última \textit{build} fallida.\\
+        & \textit{Failure Distance} (FD) & El número de \textit{builds} exitosas desde la última \textit{build} fallida.\\
         \cline{2-3}
         & \textit{Week Day} (WD) & El día de la semana en el que se ha ejecutado la \textit{build}.\\
         \cline{2-3}
@@ -397,7 +397,7 @@ debemos tener en cuenta los siguientes aspectos:
 
         \item Normalización \textit{Z-score} o estandarización: esta técnica transforma los
         valores de un conjunto de datos a una distribución con media $0$ y desviación estándar $1$.
-        Para ello, se resta a cada valor la media de los datos y se divide por la desviación
+        Para ello, se resta a cada valor la media de los datos y se divide entre la desviación
         estándar. La fórmula para la normalización \textit{Z-score} es la siguiente:
 
         \begin{equation}
@@ -408,10 +408,10 @@ debemos tener en cuenta los siguientes aspectos:
     En nuestro caso, hemos utilizado un tipo de normalización u otro en función del modelo de
     clasificación que estemos utilizando. Por ejemplo, hemos usado normalización \textit{Min-Max}
     para $k$ vecinos más cercanos y para redes neuronales, y normalización \textit{Z-score} para
-    regresión logística y máquinas de soporte vectorial. Además, añadir que no se ha utilizado
-    normalización en árboles de decisión ni en bosques aleatorios, ya que estos modelos crean
-    reglas basadas en comparaciones entre valores de las características y no en sus magnitudes,
-    lo que hace que la escala de las características no afecte a su rendimiento.
+    regresión logística y máquinas de soporte vectorial. Además, queda añadir que no se ha
+    utilizado normalización en árboles de decisión ni en bosques aleatorios, ya que estos modelos
+    crean reglas basadas en comparaciones entre valores de las características y no en sus
+    magnitudes, lo que hace que la escala de las características no afecte a su rendimiento.
 \end{itemize}
 
 \subsubsection{Cáculo de \textit{features} durante la predicción.} Para comprender bien este
@@ -484,13 +484,13 @@ nuestra aplicación internamente realiza los siguientes pasos:
     aplicación. Si estos se encuentran en la base de datos, se devuelve un mensaje informativo y
     se detiene la ejecución. Si el repositorio no existe en la aplicación, se crea la estructura
     de directorios necesaria para el almacenamiento de los datos relativos a ese repositorio:
-    \textit{builds}, \textit{features}, \textit{modelos}, \textit{gráficos de evaluación}, etc.\\
+    \textit{builds}, \textit{features}, modelos, gráficos de evaluación, etc.\\
     \item Si se continúa con la ejecución, se procede a la extracción de las \textit{builds} del 
     repositorio.\\
     \item Una vez se han extraído las \textit{builds}, se procede automáticamente a la extracción
     de \textit{features} a partir de estas \textit{builds}.\\
-    \item Finalmente, se procede automáticamente al entrenamiento de los modelos de acuerdo a las
-    \textit{features} seleccionadas en nuestro enfoque. Esto genera unos modelos de predicción
+    \item Finalmente, se procede de forma automática al entrenamiento de los modelos de acuerdo a
+    las \textit{features} seleccionadas en nuestro enfoque. Esto genera unos modelos de predicción
     listos para predecir.\\
 \end{enumerate}
 
@@ -534,7 +534,7 @@ se encuentra disponible o no.\\
 \end{figure}
 
 \subsection{Detalles técnicos de la implementación}
-En esta sección, se detallarán detalles técnicos de la implementación. Se explicarán las
+En esta sección, se muestran detalles técnicos de la implementación. Se explican las
 tecnologías empleadas y las características que estas nos proporcionan para la resolución
 de nuestro problema, los recursos que utilizamos para extraer las \textit{builds} de los
 repositorios y, finalmente, cómo se realiza la extracción de las \textit{features} a partir de
@@ -572,7 +572,7 @@ Para la resolución de nuestro problema, hemos decidido utilizar las siguientes 
 
     \item \textbf{\textit{PostgreSQL}}: es un sistema de gestión de bases de datos relacional
     (RDBMS) de código abierto. Se ha elegido por su fiabilidad, escalabilidadd y por ser muy
-    eficiente en la gestión de grandes volúmenes de datos. En nuestro caso, únicamente es
+    eficiente en la gestión de grandes volúmenes de datos. En nuestro caso, únicamente se ha
     usado para almacenar los valores de aquellos repositorios que han sido introducidos en la
     aplicación.\\
 \end{itemize}
@@ -583,8 +583,8 @@ los desarrolladores interactuar de forma programática con los servicios de \tex
 API da un soporte completo para realizar operaciones como:
 
 \begin{itemize}
-	\item \textbf{Gestión de repositorios}: crear, modificar, y eliminar repositorios.\\
-	\item \textbf{Administración de \textit{issues} y \textit{pull requests}}: crear, modificar, comentar,
+	\item \textbf{Gestión de repositorios}: crear, modificar y eliminar repositorios.\\
+	\item \textbf{Administración de \textit{issues} y \textit{pull requests}}: crear, modificar, comentar
     y cerrar \textit{issues} o \textit{pull requests}.\\
 	\item \textbf{Gestión de usuarios y organizaciones}: obtener información de usuarios, modificar
     ajustes de la cuenta, manejar miembros de organizaciones o 	equipos de trabajo, etc.\\
@@ -593,9 +593,9 @@ API da un soporte completo para realizar operaciones como:
 \end{itemize}
 
 
-Todas estas operaciones lógicamente se podrán realizar siempre y cuando los usuarios estén
-correctamente autenticados y tengan los permisos necesarios sobre los recursos sobre los que desea
-realizar la operación.\\
+Todas estas operaciones, lógicamente, se podrán realizar siempre y cuando los usuarios estén
+correctamente autenticados y tengan los permisos necesarios en relación con los recursos sobre los
+que desea realizar la operación.\\
 
 En nuestra solución, hemos realizado peticiones a esta API a través del uso de la librería
 \textit{requests} de \textit{Python}. Esta nos proporciona todo lo necesario para realizar

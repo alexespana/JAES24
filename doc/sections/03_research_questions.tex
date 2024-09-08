@@ -52,22 +52,26 @@ Con estos conceptos en mente, podemos definir las siguientes métricas de evalua
           dividida entre el total de predicciones realizadas.
             \begin{equation}
                   ACC = \frac{TP + TN}{TP + TN + FP + FN}
+                  \label{eq:accuracy}
             \end{equation}
     \item \textit{Precision}: mide la proporción de predicciones positivas correctas realizadas
           por el modelo. Se calcula como la suma de los verdaderos positivos dividida entre la
           suma de los verdaderos positivos y falsos positivos.
             \begin{equation}
                   P = \frac{TP}{TP + FP}
+                  \label{eq:precision}
             \end{equation}
     \item \textit{Recall}: mide la proporción de instancias positivas que el modelo predice
           correctamente. Se calcula como la suma de los verdaderos positivos dividida entre la
           suma de los verdaderos positivos y falsos negativos.
             \begin{equation}
                   R = \frac{TP}{TP + FN}
+                  \label{eq:recall}
             \end{equation}
     \item \textit{F1-score}: es la media armónica de \textit{precision} y \textit{recall}.
             \begin{equation}
                   F1 = 2 \times \frac{P \times R}{P + R}
+                  \label{eq:f1_score}
             \end{equation}
 \end{itemize}
 
