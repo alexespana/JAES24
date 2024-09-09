@@ -1,1 +1,38 @@
 \section{Conclusiones y trabajos futuros}
+En este trabajo, hemos propuesto y evaluado \textit{JAES24}, en enfoque novedoso para ahorrar
+costos en la Integración Continua (CI) al omitir \textit{builds} que se predice que pasarán.
+Nuestro diseño de \textit{JAES24} parte de la hipóstesis de que el momento en que se realiza una
+contribución a un proyecto de \textit{software} influye en la probabilidad de que la \textit{build}
+pase la CI o no, además, parte también de que el desgranado de los tipos de cambios que se
+realizan en una \textit{build} son especialmente importantes para la predicción de su resultado.
+Estudiamos la relación entre el momento de la contribución y el resultado de la CI, y encontramos
+evidencia que las apoya. Se ha descubierto que: el día, la hora o el tiempo entre contribuciones
+influye en la probabilidad de predecir un \textit{build failure}. Además, otros cambios como el
+número de líneas añadidas o eliminadas, que desgranan el tipo de cambio producido, también tienen
+un impacto positivo en la predicción de \textit{build failures}.\\
+
+Con este conjunto de características, \textit{JAES24} mejoró el \textit{precision} y el
+\textit{recall} de \textit{SmartBuildSkip}. Además, se trata de un algoritmo personalizable, ya
+que puede configurarse con distintos umbrales de decisión en función de las necesidades de los
+desarrolladores y, además, cuenta con dos versiones: una más conservadora y otra más agresiva.
+La variante conservadora, \textit{JAES24-Within}, por lo general, detecta un menor número de
+\textit{build failures} pero mantiene unos niveles de \textit{precision} más elevados. Por otro
+lado, la variante más agresiva, \textit{JAES24-Without}, detecta un mayor número de \textit{build
+failures}, sin embargo, mantiene unos niveles de \textit{precision} menores, lo cuál significa que
+a menudo predice como \textit{build failures} \textit{builds} que en realidad pasan (falsos positivos). Desde
+el punto de vista del desarrollador, que \textit{JAES24} incluya además, una interfaz gráfica, hace
+que sea mucho más fácil de usar y entender, convirtiéndose en un enfoque único y más accesible
+para los desarrolladores. \textit{JAES24} proporciona una estrategia novedosa que complementa las
+técnicas existentes para ahorrar costos en CI, omitiendo construcciones con cambios que no afectan
+al código.\\
+
+En el futuro, trabajaremos extendiendo la funcionalidad de \textit{JAES24} para que pueda
+realizar análisis estáticos en función del contenido de los cambios realizados en el código
+fuente de las \textit{builds}. Igualmente, otros tipos de análisis como el dinámico
+pueden ser considerados. Además, lo haremos extensible a otros lenguajes de programación, estudiando los hábitos
+de CI que puedan darse en proyectos \textit{software} de distinta naturaleza. Podría
+realizarse un código totalmente funcional, que permitiera a los desarrolladores integrar
+\textit{JAES24} en su ciclo de desarrollo \textit{software}, permitiendo que puedan hacer
+predicciones basándose en su repositorio local. Finalmente, se realizarán cambios en la
+interfaz gráfica para hacerla más flexible y accesible a los desarrolladores, incluyendo nuevas
+funcionalidades y mejorando la usabilidad.\\
