@@ -157,8 +157,8 @@ conjunto de datos de prueba.\\
     parte de \textit{test}. Cuando este proceso se ha realizado con cada uno de los \textit{folds},
     habrá un total de $10$ resultados disponibles, calculando así posteriormente la media de cada
     una de las métricas obtenidas en cada \textit{fold}. Este proceso se ha realizado
-    iterativamente para un total de $6$ umbrales de decisión, que van desde el $0$ hasta el $1$,
-    con incrementos de $0.2$.\\
+    con un umbral de decisión de $0.5$, con el fin de contrastar los resultados obtenidos para el 
+    conjunto de entrenamiento y prueba.\\
 \end{enumerate}
 
 \subsubsection{Métricas de evaluación}
@@ -210,7 +210,7 @@ estos serían las etiquetas predichas por el algoritmo.
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.9\textwidth]{images/Folds predictions.pdf}
-    \caption{Acumulación de predicciones en \textit{key-fold cross-validation}}
+    \caption{Acumulación de predicciones en \textit{key-fold cross-validation}.}
     \label{fig:fold-predictions}
 \end{figure}
 
@@ -220,6 +220,276 @@ de ellas. Podemos observar, además, que el primer \textit{fold} no se usa para 
 usándose únicamente para entrenamiento. Sucede algo similar con el último \textit{fold}, que no
 es usado para entrenamiento y se usa únicamente para \textit{test}.\\
 
- 
-
 \subsection{Resultados}
+En este apartado, se presentan los resultados obtenidos del estudio y se responde a las
+preguntas de investigación planteadas en la Sección \ref{sec:research_questions}. A continuación,
+se presentan con detalle las pruebas realizadas y el análisis de los resultados obtenidos.\\
+
+\begin{mdframed}[backgroundcolor=gray!10,linewidth=0.5pt,roundcorner=1pt]
+    \textbf{PI-1:} ¿Qué algoritmo de predicción produce los mejores resultados en la predicción automática del re-
+    sultado de la integración continua?
+\end{mdframed}
+
+Para responder a esta pregunta de investigación, se ha realizado un análisis comparativo entre
+las tres técnicas presentadas, cada uno de los cuales ha sido evaluado en los dos escenarios
+posibles: proyectos difíciles y proyectos normales. 
+
+\subsubsection{Escenario 1 - Proyectos difíciles.} Evaluación comparativa de las tres técnicas
+mediante entrenamiento y prueba, $80\%$ y $20\%$ respectivamente, con un umbral de decisión
+de $0.5$, el valor por defecto.\\
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{images/Difficult projects: Recall.pdf}
+    \caption{\textit{Recall} en proyectos difíciles}
+    \label{fig:train_test_recall_difficult_projects}
+\end{figure}
+
+En la figura \ref{fig:train_test_recall_difficult_projects}, podemos observar los valores de
+\textit{recall} obtenidos en los proyectos difíciles. Como vemos, no se han obtenido valores
+demasiado altos, sin embargo, en prácticamente todos los proyectos, \textit{JAES24} ha obtenido
+mejores resultados que \textit{SmartBuildSkip}. A simple vista, parece que \textit{JAES24-Without}
+ofrece mejores valores de \textit{recall}, ya que en proyectos como \textit{coherence},
+\textit{hertzbeat} o \textit{NewPipe} es el único que consigue predecir algún \textit{build
+failure}. En otros, como en \textit{ozone} y \textit{spring-session}, es superior. Observando
+la gráfica, podemos ver que en \textit{avro} se obtienen mejores valores para \textit{SBS-Within},
+esto puede deberse a que en este proyecto las \textit{features} que usa \textit{SBS-Within} 
+sean más significativas que en otros proyectos, aunque por lo general, \textit{JAES24-Without}
+es el que mejor se comporta.\\
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{images/Difficult projects: Precision.pdf}
+    \caption{\textit{Precision} en proyectos difíciles.}
+    \label{fig:train_test_precision_difficult_projects}
+\end{figure}
+
+En este caso, tenemos que el \textit{precision} es bastante bajo para las tres técnicas, sin
+embargo, \textit{JAES24} ofrece resultados ligeramente superiores que \textit{SmartBuildSkip}.
+Actualmente, el modelo se equivoca prediciendo como \textit{build failures} una cantidad elevada
+de \textit{builds} que en realidad no lo son. Debemos recordar que, en este escenario, el modelo
+tiene muy pocas instancias positivas de las que aprender, haciendo este proceso de aprendizaje
+más complicado. Aún así, \textit{JAES24-Without} es el que mejor se comporta en este aspecto.\\
+
+Con el fin de validar los resultados obtenidos y clarificar cuál de las técnicas de \textit{JAES24}
+es la que mejor se comporta, vamos a realizar las mismas gráficas usando \textbf{\textit{key-fold
+cross-validation}} en lugar de \textit{train} y \textit{test}. Esta validación cruzada ha sido
+realizada usando un umbral de decisión de $0.5$ y $11$ particiones.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{images/Difficult projects: Recall key-fold cross validation.pdf}
+    \caption{\textit{Recall} en proyectos difíciles usando validación cruzada.}
+    \label{fig:key-fold_recall_difficult_projects}
+\end{figure}
+
+Tras realizar validación cruzada sobre nuestro \textit{dataset} de proyectos difíciles, podemos
+observar en la Figura \ref{fig:key-fold_recall_difficult_projects} que los resultados varían
+ligeramente a los anteriores. En este caso, se observa claramente que \textit{JAES24-Within} es
+la que mejor resultados obtiene en cuando a \textit{recall}. Ambas técnicas, tanto
+\textit{JAES24-Within} como \textit{JAES24-Without}, ofrecen mejores resultados que
+\textit{SmartBuildSkip}. Si comparamos únicamente las técnicas de \textit{JAES24}, podemos deducir
+que \textit{JAES24-Within} se comporta mejor en este \textit{dataset} de proyectos porque
+probablemente exista un mayor número de \textit{build failures} de forma consecutiva, lo cual no
+quiere decir que \textit{JAES24-Without} sea peor, simplemente que en este contexto, \textit{JAES24-Within}
+se comporta mejor.\\
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{images/Difficult projects: Precision key-fold cross validation.pdf}
+    \caption{\textit{Precision} en proyectos difíciles usando validación cruzada.}
+    \label{fig:key-fold_precision_difficult_projects}
+\end{figure}
+
+En la Figura \ref{fig:key-fold_precision_difficult_projects}, podemos observar resultados algo
+contradictorios, ya que en algunos casos \textit{SBS-Within} ofrece mejores resultados para
+el \textit{precision}, mientras que en otros, \textit{JAES24-Without} es el que mejor se comporta.
+Sin embargo, en más de la mitad de los proyectos seleccionados, \textit{JAES24-Without} es el que
+mejores resultados ofrece para \textit{precision}.\\
+
+Si nos fijamos, a pesar de que \textit{JAES24-Within} ofrezca mejores resultados en \textit{recall},
+\textit{JAES24-Without} es el que mejor se comporta en \textit{precision}. Esto nos parece
+adelantar dos variantes del algoritmo muy interesantes:
+
+\begin{itemize}
+    \item \textit{JAES24-Within}: se trata de una técnica más agresiva en identificar fallos. Si
+    el desarrollador quiere asegurarse de predecir la mayor cantidad de fallos (aunque esto
+    implique ejecutar \textit{builds} que en realidad no fallarán), esta técnica es la más
+    adecuada.\\
+
+    \item \textit{JAES24-Without}: es una técnica más conservadora, pero cuando predice un fallo,
+    es más probable que sea correcto. Si el objetivo del desarrollador es minimizar falsas
+    alarmas y tener predicciones más confiables, esta técnica es más adecuada.
+\end{itemize}
+
+La decisión de utilizar una u otra técnica dependerá de las necesidades del proyecto y del
+desarrollador. Si la prioridad es detectar el mayor número de fallos posibles, incluso a costa de
+más falsos positivos, \textit{JAES24-Within} es la mejor opción. Si la prioridad es minimizar
+falsas alarmas y asegurar que cuando se predice un fallo, realmente ocurra, entonces
+\textit{JAES24-Without} es la mejor opción.\\
+
+
+\subsubsection{Escenario 2 - Proyectos normales.} Evaluación comparativa de las tres técnicas
+mediante entrenamiento y prueba, $80\%$ y $20\%$ respectivamente, con un umbral de decisión
+de $0.5$, el valor por defecto.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{images/Normal projects: Recall.pdf}
+    \caption{Recall en proyectos normales.}
+    \label{fig:train_test_recall_normal_projects}
+\end{figure}
+
+Observando los resultados obtenidos en la Figura \ref{fig:train_test_recall_normal_projects},
+vemos que las tres técnicas se comportan mucho mejor que en el Escenario $1$. En este caso,
+los modelos tienen una mayor cantidad de \textit{build failures} sobre los que aprender, lo que
+hace más sencillo el proceso de aprendizaje. A simple vista, parece que \textit{JAES24-Without}
+es la que mejor resultados ofrece, siendo superior el \textit{recall} en ocho de los diez
+proyectos evaluados. En el proyecto \textit{skywalking}, vemos que \textit{JAES24-Within} ofrece
+mejores resultados y, en el proyecto \textit{bookkeeper}, el que mayor número de \textit{build
+failures} posee, \textit{SBS-Within} es el que mejor se comporta. Por lo general, vemos que
+\textit{JAES24}, en cualquiera de sus dos variantes, ofrece mejores resultados que
+\textit{SmartBuildSkip}.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.7\textwidth]{images/Normal projects: Precision.pdf}
+    \caption{Precision en proyectos normales.}
+    \label{fig:train_test_precision_normal_projects}
+\end{figure}
+
+Analizando los resultados de \textit{precision} obtenidos en la Figura
+\ref{fig:train_test_precision_normal_projects}, vemos que \textit{JAES24-Without} es el que mejor
+resultados ofrece, siendo superior en seis de los diez proyectos evaluados. En otros casos, como
+en \textit{spring-security}, \textit{nifi} e \textit{incubator-streampark} es superior 
+\textit{JAES24-Within}. Este comportamiento indica que \textit{JAES24-Within} es más preciso
+a la hora de predecir \textit{build failures} en los proyectos mencionados anteriormente, es decir, 
+predice menor cantidad de falsos positivos que \textit{JAES24-Without}.\\
+
+Con el objetivo de evaluar el rendimiento de manera más robusta y confiable, se ha realizado
+\textit{key-fold cross-validation} también en este escenario. Esto evita el sobreajuste y
+garantiza que los resultados no dependan únicamente de una partición específica del conjunto
+de datos. Para realizar una comparación justa entre escenarios, se ha realizado con el mismo
+umbral de decisión, $0.5$ y, con $11$ particiones.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{images/Normal projects: Recall key-fold cross validation.pdf}
+    \caption{Recall en proyectos normales usando validación cruzada.}
+    \label{fig:key-fold_recall_normal_projects}
+\end{figure}
+
+Observando los resultados obtenidos en la Figura \ref{fig:key-fold_recall_normal_projects}, vemos
+que se obtienen resultados bastante superiores a \textit{SmartBuildSkip}, siendo este enfoque
+mucho más efectivo en escenarios donde el número de \textit{build features} es más elevado. Podemos
+ver claramente como en casi todos los proyectos (salvo uno) los valores de \textit{recall} de
+\textit{JAES24} superan a \textit{SmartBuildSkip}. Realizando una comparación entre las técnicas
+de \textit{JAES24}, en los seis primeros proyectos, \textit{JAES-Without} detecta mayor número
+de \textit{build failures}, mientras que en los cuatro restantes, \textit{JAES24-Within} ofrece
+mejores resultados.\\
+
+Esto nos vuelve a confirmar que la elección de una u otra técnica puede depender de los hábitos
+de \textit{CI} del proyecto. Si en el proyecto detectamos que normalmente se producen fallos
+de forma consecutiva, será más apropiado utilizar como técnica de predicción
+\textit{JAES24-Within}, ya que esta garantiza que al encontrar un primer fallo (\textit{first
+failure}), se prediga de forma automática que la siguiente \textit{build} no pasará. En cambio,
+si detectamos que normalmente los \textit{build failures} se producen de forma más aleatoria en
+el conjunto de \textit{builds}, será más apropiado utilizar \textit{JAES24-Without}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{images/Normal projects: Precision key-fold cross validation.pdf}
+    \caption{Precision en proyectos normales usando validación cruzada.}
+    \label{fig:key-fold_precision_normal_projects}
+\end{figure}
+
+Finalmente, en la Figura \ref{fig:key-fold_precision_normal_projects}, vemos que se produce una
+tendencia algo distinta a la observada en el Escenario $1$. En este caso, vemos que igualmente
+ambas técnicas superan a \textit{SmartBuildSkip}, sin embargo, \textit{JAES24-Within} es la que
+mejores resultados ofrece en cuanto a \textit{precision}, siendo superior en siete de los diez
+proyectos evaluados. Por lo tanto, tenemos que en este \textit{dataset} de proyectos normales, la
+técnica \textit{JAES24-Within} es más conservadora, ya que ofrece menos \textit{recall} a cambio
+de aumentar el \textit{precision} y, \textit{JAES24-Without} es más agresiva, ya que ofrece más
+\textit{recall} a cambio de disminuir el \textit{precision}.\\
+
+Los resultados obtenidos en este apartado confirman que las \textit{features} que capturan el
+\textbf{\textit{timing} en el que se quiere realizar la contribución} (\textit{Time Frequency},
+\textit{Week Day} y \textit{Day Hour)}, y las \textbf{\textit{features} que desgranan los cambios
+realizados} en la \textit{build} (\textit{Lines Added} y \textit{Lines Removed}) son más
+significativas que otras \textit{features} evaluadas en otras técnicas \cite{2}. Estas
+características ofrecen una mayor capacidad predictiva, lo que sugiere que el momento en el que
+se ejecuta la \textit{build} y el tipo de modificaciones introducidas tienen un impacto directo
+en la probabilidad de que se produzcan \textit{build failures}. Este hallazgo subraya la
+importancia de considerar no solo aspectos técnicos del código, sino también el contexto temporal
+y la naturaleza de los cambios realizados.\\
+
+\begin{mdframed}[backgroundcolor=gray!10,linewidth=0.5pt,roundcorner=1pt]
+    \textbf{PI-2:} ¿Qué características de las builds son más significativas en la predicción?
+\end{mdframed}
+
+Para responder a esta pregunta de investigación, hemos aplicado un enfoque basado en el análisis
+de importancia de características, utilizando dos algoritmos de clasificación diferentes:
+árboles de decisión y bosques aleatorios, que son los usados por las dos técnicas propuestas en
+este estudio, \textit{JAES24} y, \textit{SmartBuildSkip}, respectivamente. Para ello, hemos
+considerado el conjunto completo de \textit{features} disponibles de la Tabla \ref{tab:features}
+y, hemos calculado la importancia de cada una de ellas para cada proyecto. Posteriormente, hemos
+calculado la media de la importancia de cada \textit{feature} en cada algoritmo de clasificación,
+obteniendo así una visión general de cuáles son las \textit{features} más significativas en la
+predicción.\\
+
+\noindent A continuación, se presentan los valores medios de importancia de cada \textit{feature}
+para árboles de decisión:
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{images/Average features importance for decision tree.pdf}
+    \caption{Importancia de las \textit{features} en árboles de decisión.}
+    \label{fig:decision_tree_feature_importance}
+\end{figure}
+
+\noindent A continuación, se presentan los valores medios de importancia de cada \textit{feature}
+para bosques aleatorios:
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{images/Average features importance for random forest.pdf}
+    \caption{Importancia de las \textit{features} en bosques aleatorios.}
+    \label{fig:random_forest_feature_importance}
+\end{figure}
+
+\noindent Considerando todas las \textit{features} del conjunto presentado en la Tabla \ref{tab:features},
+observamos lo siguiente:
+
+\begin{itemize}
+    \item Cuando se realiza el entrenamiento del modelo, las \textit{features} que tienen relación
+    con el histórico de \textit{builds} ejecutadas anteriormente, como \textit{Performance short},
+    \textit{Failure Distance} y \textit{Performance Long}, tienen una importancia significativa
+    a la hora de predecir \textit{build failures}.\\
+
+    \item Las \textit{features} que describen el \textit{timing} en el que se realiza la
+    contribución como el \textit{Day Hour}, \textit{Time Frequency} y \textit{Week Day} tienen
+    una importancia significativa en la predicción de \textit{build failures}.\\
+
+    \item Las \textit{features} que describen los cambios realizados, como \textit{Lines changed}
+    y, otras que desgranan los cambios realizados en la \textit{build}, como \textit{Lines Added}
+    y \textit{Lines Removed}, son también importantes en la predicción de \textit{build failures}.
+\end{itemize}
+
+Cabe destacar que, apesar de que las \textit{features} que más importancia tienen a la hora de
+predecir \textit{build failures} son el PS, PL Y FD, estas \textit{features} no se han utilizado
+en nuestro enfoque. Esto se debe a que, en un caso de uso real, si nos encontramos utilizando
+un modelo predictivo para decidir si saltar o no una \textit{build}, estas \textit{features} no
+podrán calcularse de forma exacta, ya que no conocemos el resultado de aquellas \textit{builds}
+propuestas que se hayan predicho como \textit{pass}. En nuestra implementación, se ha realizado
+experimentación añadiendo este conjunto de \textit{features}, pero los resultados obtenidos eran
+francamente peores que los obtenidos sin ellas. El hecho de asumir que, cuando el algoritmo predice
+una \textit{build} propuesta como \textit{pass}, esta realmente lo será (Sección
+\ref{sec:features_used}), no ofrece garantías de que el modelo sea efectivo en un caso de uso
+real para la predicción.\\
+
+Finalmente, podemos concluir que, efectivamente, las \textit{features} PL, PS y FD son las que
+más influencia tienen a la hora de predecir \textit{build failures}, sin embargo, no son del
+todo aplicables a la hora de realizar una predicción en un caso de uso real. Por otro lado, vemos
+que \textit{features} que describen el \textit{timing} en el que se realiza la contribución y,
+las que describen los cambios realizados, son también importantes para la predicción, confirmando
+una vez más nuestra hipótesis inicial.
