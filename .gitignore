@@ -166,3 +166,12 @@ cython_debug/
 project/frontend/node_modules/
 project/frontend/dist/
 project/frontend/.angular/
+
+# Flask App
+project/backend/__pycache__/
+project/backend/AIModels
+project/backend/features
+
+# Any svg image
+*.svg
+

@@ -5,3 +5,7 @@ requests
 psycopg2-binary
 Flask-SQLAlchemy
 matplotlib
+marshmallow
+flask-marshmallow
+marshmallow-sqlalchemy
+flask-cors

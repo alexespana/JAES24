@@ -22,7 +22,7 @@ GET_COMMIT = 'https://api.github.com/repos/OWNER/REPO/commits/COMMIT_SHA'
 # Converter to obtain the time frequency in hours
 HOUR_CONVERTER = 3600
 # Time to retry the request in seconds
-RETRY_TIME = 60
+RETRY_TIME = 120
 
 # Model classifiers types
 DT_CLASSIFIER = 'Decision Tree'

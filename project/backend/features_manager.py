@@ -6,11 +6,10 @@ train the model and make predictions later on.
 import re
 import os
 import datetime
-import time
 import pandas as pd
 import json
 from typing import Tuple, Optional
-from model_manager import train_all
+from model_manager import train_all_models, train_and_evaluate_all_models
 from constants import HOUR_CONVERTER
 from github_manager import GithubManager
 from utils import get_owner, get_repo_name, get_builds_folder, get_features_folder
@@ -117,7 +116,7 @@ def get_build_pr_number(build: dict) -> Optional[int]:
 
     return pr_number
 
-def get_num_commits(build: dict, build_pr_number: int) -> int:
+def get_commits_info(build: dict, build_pr_number: int) -> Tuple[int, int]:
     """
     Calculate the number of commits in a build.
 
@@ -136,7 +135,15 @@ def get_num_commits(build: dict, build_pr_number: int) -> int:
     # Get the commits for this PR
     commits = github_manager.get_pull_request_commits(owner, repo_name, build_pr_number)
 
-    return len(commits)
+    # Calculate commit delay
+    initial_date = commits[0]['commit']['committer']['date']
+    final_date = commits[-1]['commit']['committer']['date']
+
+    # Delay in hours
+    commits_delay = round((datetime.datetime.strptime(final_date, "%Y-%m-%dT%H:%M:%SZ") - datetime.datetime.strptime(initial_date, "%Y-%m-%dT%H:%M:%SZ")).total_seconds() / HOUR_CONVERTER)
+
+    return len(commits), commits_delay
+
 
 def get_num_files_changed(pull_request_files: dict) -> Tuple[int, int, int, int]:
     """
@@ -194,7 +201,7 @@ def get_num_lines_changed(pull_request_files: dict) -> Tuple[int, int, int, int,
 
         file_name = file['filename'].lower()
         if 'test' in file_name or 'spec' in file_name:
-            test_lines_changed = file['changes']
+            test_lines_changed += file['changes']
         else:
             extensions_pattern = "|".join(re.escape(ext) for ext in extensions)
             regex = re.compile(r"\b" + extensions_pattern + r"\b")
@@ -307,7 +314,7 @@ def get_features(repo_name: str, branch: str, csv_file: str) -> None:
     builds_folder = get_builds_folder(repo_name, branch) 
     sorted_builds_files = sorted(os.listdir(builds_folder), reverse = True)
 
-    df = pd.DataFrame(columns=['ID', 'PS', 'PL', 'TF', 'NC', 'FC', 'FA', 'FM', 'FR', 'LC', 'LA', 'LR', 'LT', 'UT' ,'FD', 'WD', 'DH', 'outcome'])
+    df = pd.DataFrame(columns=['ID', 'PS', 'PL', 'TF', 'NC', 'FC', 'FA', 'FM', 'FR', 'LC', 'LA', 'LR', 'LT', 'UT' ,'FD', 'WD', 'DH', 'CD', 'outcome'])
 
     for file in sorted_builds_files:
         with open(builds_folder + file, 'r') as f:
@@ -317,7 +324,12 @@ def get_features(repo_name: str, branch: str, csv_file: str) -> None:
 
         # Extract the features
         for build in builds["workflow_runs"]:
-            build_id = build['id']            
+            build_id = build['id']
+
+            # Skip builds that were skipped or canceled
+            if(build['conclusion'] == 'skipped' or build['conclusion'] == 'cancelled'):
+                continue
+
             full_name = build['repository']['full_name']
             owner, repo_name = full_name.split('/')
             PS = get_performance_short(build_id, builds, id_to_index)
@@ -330,7 +342,7 @@ def get_features(repo_name: str, branch: str, csv_file: str) -> None:
 
             # Get the event type which triggered the build
             event_type = get_event_type(build)
-            
+
             if 'pull_request' in event_type:
                 build_pr_number = get_build_pr_number(build)
 
@@ -338,10 +350,10 @@ def get_features(repo_name: str, branch: str, csv_file: str) -> None:
                     continue
 
                 pr_files = github_manager.get_pull_request_files(owner, repo_name, build_pr_number)
-                NC = get_num_commits(build, build_pr_number)
-
-            elif event_type == 'push' or event_type == 'schedule' or event_type == 'dynamic':
+                NC, CD = get_commits_info(build, build_pr_number)
+            else:
                 NC = 1
+                CD = 0
                 sha = build['head_sha']
                 commit = github_manager.get_commit(owner, repo_name, sha)
                 pr_files = commit['files']
@@ -350,7 +362,7 @@ def get_features(repo_name: str, branch: str, csv_file: str) -> None:
             LC, LA, LR, LT, UT = get_num_lines_changed(pr_files)
 
             # Add CI build
-            df.loc[len(df.index)] = [build_id, PS, PL, TF, NC, FC, FA, FM, FR, LC, LA, LR, LT, UT, FD, WD, DH, outcome]
+            df.loc[len(df.index)] = [build_id, PS, PL, TF, NC, FC, FA, FM, FR, LC, LA, LR, LT, UT, FD, WD, DH, CD, outcome]
 
         # Save the features in a csv file or add them to an existing file
         try:
@@ -361,7 +373,7 @@ def get_features(repo_name: str, branch: str, csv_file: str) -> None:
 
         df = df.drop(df.index)
 
-def process_repository(repository_url: str, branch: str, features_file: str, pickle_pattern: str, evaluate: bool = False) -> None:
+def process_repository(repository_url: str, branch: str, features_file: str, pickle_pattern: str, evaluate: bool = False, with_accumulation: bool = False) -> None:
     owner = get_owner(repository_url)
     repo_name = get_repo_name(repository_url)
     
@@ -372,11 +384,14 @@ def process_repository(repository_url: str, branch: str, features_file: str, pic
     get_features(repo_name, branch, features_file)
 
     # Train all models with the features extracted
-    train_data = pd.read_csv(get_features_folder(repo_name, branch) + features_file)
-    train_data = train_data.drop(columns=['ID'])
+    features = pd.read_csv(get_features_folder(repo_name, branch) + features_file)
+    features = features.iloc[::-1]
+    features = features.drop(columns=['ID', 'PS', 'PL', 'FD', 'FA', 'FM', 'FR', 'UT', 'CD'])
     
-    train_all(train_data, pickle_pattern, evaluate)
-
+    if evaluate:
+        train_and_evaluate_all_models(features, pickle_pattern, with_accumulation)
+    else:
+        train_all_models(features, pickle_pattern)
 
 def get_event_type(build: dict) -> str:
     """
