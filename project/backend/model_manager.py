@@ -458,14 +458,20 @@ def k_fold_cross_validation(data: pd.DataFrame, pickle_pattern: str, k: int = 11
         file.write(print_model_metrics(NN_CLASSIFIER, *calculate_metrics(y_test_folds, predictions_nn, predictions_nn_prob)))
 
     if sensitivity_threshold is not None:
-        df = pd.DataFrame(columns=['sensitivity', 'recall_dt', 'recall_rf', 'recall_lr', 'recall_svm', 'recall_knn', 'recall_nn'])
+        df = pd.DataFrame(columns=['sensitivity', 'recall_dt', 'recall_rf', 'recall_lr', 'recall_svm', 'recall_knn', 'recall_nn', 'precision_dt', 'precision_rf', 'precision_lr', 'precision_svm', 'precision_knn', 'precision_nn'])
         df.loc[0] = [sensitivity_threshold, 
                      recall_score(y_test_folds, predictions_dt, pos_label=0, zero_division=0),
                      recall_score(y_test_folds, predictions_rf, pos_label=0, zero_division=0),
                      recall_score(y_test_folds, predictions_lr, pos_label=0, zero_division=0),
                      recall_score(y_test_folds, predictions_svm, pos_label=0, zero_division=0),
                      recall_score(y_test_folds, predictions_knn, pos_label=0, zero_division=0),
-                     recall_score(y_test_folds, predictions_nn, pos_label=0, zero_division=0)
+                     recall_score(y_test_folds, predictions_nn, pos_label=0, zero_division=0),
+                     precision_score(y_test_folds, predictions_dt, pos_label=0, zero_division=0),
+                     precision_score(y_test_folds, predictions_rf, pos_label=0, zero_division=0),
+                     precision_score(y_test_folds, predictions_lr, pos_label=0, zero_division=0),
+                     precision_score(y_test_folds, predictions_svm, pos_label=0, zero_division=0),
+                     precision_score(y_test_folds, predictions_knn, pos_label=0, zero_division=0),
+                     precision_score(y_test_folds, predictions_nn, pos_label=0, zero_division=0)
                     ]
         try:
             with open(AIMODELS_FOLDER + pickle_pattern + '/' + 'k-Fold Cross-Validation/Sensitivity/results.csv', 'x') as f:

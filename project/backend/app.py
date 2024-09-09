@@ -1,20 +1,26 @@
 import os
 import pandas as pd
 import pickle
-from flask import Flask, request
+from flask import Flask, request, jsonify
 from concurrent.futures import ThreadPoolExecutor
 from models import db, RepositoryMetadata, init_db
 from sklearn.model_selection import train_test_split
 from flask_marshmallow import Marshmallow
 from utils import (
-    get_repo_name, is_repository_url, 
-    normalize_branch_name, is_csv_available, 
+    get_repo_name, is_repository_url,
+    normalize_branch_name, is_csv_available,
     get_builds_folder, get_aimodels_folder
 )
 from model_manager import is_model_available, get_model_path
 from features_manager import  process_repository
+from flask_cors import CORS
+from schemas import RepositoryMetadataSchema
+from constants import NN_CLASSIFIER
 
 app = Flask(__name__)
+ma = Marshmallow(app)
+CORS(app)       # Do it more restrictive in production
+
 executor = ThreadPoolExecutor(max_workers=4)
 
 app.config["SQLALCHEMY_DATABASE_URI"] = 'postgresql://' + os.getenv('POSTGRES_USER') + ':' + os.getenv('POSTGRES_PASSWORD') + '@db:5432/' + os.getenv('POSTGRES_DB')
