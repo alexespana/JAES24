@@ -21,13 +21,13 @@ predicción y, por otro lado, las dos técnicas propuestas en este estudio, JAES
 se describen las tres técnicas a comparar:
 
 \begin{itemize}
-    \item \textbf{SBS-Within}: técnica propuesta en \textit{SmartBuildSkip} que utiliza bosques
+    \item \textbf{SBS-\textit{Within}}: técnica propuesta en \textit{SmartBuildSkip} que utiliza bosques
     aleatorios en su algoritmo de \textit{Machine Learning} para la predicción. Esta técnica
     tiene dos fases principales: una en la que el algoritmo predice de forma automática que
     la \textit{build} fallará, por encontrarse en una secuencia de \textit{build failures}, y
     otra en la que utiliza predicción mediante \textit{Machine Learning}.\\
 
-    \item \textbf{JAES24-Within}: técnica propuesta en este estudio que utiliza como modelo de
+    \item \textbf{JAES24-\textit{Within}}: técnica propuesta en este estudio que utiliza como modelo de
     ML áboles de decisión. El algoritmo de predicción se basa en la implementación propuesta de
     \textit{SmartBuildSkip}, pero modificando el conjunto de \textit{features} empleado: TF, NC,
     FC, LC, LA, LR, LT, WD y DH, el cual captura eventos temporales al realizar las \textit{builds}
@@ -35,7 +35,7 @@ se describen las tres técnicas a comparar:
     acumulación de \textit{features}, lo cual permite acumular cambios para la predicción cuando
     una \textit{build} es saltada por el algoritmo.\\
     
-    \item \textbf{JAES24-Without}: técnica propuesta en este estudio que utiliza como modelo de
+    \item \textbf{JAES24-\textit{Without}}: técnica propuesta en este estudio que utiliza como modelo de
     ML árboles de decisión. Este modelo emplea el mismo conjunto de \textit{features} descrito en
     el punto anterior, sin embargo, no utiliza como base la implementación realizada
     \textit{SmartBuildSkip}, por lo que no se realiza acumulación de valores en las \textit{features}
@@ -47,10 +47,10 @@ se describen las tres técnicas a comparar:
 Dependiendo del contexto sobre el que se realicen las predicciones, puede ser más adecuado
 utilizar una técnica u otra. Por ejemplo, si el proyecto sobre el que realizamos predicciones
 suele tener muchos \textit{build failures} de forma consecutiva, será más beneficioso utilizar
-las técnicas \textit{SBS-Within} o \textit{JAES24-Within}, ya que estas tienen una fase
+las técnicas SBS-\textit{Within} o JAES24-\textit{Within}, ya que estas tienen una fase
 en la predicción especialmente diseñada para detectar secuencias de \textit{build failures}. Por
 otro lado, si el proyecto tiene \textit{build failures} producidos más aleatoriamente a lo largo
-del proyecto, será más beneficioso utilizar la técnica \textit{JAES24-Without}, ya que esta no 
+del proyecto, será más beneficioso utilizar la técnica JAES24-\textit{Without}, ya que esta no 
 tiene en cuenta secuencias de \textit{build failures} en su algoritmo de predicción.\\
 
 Realizar una comparación entre estas tres técnicas nos da una visión más amplia de los
@@ -247,14 +247,14 @@ de $0.5$, el valor por defecto.\\
 
 En la figura \ref{fig:train_test_recall_difficult_projects}, podemos observar los valores de
 \textit{recall} obtenidos en los proyectos difíciles. Como vemos, no se han obtenido valores
-demasiado altos, sin embargo, en prácticamente todos los proyectos, \textit{JAES24} ha obtenido
-mejores resultados que \textit{SmartBuildSkip}. A simple vista, parece que \textit{JAES24-Without}
+demasiado altos, sin embargo, en prácticamente todos los proyectos, JAES24 ha obtenido
+mejores resultados que \textit{SmartBuildSkip}. A simple vista, parece que JAES24-\textit{Without}
 ofrece mejores valores de \textit{recall}, ya que en proyectos como \textit{coherence},
 \textit{hertzbeat} o \textit{NewPipe} es el único que consigue predecir algún \textit{build
 failure}. En otros, como en \textit{ozone} y \textit{spring-session}, es superior. Observando
-la gráfica, podemos ver que en \textit{avro} se obtienen mejores valores para \textit{SBS-Within},
-esto puede deberse a que en este proyecto las \textit{features} que usa \textit{SBS-Within} 
-sean más significativas que en otros proyectos, aunque por lo general, \textit{JAES24-Without}
+la gráfica, podemos ver que en \textit{avro} se obtienen mejores valores para SBS-\textit{Within},
+esto puede deberse a que en este proyecto las \textit{features} que usa SBS-\textit{Within} 
+sean más significativas que en otros proyectos, aunque por lo general, JAES24-\textit{Without}
 es el que mejor se comporta.\\
 
 \begin{figure}[H]
@@ -265,13 +265,13 @@ es el que mejor se comporta.\\
 \end{figure}
 
 En este caso, tenemos que el \textit{precision} es bastante bajo para las tres técnicas, sin
-embargo, \textit{JAES24} ofrece resultados ligeramente superiores que \textit{SmartBuildSkip}.
+embargo, JAES24 ofrece resultados ligeramente superiores que \textit{SmartBuildSkip}.
 Actualmente, el modelo se equivoca prediciendo como \textit{build failures} una cantidad elevada
 de \textit{builds} que en realidad no lo son. Debemos recordar que, en este escenario, el modelo
 tiene muy pocas instancias positivas de las que aprender, haciendo este proceso de aprendizaje
-más complicado. Aún así, \textit{JAES24-Without} es el que mejor se comporta en este aspecto.\\
+más complicado. Aún así, JAES24-\textit{Without} es el que mejor se comporta en este aspecto.\\
 
-Con el fin de validar los resultados obtenidos y clarificar cuál de las técnicas de \textit{JAES24}
+Con el fin de validar los resultados obtenidos y clarificar cuál de las técnicas de JAES24
 es la que mejor se comporta, vamos a realizar las mismas gráficas usando \textbf{\textit{key-fold
 cross-validation}} en lugar de \textit{train} y \textit{test}. Esta validación cruzada ha sido
 realizada usando un umbral de decisión de $0.5$ y $11$ particiones.
@@ -285,13 +285,13 @@ realizada usando un umbral de decisión de $0.5$ y $11$ particiones.
 
 Tras realizar validación cruzada sobre nuestro \textit{dataset} de proyectos difíciles, podemos
 observar en la Figura \ref{fig:key-fold_recall_difficult_projects} que los resultados varían
-ligeramente a los anteriores. En este caso, se observa claramente que \textit{JAES24-Within} es
+ligeramente a los anteriores. En este caso, se observa claramente que JAES24-\textit{Within} es
 la que mejor resultados obtiene en cuando a \textit{recall}. Ambas técnicas, tanto
-\textit{JAES24-Within} como \textit{JAES24-Without}, ofrecen mejores resultados que
-\textit{SmartBuildSkip}. Si comparamos únicamente las técnicas de \textit{JAES24}, podemos deducir
-que \textit{JAES24-Within} se comporta mejor en este \textit{dataset} de proyectos porque
+JAES24-\textit{Within} como JAES24-\textit{Without}, ofrecen mejores resultados que
+\textit{SmartBuildSkip}. Si comparamos únicamente las técnicas de JAES24, podemos deducir
+que JAES24-\textit{Within} se comporta mejor en este \textit{dataset} de proyectos porque
 probablemente exista un mayor número de \textit{build failures} de forma consecutiva, lo cual no
-quiere decir que \textit{JAES24-Without} sea peor, simplemente que en este contexto, \textit{JAES24-Within}
+quiere decir que JAES24-\textit{Without} sea peor, simplemente que en este contexto, JAES24-\textit{Within}
 se comporta mejor.\\
 
 \begin{figure}[H]
@@ -302,31 +302,31 @@ se comporta mejor.\\
 \end{figure}
 
 En la Figura \ref{fig:key-fold_precision_difficult_projects}, podemos observar resultados algo
-contradictorios, ya que en algunos casos \textit{SBS-Within} ofrece mejores resultados para
-el \textit{precision}, mientras que en otros, \textit{JAES24-Without} es el que mejor se comporta.
-Sin embargo, en más de la mitad de los proyectos seleccionados, \textit{JAES24-Without} es el que
+contradictorios, ya que en algunos casos SBS-\textit{Within} ofrece mejores resultados para
+el \textit{precision}, mientras que en otros, JAES24-\textit{Without} es el que mejor se comporta.
+Sin embargo, en más de la mitad de los proyectos seleccionados, JAES24-\textit{Without} es el que
 mejores resultados ofrece para \textit{precision}.\\
 
-Si nos fijamos, a pesar de que \textit{JAES24-Within} ofrezca mejores resultados en \textit{recall},
-\textit{JAES24-Without} es el que mejor se comporta en \textit{precision}. Esto nos parece
+Si nos fijamos, a pesar de que JAES24-\textit{Within} ofrezca mejores resultados en \textit{recall},
+JAES24-\textit{Without} es el que mejor se comporta en \textit{precision}. Esto nos parece
 adelantar dos variantes del algoritmo muy interesantes:
 
 \begin{itemize}
-    \item \textit{JAES24-Within}: se trata de una técnica más agresiva en identificar fallos. Si
+    \item JAES24-\textit{Within}: se trata de una técnica más agresiva para identificar fallos. Si
     el desarrollador quiere asegurarse de predecir la mayor cantidad de fallos (aunque esto
     implique ejecutar \textit{builds} que en realidad no fallarán), esta técnica es la más
     adecuada.\\
 
-    \item \textit{JAES24-Without}: es una técnica más conservadora, pero cuando predice un fallo,
+    \item JAES24-\textit{Without}: es una técnica más conservadora, pero cuando predice un fallo,
     es más probable que sea correcto. Si el objetivo del desarrollador es minimizar falsas
     alarmas y tener predicciones más confiables, esta técnica es más adecuada.
 \end{itemize}
 
 La decisión de utilizar una u otra técnica dependerá de las necesidades del proyecto y del
 desarrollador. Si la prioridad es detectar el mayor número de fallos posibles, incluso a costa de
-más falsos positivos, \textit{JAES24-Within} es la mejor opción. Si la prioridad es minimizar
+más falsos positivos, JAES24-\textit{Within} es la mejor opción. Si la prioridad es minimizar
 falsas alarmas y asegurar que cuando se predice un fallo, realmente ocurra, entonces
-\textit{JAES24-Without} es la mejor opción.\\
+JAES24-\textit{Without} es la mejor opción.\\
 
 
 \subsubsection{Escenario 2 - Proyectos normales.} Evaluación comparativa de las tres técnicas
@@ -336,35 +336,35 @@ de $0.5$, el valor por defecto.
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.7\textwidth]{images/Normal projects: Recall.pdf}
-    \caption{Recall en proyectos normales.}
+    \caption{\textit{Recall} en proyectos normales.}
     \label{fig:train_test_recall_normal_projects}
 \end{figure}
 
 Observando los resultados obtenidos en la Figura \ref{fig:train_test_recall_normal_projects},
 vemos que las tres técnicas se comportan mucho mejor que en el Escenario $1$. En este caso,
 los modelos tienen una mayor cantidad de \textit{build failures} sobre los que aprender, lo que
-hace más sencillo el proceso de aprendizaje. A simple vista, parece que \textit{JAES24-Without}
+hace más sencillo el proceso de aprendizaje. A simple vista, parece que JAES24-\textit{Without}
 es la que mejor resultados ofrece, siendo superior el \textit{recall} en ocho de los diez
-proyectos evaluados. En el proyecto \textit{skywalking}, vemos que \textit{JAES24-Within} ofrece
+proyectos evaluados. En el proyecto \textit{skywalking}, vemos que JAES24-\textit{Within} ofrece
 mejores resultados y, en el proyecto \textit{bookkeeper}, el que mayor número de \textit{build
-failures} posee, \textit{SBS-Within} es el que mejor se comporta. Por lo general, vemos que
-\textit{JAES24}, en cualquiera de sus dos variantes, ofrece mejores resultados que
+failures} posee, SBS-\textit{Within} es el que mejor se comporta. Por lo general, vemos que
+JAES24, en cualquiera de sus dos variantes, ofrece mejores resultados que
 \textit{SmartBuildSkip}.
 
 \begin{figure}
     \centering
     \includegraphics[width=0.7\textwidth]{images/Normal projects: Precision.pdf}
-    \caption{Precision en proyectos normales.}
+    \caption{\textit{Precision} en proyectos normales.}
     \label{fig:train_test_precision_normal_projects}
 \end{figure}
 
 Analizando los resultados de \textit{precision} obtenidos en la Figura
-\ref{fig:train_test_precision_normal_projects}, vemos que \textit{JAES24-Without} es el que mejor
+\ref{fig:train_test_precision_normal_projects}, vemos que JAES24-\textit{Without} es el que mejor
 resultados ofrece, siendo superior en seis de los diez proyectos evaluados. En otros casos, como
 en \textit{spring-security}, \textit{nifi} e \textit{incubator-streampark} es superior 
-\textit{JAES24-Within}. Este comportamiento indica que \textit{JAES24-Within} es más preciso
+JAES24-\textit{Within}. Este comportamiento indica que JAES24-\textit{Within} es más preciso
 a la hora de predecir \textit{build failures} en los proyectos mencionados anteriormente, es decir, 
-predice menor cantidad de falsos positivos que \textit{JAES24-Without}.\\
+predice menor cantidad de falsos positivos que JAES24-\textit{Without}.\\
 
 Con el objetivo de evaluar el rendimiento de manera más robusta y confiable, se ha realizado
 \textit{key-fold cross-validation} también en este escenario. Esto evita el sobreajuste y
@@ -375,7 +375,7 @@ umbral de decisión, $0.5$ y, con $11$ particiones.
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.7\textwidth]{images/Normal projects: Recall key-fold cross validation.pdf}
-    \caption{Recall en proyectos normales usando validación cruzada.}
+    \caption{\textit{Recall} en proyectos normales usando validación cruzada.}
     \label{fig:key-fold_recall_normal_projects}
 \end{figure}
 
@@ -383,33 +383,33 @@ Observando los resultados obtenidos en la Figura \ref{fig:key-fold_recall_normal
 que se obtienen resultados bastante superiores a \textit{SmartBuildSkip}, siendo este enfoque
 mucho más efectivo en escenarios donde el número de \textit{build features} es más elevado. Podemos
 ver claramente como en casi todos los proyectos (salvo uno) los valores de \textit{recall} de
-\textit{JAES24} superan a \textit{SmartBuildSkip}. Realizando una comparación entre las técnicas
-de \textit{JAES24}, en los seis primeros proyectos, \textit{JAES-Without} detecta mayor número
-de \textit{build failures}, mientras que en los cuatro restantes, \textit{JAES24-Within} ofrece
+JAES24 superan a \textit{SmartBuildSkip}. Realizando una comparación entre las técnicas
+de JAES24, en los seis primeros proyectos, \textit{JAES-Without} detecta mayor número
+de \textit{build failures}, mientras que en los cuatro restantes, JAES24-\textit{Within} ofrece
 mejores resultados.\\
 
 Esto nos vuelve a confirmar que la elección de una u otra técnica puede depender de los hábitos
-de \textit{CI} del proyecto. Si en el proyecto detectamos que normalmente se producen fallos
+de CI del proyecto. Si en el proyecto detectamos que normalmente se producen fallos
 de forma consecutiva, será más apropiado utilizar como técnica de predicción
-\textit{JAES24-Within}, ya que esta garantiza que al encontrar un primer fallo (\textit{first
+JAES24-\textit{Within}, ya que esta garantiza que al encontrar un primer fallo (\textit{first
 failure}), se prediga de forma automática que la siguiente \textit{build} no pasará. En cambio,
 si detectamos que normalmente los \textit{build failures} se producen de forma más aleatoria en
-el conjunto de \textit{builds}, será más apropiado utilizar \textit{JAES24-Without}.
+el conjunto de \textit{builds}, será más apropiado utilizar JAES24-\textit{Without}.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.7\textwidth]{images/Normal projects: Precision key-fold cross validation.pdf}
-    \caption{Precision en proyectos normales usando validación cruzada.}
+    \caption{\textit{Precision} en proyectos normales usando validación cruzada.}
     \label{fig:key-fold_precision_normal_projects}
 \end{figure}
 
 Finalmente, en la Figura \ref{fig:key-fold_precision_normal_projects}, vemos que se produce una
 tendencia algo distinta a la observada en el Escenario $1$. En este caso, vemos que igualmente
-ambas técnicas superan a \textit{SmartBuildSkip}, sin embargo, \textit{JAES24-Within} es la que
+ambas técnicas superan a \textit{SmartBuildSkip}, sin embargo, JAES24-\textit{Within} es la que
 mejores resultados ofrece en cuanto a \textit{precision}, siendo superior en siete de los diez
 proyectos evaluados. Por lo tanto, tenemos que en este \textit{dataset} de proyectos normales, la
-técnica \textit{JAES24-Within} es más conservadora, ya que ofrece menos \textit{recall} a cambio
-de aumentar el \textit{precision} y, \textit{JAES24-Without} es más agresiva, ya que ofrece más
+técnica JAES24-\textit{Within} es más conservadora, ya que ofrece menos \textit{recall} a cambio
+de aumentar el \textit{precision} y, JAES24-\textit{Without} es más agresiva, ya que ofrece más
 \textit{recall} a cambio de disminuir el \textit{precision}.\\
 
 Los resultados obtenidos en este apartado confirman que las \textit{features} que capturan el
@@ -420,7 +420,7 @@ significativas que otras \textit{features} evaluadas en otras técnicas \cite{2}
 características ofrecen una mayor capacidad predictiva, lo que sugiere que el momento en el que
 se ejecuta la \textit{build} y el tipo de modificaciones introducidas tienen un impacto directo
 en la probabilidad de que se produzcan \textit{build failures}. Este hallazgo subraya la
-importancia de considerar no solo aspectos técnicos del código, sino también el contexto temporal
+importancia de considerar, no solo aspectos técnicos del código, sino también el contexto temporal
 y la naturaleza de los cambios realizados.\\
 
 \begin{mdframed}[backgroundcolor=gray!10,linewidth=0.5pt,roundcorner=1pt]
@@ -430,9 +430,9 @@ y la naturaleza de los cambios realizados.\\
 Para responder a esta pregunta de investigación, hemos aplicado un enfoque basado en el análisis
 de importancia de características, utilizando dos algoritmos de clasificación diferentes:
 árboles de decisión y bosques aleatorios, que son los usados por las dos técnicas propuestas en
-este estudio, \textit{JAES24} y, \textit{SmartBuildSkip}, respectivamente. Para ello, hemos
+este estudio de JAES24 y, \textit{SmartBuildSkip}, respectivamente. Para ello, hemos
 considerado el conjunto completo de \textit{features} disponibles de la Tabla \ref{tab:features}
-y, hemos calculado la importancia de cada una de ellas para cada proyecto. Posteriormente, hemos
+y hemos calculado la importancia de cada una de ellas para cada proyecto. Posteriormente, hemos
 calculado la media de la importancia de cada \textit{feature} en cada algoritmo de clasificación,
 obteniendo así una visión general de cuáles son las \textit{features} más significativas en la
 predicción.\\
@@ -487,9 +487,83 @@ una \textit{build} propuesta como \textit{pass}, esta realmente lo será (Secci�
 \ref{sec:features_used}), no ofrece garantías de que el modelo sea efectivo en un caso de uso
 real para la predicción.\\
 
-Finalmente, podemos concluir que, efectivamente, las \textit{features} PL, PS y FD son las que
+Podemos concluir que, las \textit{features} PL, PS y FD son las que
 más influencia tienen a la hora de predecir \textit{build failures}, sin embargo, no son del
 todo aplicables a la hora de realizar una predicción en un caso de uso real. Por otro lado, vemos
-que \textit{features} que describen el \textit{timing} en el que se realiza la contribución y,
+que \textit{features} que describen el \textit{timing} en el que se realiza la contribución y
 las que describen los cambios realizados, son también importantes para la predicción, confirmando
-una vez más nuestra hipótesis inicial.
+una vez más nuestra hipótesis inicial.\\
+
+Finalmente, con el objetivo de contrastar más los resultados y confirmar nuestra hipótesis inicial,
+veamos la distribución temporal de \textit{build failures} en el conjunto de repositorios
+estudiados:
+
+\begin{table}[H]
+    \centering
+    \caption{Distribución temporal de los \textit{build failures}.}
+    \label{tab:distribution_build_failures}
+
+    \begin{tabular}{|>{\centering\arraybackslash}m{3cm}|>{\centering\arraybackslash}m{3cm}|>{\centering\arraybackslash}m{3cm}|>{\centering\arraybackslash}m{3cm}|} % Encabezados centrados
+        \hline
+        \textbf{\textit{Día de la semana}} & \textbf{\textit{Builds} ejecutadas} & \textbf{\textit{Builds} fallidas} & \textbf{Proporción de \textit{builds} fallidas}\\
+        \hline
+        Lunes & 18222 & 836 & 4.59\%\\
+        \hline
+        Martes & 17447 & 853 & 4.89\%\\
+        \hline
+        Miércoles & 16690 & 825 & 4.94\% \\
+        \hline
+        Jueves & 16687 & 877 & 5.26\%\\
+        \hline
+        Viernes & 15043 & 818 & 5.44\%\\
+        \hline
+        Sábado & 7510 & 420 & 5.59\%\\
+        \hline
+        Domingo & 7235 & 376 & 5.19\%\\
+        \hline
+    \end{tabular}
+\end{table}
+
+Estos resultados confirman nuestra hipótesis inicial de que el \textit{timing} en el que se quiere
+realizar la contribución juega un papel importante para la predicción de \textit{build failures}.
+En la Tabla \ref{tab:distribution_build_failures} podemos observar que la proporción de \textit{build
+failures} producidos va aumentando conforme avanza la semana, siendo el viernes y el sábado los dos
+días en los que se producen más fallos en comparación con la cantidad de \textit{builds} ejecutadas.
+Esto puede deberse posiblemente a la prisa de los desarrolladores por completar las tareas antes
+del fin de semana o por la fatiga acumulada durante la semana laboral.
+
+\begin{table}[H]
+    \centering
+    \caption{Horas en las que se producen más \textit{build failures} para cada día.}
+    \label{tab:day_hour_build_failures}
+
+    \begin{tabular}{|>{\centering\arraybackslash}m{3cm}|>{\centering\arraybackslash}m{3cm}|} % Encabezados centrados
+        \hline
+        \textbf{\textit{Día de la semana}} & \textbf{Hora}\\
+        \hline
+        Lunes & 12:00\\
+        \hline
+        Martes & 18:00\\
+        \hline
+        Miércoles & 18:00\\
+        \hline
+        Jueves & 18:00\\
+        \hline
+        Viernes & 18:00\\
+        \hline
+        Sábado & 18:00\\
+        \hline
+        Domingo & 18:00\\
+        \hline
+    \end{tabular}
+\end{table}
+
+En la tabla \ref{tab:day_hour_build_failures}, podemos observar la hora para cada uno de
+los días de la semana en que se producen más \textit{build failures}. En este caso, vemos que la
+mayoría de fallos tienen lugar a las 18:00 de la tarde, lo cual puede ser bastante razonable,
+ya que es normalmente el final de jornada laboral y, muchos sistemas de CI están configurados
+para lanzar las \textit{builds} al final del día laboral. Además, normalmente, los desarrolladores
+suelen esperar al final de la jornada para ejecutar la CI, evitando tener que esperar al resultado
+de la ejecución de la misma. Por último, observamos que para los lunes, las 12:00 de la mañana es
+cuando se producen más fallos, lo cual puede deberse a cambios no ejecutados o menos revisados de
+la semana pasada, aunque las razones concretas requieren una mayor investigación.\\

@@ -194,11 +194,11 @@ hemos seguido los siguientes pasos:
     \item \textbf{Métricas de evaluación}: una vez realizadas las predicciones, hemos definido
     las métricas de evaluación, que nos ayudarán a determinar el rendimiento de nuestros modelos.
     Las métricas que hemos usado son: \textit{accuracy}, \textit{precision}, \textit{recall},
-    \textit{F1-score}, \textit{confusion matrix} y \textit{ROC curve}. Todas
+    \textit{F1-score}, \textit{confusion matrix} y ROC \textit{curve}. Todas
     ellas han sido descritas en la Sección \ref{sec:research_questions}, exceptuando el área
-    bajo la curva \textit{ROC} (\textit{Area Under the Curve, AUC}), que mide la capacidad de
+    bajo la curva ROC (\textit{Area Under the Curve}, AUC), que mide la capacidad de
     un modelo para distinguir entre clases positivas y negativas. Cuanto mayor sea el valor de
-    \textit{AUC}, mejor será el desempeño del modelo en la clasificación, ya que esta indica una
+    AUC, mejor será el desempeño del modelo en la clasificación, ya que esta indica una
     mayor capacidad para separar correctamente las clases.
 \end{enumerate}
 
@@ -316,7 +316,7 @@ de las \textit{features}, hay que tener en cuenta lo siguiente:
     \end{tabular}
     \begin{tabular}{|>{\raggedright\arraybackslash}m{3cm}|>{\raggedright\arraybackslash}m{4cm}|>{\raggedright\arraybackslash}m{7cm}|} % Contenido alineado a la izquierda en la esquina superior
         \hline
-        \multirow{4}{=}{Consideradas en SmartBuildSkip} & \textit{Number Commits} (NC) & El número de \textit{commits desde la última \textit{build}.} \\
+        \multirow{4}{=}{Consideradas y utilizadas en \textit{SmartBuildSkip} y JAES24} & \textit{Number Commits} (NC) & El número de \textit{commits desde la última \textit{build}.} \\
         \cline{2-3}
         & \textit{Files Changed} (FC) & El número de archivos modificados desde la última \textit{build}, incluyendo archivos añadidos, modificados y eliminados.\\
         \cline{2-3}
@@ -324,31 +324,31 @@ de las \textit{features}, hay que tener en cuenta lo siguiente:
         \cline{2-3}
         & \textit{Test Lines Changed} (LT) & El número de líneas de código de \textit{test} modificadas desde la última \textit{build}, incluyendo líneas añadidas y eliminadas.\\
         \Xhline{1pt}
-        \multirow{6}{=}{Consideradas en SmartBuildSkip pero no utilizadas} & \textit{Performance Short} (PS) & La proporción de \textit{builds} exitosas en las últimas cinco \textit{builds}.\\
+        \multirow{3}{=}{Consideradas en \textit{SmartBuildSkip}, pero no utilizadas} & \textit{Performance Short} (PS) & La proporción de \textit{builds} exitosas en las últimas cinco \textit{builds}.\\
         \cline{2-3}
         & \textit{Performance Long} (PL) & La proporción de \textit{builds} exitosas de todas las \textit{builds} previas.\\
         \cline{2-3}
-        & \textit{Time Frequency} (TF) & El intervalo de tiempo en horas desde la última \textit{build}.\\
-        \cline{2-3}
         & \textit{Failure Distance} (FD) & El número de \textit{builds} exitosas desde la última \textit{build} fallida.\\
+        \Xhline{1pt}
+        \multirow{3}{=}{Consideradas en \textit{SmartBuildSkip} y utilizadas en JAES24} & \textit{Time Frequency} (TF) & El intervalo de tiempo en horas desde la última \textit{build}.\\
         \cline{2-3}
         & \textit{Week Day} (WD) & El día de la semana en el que se ha ejecutado la \textit{build}.\\
         \cline{2-3}
         & \textit{Day Hour} (DH) & La hora del día en la que se ha ejecutado la \textit{build}.\\
         \Xhline{1pt}
-        \multirow{7}{=}{Nuevas consideradas en este estudio}& \textit{Files Added} (FA) & El número de archivos añadidos desde la última \textit{build}.\\
+        \multirow{5}{=}{Nuevas consideradas en este estudio, pero no utilizadas}& \textit{Files Added} (FA) & El número de archivos añadidos desde la última \textit{build}.\\
         \cline{2-3}
         & \textit{Files Modified} (FM) & El número de archivos modificados desde la última \textit{build}.\\
         \cline{2-3}
         & \textit{Files Removed} (FR) & El número de archivos modificados desde la última \textit{build}.\\
         \cline{2-3}
-        & \textit{Source Lines Removed} (LR) & El número de líneas de código eliminadas desde la última \textit{build}.\\
-        \cline{2-3}
-        & \textit{Source Lines Added} (LA) & El número de líneas de código añadidas desde la última \textit{build}.\\
-        \cline{2-3}
         & \textit{Unit Tests} (UT) & Si se han escrito pruebas unitarias desde la última \textit{build}.\\
         \cline{2-3}
         & \textit{Commit Delay} (CD) & El tiempo transcurrido en horas entre \textit{commits} de una misma \textit{build}.\\
+        \Xhline{1pt}
+        \multirow{2}{=}{Nuevas consideradas y utilizadas en este estudio} & \textit{Source Lines Removed} (LR) & El número de líneas de código eliminadas desde la última \textit{build}.\\
+        \cline{2-3}
+        & \textit{Source Lines Added} (LA) & El número de líneas de código añadidas desde la última \textit{build}.\\        
         \hline
         % Añade más filas según sea necesario
     \end{tabular}

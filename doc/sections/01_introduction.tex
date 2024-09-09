@@ -79,6 +79,22 @@ predicciones basadas en un repositorio concreto. Por lo tanto, este estudio se e
 desarrollo de \textit{software} moderno, específicamente en el ámbito de la Integración Continua y
 la predicción automática del resultado de dicha integración.\\
 
+Desde nuestra perspectiva, tenemos la intuición de que el momento en el que se realiza la
+contribución, así como los tipos de cambios introducidos en la base de código, podrían ser factores
+clave en la predicción del resultado de la integración. Consideramos que la utilización de
+\textbf{características que capturen el \textit{timing}} exacto de la contribución, junto con
+otras que \textbf{desglosen detalladamente los tipos de cambios} realizados, podría llevarnos a
+obtener mejores resultados en la predicción de \textit{builds} fallidas. Tenemos la hipótesis de
+que el momento en el que se lanza la CI puede ser decisivo en la predicción del resultado. Por
+ejemplo, pueden producirse mayor cantidad de fallos los lunes, cuando los desarrolladores regresan
+después del fin de semana y no están concentrados. También, puede que durante picos de actividad
+justo antes de un lanzamiento o durante periodos de alta presión, como el día de una entrega o en
+los últimos días de un \textit{sprint}, se produzcan más fallos. Estas suposiciones, no son
+arbitrarias, sino que existen estudios que indican que los viernes tienden a ser el día con mayor
+frecuencia de fallos, posiblemente debido a la prisa de los desarrolladores por completar las
+tareas antes del fin de semana o por la fatiga acumulada durante la semana laboral \cite{21}. En
+nuestro estudio, hemos encontrado evidencia que respalda esta hipótesis.\\
+
 La memoria queda organizada de la siguiente forma: en primer lugar, se realiza un estudio del
 estado del arte que sitúa los antecedentes previos a la Integración Continua y la predicción
 automática de resultados de \textit{builds}. Posteriormente, se establecen los objetivos y
