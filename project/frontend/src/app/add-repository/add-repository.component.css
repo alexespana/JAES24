@@ -1,0 +1,43 @@
+/* Styles for forms */
+form {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    padding: 10px;
+    font-size: medium;
+    border: 5px solid #180716;
+    border-radius: 10px;
+    box-sizing: border-box;
+    background-color: white;
+}
+
+.form-group {
+    margin: 10px;
+}
+
+.form-label {
+    color: black;
+    margin-bottom: 5px;
+    font-weight:lighter;
+}
+
+.form-control {
+    width: 100%;
+    padding: 12px 20px;
+    margin: 8px 0;
+    display: inline-block;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-right: 10px;
+}
+
+.btn-primary:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}

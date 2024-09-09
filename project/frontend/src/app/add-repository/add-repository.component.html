@@ -1,0 +1,13 @@
+<form [formGroup]="addRepositoryForm" (ngSubmit)="onSubmit()">
+  <div class="form-group">
+    <label for="repository" class="form-label">Repository: </label>
+    <input id="repository" type="text" class="form-control" formControlName="repository" placeholder="Repository URL">
+  </div>
+  <div class="form-group">
+    <label for="branch" class="form-label">Branch: </label>
+    <input id="branch" type="text" class="form-control" formControlName="branch" placeholder="Branch name">
+  </div>
+  <div class="form-actions">
+    <button type="submit" class="btn btn-primary" [disabled]="!addRepositoryForm.valid">Train model</button>
+  </div>
+</form>
