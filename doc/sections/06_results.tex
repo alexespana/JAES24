@@ -28,7 +28,7 @@ se describen las tres técnicas a comparar:
     otra en la que utiliza predicción mediante \textit{Machine Learning}.\\
 
     \item \textbf{JAES24-\textit{Within}}: técnica propuesta en este estudio que utiliza como modelo de
-    ML áboles de decisión. El algoritmo de predicción se basa en la implementación propuesta de
+    ML árboles de decisión. El algoritmo de predicción se basa en la implementación propuesta de
     \textit{SmartBuildSkip}, pero modificando el conjunto de \textit{features} empleado: TF, NC,
     FC, LC, LA, LR, LT, WD y DH, el cual captura eventos temporales al realizar las \textit{builds}
     y desgrana los cambios realizados en la misma. Además, en este algoritmo se realiza la
@@ -179,17 +179,17 @@ ellas en el procedimiento de \textbf{entrenamiento y prueba}:
     \item \textit{Accuracy}: a partir de las predicciones realizadas por el modelo para el
     conjunto de \textit{test} (que supone el $20\%$ de las \textit{builds}), se calcula a
     partir de los valores de las etiquetas reales de las \textit{builds} y las predicciones
-    realizadas por el modelo \eqref{eq:accuracy}.\\
+    realizadas por el modelo (Ecuación \eqref{eq:accuracy}).\\
 
     \item \textit{Precision}: a partir de las etiquetas reales del conjunto de \textit{test} y
     las etiquetas predichas por el algoritmo, se calcula la precisión del modelo
-    \eqref{eq:precision}. Hemos tenido que indicar cuál es la clase positiva en nuestro problema
+    (Ecuación \eqref{eq:precision}). Hemos tenido que indicar cuál es la clase positiva en nuestro problema
     (clase 0) e incluir el valor por defecto que asigna cuando se produce una división entre $0$,
     en el caso de que la suma de verdaderos positivos y falsos positivos sea $0$.\\
 
     \item \textit{Recall}: a partir de las etiquetas reales del conjunto de \textit{test} y las
     etiquetas predichas por el algoritmo, se calcula el \textit{recall} del modelo
-    \eqref{eq:recall}. Al igual que en el caso de \textit{precision}, hemos tenido que indicar
+    (Ecuación  \eqref{eq:recall}). Al igual que en el caso de \textit{precision}, hemos tenido que indicar
     cuál es la clase positiva en nuestro problema (clase 0) para que el cálculo sea correcto y,
     añadir el valor por defecto en caso de división entre $0$, en este caso, cuando la suma de
     verdaderos positivos y falsos negativos sea $0$.\\
@@ -245,7 +245,7 @@ de $0.5$, el valor por defecto.\\
     \label{fig:train_test_recall_difficult_projects}
 \end{figure}
 
-En la figura \ref{fig:train_test_recall_difficult_projects}, podemos observar los valores de
+En la Figura \ref{fig:train_test_recall_difficult_projects}, podemos observar los valores de
 \textit{recall} obtenidos en los proyectos difíciles. Como vemos, no se han obtenido valores
 demasiado altos, sin embargo, en prácticamente todos los proyectos, JAES24 ha obtenido
 mejores resultados que \textit{SmartBuildSkip}. A simple vista, parece que JAES24-\textit{Without}
@@ -476,7 +476,7 @@ observamos lo siguiente:
 \end{itemize}
 
 Cabe destacar que, apesar de que las \textit{features} que más importancia tienen a la hora de
-predecir \textit{build failures} son el PS, PL Y FD, estas \textit{features} no se han utilizado
+predecir \textit{build failures} son el PS, PL y FD, estas \textit{features} no se han utilizado
 en nuestro enfoque. Esto se debe a que, en un caso de uso real, si nos encontramos utilizando
 un modelo predictivo para decidir si saltar o no una \textit{build}, estas \textit{features} no
 podrán calcularse de forma exacta, ya que no conocemos el resultado de aquellas \textit{builds}
@@ -558,7 +558,7 @@ del fin de semana o por la fatiga acumulada durante la semana laboral.
     \end{tabular}
 \end{table}
 
-En la tabla \ref{tab:day_hour_build_failures}, podemos observar la hora para cada uno de
+En la Tabla \ref{tab:day_hour_build_failures}, podemos observar la hora para cada uno de
 los días de la semana en que se producen más \textit{build failures}. En este caso, vemos que la
 mayoría de fallos tienen lugar a las 18:00 de la tarde, lo cual puede ser bastante razonable,
 ya que es normalmente el final de la jornada laboral y, muchos sistemas de CI están configurados
