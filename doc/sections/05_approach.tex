@@ -68,7 +68,7 @@ algoritmos de clasificación supervisada, entre los que nos encontramos:
     clasificación que se utiliza para predecir la probabilidad de que una variable dependiente
     pertenezca a una categoría particular. Aunque se llama regresión, en realidad es un algoritmo
     de clasificación binaria.\\
-    \item \textbf{Máquinas de Soporte Vectorial (\textit{Support Vector Machines}, SVM)}. Es un
+    \item \textbf{Máquinas de Vectores de Soporte (\textit{Support Vector Machines}, SVM)}. Es un
     algoritmo de clasificación que busca encontrar el hiperplano que mejor divide un conjunto de
     datos en dos clases. El hiperplano es la línea que maximiza el margen entre las dos clases. Si
     los datos no son linealmente separables, se puede utilizar un truco matemático llamado
@@ -147,13 +147,13 @@ se han definido todos los algoritmos con los parámetros por defecto de la bibli
     estrategia útil para entrenar un modelo que sea más sensible en la detección de
     \textit{builds failures}, a pesar de ser poco numerosas. Para ello, se ha definido un peso de
     20:1 a favor de las \textit{build failures} en Árbol de Decisión, Bosque Aleatorio, Regresión
-    Logística y Máquinas de Soporte Vectorial.\\
+    Logística y Máquinas de Vectores de Soporte.\\
 
 	\item En Regresión Logística, se establece el número máximo de iteraciones que el algoritmo de
     optimización realizará antes de detenerse. En este caso se utiliza el valor $15000$ para
     asegurar que el algoritmo tenga suficiente tiempo para converger.\\
 
-	\item En el algoritmo de Máquinas de Soporte Vectorial, hemos añadido el hiperparámetro que
+	\item En el algoritmo de Máquinas de Vectores de Soporte, hemos añadido el hiperparámetro que
     habilita el cálculo de probabilidades de pertenencia a cada clase. Cuando el parámetro
     \textit{probability} está habilitado, el modelo ajusta de manera interna un modelo de
     probabilidad, permitiendo que las salidas del modelo sean las etiquetas de clase y sus
@@ -408,7 +408,7 @@ debemos tener en cuenta los siguientes aspectos:
     En nuestro caso, hemos utilizado un tipo de normalización u otro en función del modelo de
     clasificación que estemos utilizando. Por ejemplo, hemos usado normalización \textit{Min-Max}
     para $k$ vecinos más cercanos y para redes neuronales, y normalización \textit{Z-score} para
-    regresión logística y máquinas de soporte vectorial. Además, queda añadir que no se ha
+    regresión logística y máquinas de vectores de soporte. Además, queda añadir que no se ha
     utilizado normalización en árboles de decisión ni en bosques aleatorios, ya que estos modelos
     crean reglas basadas en comparaciones entre valores de las características y no en sus
     magnitudes, lo que hace que la escala de las características no afecte a su rendimiento.
