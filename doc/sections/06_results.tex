@@ -5,7 +5,7 @@ para validar y verificar la implementación descrita en apartados anteriores. Es
 la explicación en detalle de todo el diseño experimental llevado a cabo, incluyendo las técnicas
 a comparar, la descripción del \textit{dataset} utilizado para la experimentación, el
 procedimiento seguido para realizar el entrenamiento y prueba de los modelos, incluyendo el
-\textit{key-fold cross-validation}, la descripción del cálculo de las distintas métricas de
+\textit{k-fold cross-validation}, la descripción del cálculo de las distintas métricas de
 evaluación y, finalmente, los resultados obtenidos y su correspondiente análisis. Además, en esta
 última sección, se dará respuesta a las preguntas de investigación planteadas en la Sección
 \ref{sec:research_questions}, lo que constituye el objetivo principal de este estudio.
@@ -148,8 +148,8 @@ conjunto de datos de prueba.\\
     Además, para realizar este entrenamiento y prueba, se ha escogido el umbral de decisión
     por defecto, con valor $0.5$.\\
 
-    \item \textbf{Key-fold cross-validation}: se ha utilizado la técnica de validación cruzada
-    \textit{key-fold cross-validation} para evaluar el rendimiento de los modelos de clasificación
+    \item \textbf{K-fold cross-validation}: se ha utilizado la técnica de validación cruzada
+    \textit{k-fold cross-validation} para evaluar el rendimiento de los modelos de clasificación
     propuestos. Para cada proyecto, se han seleccionado sus \textit{builds} y se han creado $11$
     subconjuntos a partes iguales. A continuación, se ha realizado la validación cruzada de
     la siguiente forma: se han ido seleccionando los \textit{folds} de forma acumulativa para
@@ -201,7 +201,7 @@ ellas en el procedimiento de \textbf{entrenamiento y prueba}:
     además de indicar cuál es la clase positiva y el valor en caso de división entre $0$.\\
 \end{itemize}
 
-En el caso de \textbf{\textit{key-fold cross-validation}}, el cálculo en sí de estas métricas
+En el caso de \textbf{\textit{k-fold cross-validation}}, el cálculo en sí de estas métricas
 es similar al descrito anteriormente, con la característica de que por cada \textit{fold} de
 \textit{test} evaluado, se almacenan las predicciones, hasta que finalmente se tengan los
 resultados de $k-1$ \textit{folds}, en este caso $10$ folds. Una vez obtenidos estos resultados,
@@ -210,7 +210,7 @@ estos serían las etiquetas predichas por el algoritmo.
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.9\textwidth]{images/Folds predictions.pdf}
-    \caption{Acumulación de predicciones en \textit{key-fold cross-validation}.}
+    \caption{Acumulación de predicciones en \textit{k-fold cross-validation}.}
     \label{fig:fold-predictions}
 \end{figure}
 
@@ -272,7 +272,7 @@ tiene muy pocas instancias positivas de las que aprender, haciendo este proceso 
 más complicado. Aún así, JAES24-\textit{Without} es el que mejor se comporta en este aspecto.\\
 
 Con el fin de validar los resultados obtenidos y clarificar cuál de las técnicas de JAES24
-es la que mejor se comporta, vamos a realizar las mismas gráficas usando \textbf{\textit{key-fold
+es la que mejor se comporta, vamos a realizar las mismas gráficas usando \textbf{\textit{k-fold
 cross-validation}} en lugar de \textit{train} y \textit{test}. Esta validación cruzada ha sido
 realizada usando un umbral de decisión de $0.5$ y $11$ particiones.
 
@@ -367,7 +367,7 @@ a la hora de predecir \textit{build failures} en los proyectos mencionados anter
 predice menor cantidad de falsos positivos que JAES24-\textit{Without}.\\
 
 Con el objetivo de evaluar el rendimiento de manera más robusta y confiable, se ha realizado
-\textit{key-fold cross-validation} también en este escenario. Esto evita el sobreajuste y
+\textit{k-fold cross-validation} también en este escenario. Esto evita el sobreajuste y
 garantiza que los resultados no dependan únicamente de una partición específica del conjunto
 de datos. Para realizar una comparación justa entre escenarios, se ha realizado con el mismo
 umbral de decisión, $0.5$ y, con $11$ particiones.
