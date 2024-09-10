@@ -238,12 +238,12 @@ prueba. Finalmente, dado que se habrán obtenido 10 resultados de las métricas 
 promedian para obtener una estimación más precisa del rendimiento del modelo.\\
 
 A continuación, se presenta de forma gráfica el funcionamiento de nuestro algoritmo de
-\textit{key-fold cross validation}:
+\textit{k-fold cross-validation}:
 
 \begin{figure}[H]
     \centering
-    \includegraphics[scale=0.5]{images/Cross validation.pdf}
-    \caption{Funcionamiento de la técnica \textit{key-fold cross validation}.}
+    \includegraphics[scale=0.5]{images/cross validation.pdf}
+    \caption{Funcionamiento de la técnica \textit{k-fold cross-validation}.}
     \label{fig:confusion_matrix}
 \end{figure}
 
@@ -276,12 +276,13 @@ la probabilidad de que una \textit{build} falle es igual o mayor a $0.5$, se pre
 \textit{build} es exitosa, mientras que si es menor a $0.5$, se predecirá que la \textit{build}
 falla.\\
 
-En nuestra implementación, hemos evaluado el rendimiento de todos los modelos y variantes del
-mismo para valores del umbral de decisión comprendidos en el intervalo $[0, 1]$. Para ello, se
-han calculado las métricas de evaluación para cada valor del umbral y se han representado en
-gráficos para poder comparar el rendimiento de los modelos en función del umbral de decisión. De
-esta forma, se ha podido determinar cuál de los modelos es el que mejor rendimiento ofrece y cuál
-de las implementaciones es la que mejor resultado proporciona.
+En nuestra implementación, hemos analizado el rendimiento de todos los modelos y sus variantes
+para diferentes valores del umbral de decisión dentro del rango $[0, 1]$. Para ello, hemos
+calculado las métricas de evaluación en cada valor del umbral, lo que nos ha permitido identificar
+cuál de los algoritmos de clasificación ofrece el mejor rendimiento. Como resultado de este
+análisis, hemos determinado que el modelo basado en \textbf{árboles de decisión} es el que obtiene los
+mejores resultados en términos de \textit{precision} y \textit{recall}. Por lo tanto, este será
+el algoritmo de clasificación predeterminado que utilizará JAES24.
 
 
 \subsection{\textit{Features} empleadas}\label{sec:features_used}
@@ -355,11 +356,14 @@ de las \textit{features}, hay que tener en cuenta lo siguiente:
 \end{table}
 
 Como vemos en la Tabla \ref{tab:features}, las \textit{features} que se encuentran en la primera
-clasificación, son aquellas que realmente se han utilizado para el entrenamiento de los modelos
-en estudios previos \cite{2}. Las \textit{features} que se encuentran en la segunda clasificación
-son aquellas que se han considerado en SmartBuildSkip, pero que no se han llegado a utilizar para
-el entrenamiento de los modelos. Por último, las que se encuentran en la tercera clasificación son
-\textit{features} nuevas propuestas en este estudio.\\
+clasificación, son aquellas que han sido consideradas en \textit{SmartBuildSkip} \cite{2} y que
+han sido utilizadas tanto en él, como en nuestro enfoque, JAES24. Las \textit{features} que se
+encuentran en la segunda clasificación, fueron consideradas en \textit{SmartBuildSkip}, pero
+finalmente no fueron utilizadas. Continuando con la clasificación, las features que se encuentran
+en la tercera división, fueron consideradas por \textit{SmartBuildSkip} por primera vez, pero solo
+utilizadas en JAES24. Finalmente, en las dos últimas clasificaciones, se presentan
+\textit{features} nuevas consideradas en este estudio, teniendo que únicamente fueron utilizadas
+las de la última clasificación.\\
 
 \noindent Para el cálculo de las \textit{features} mencionadas en la Tabla \ref{tab:features},
 debemos tener en cuenta los siguientes aspectos:
@@ -414,6 +418,31 @@ debemos tener en cuenta los siguientes aspectos:
     magnitudes, lo que hace que la escala de las características no afecte a su rendimiento.
 \end{itemize}
 
+En el proceso de selección de \textit{features} para nuestro modelo de clasificación, se ha
+realizado un análisis exhaustivo de las variables disponibles, con el objetivo de optimizar el
+rendimiento, reducir la complejidad y mejorar la generalización del modelo. Tras evaluar diversas
+combinaciones de \textit{features} y analizar su impacto en las métricas de evaluación, se ha
+seleccionado el subconjunto de \textit{features} \textbf{TF}, \textbf{NC}, \textbf{FC},
+\textbf{LC}, \textbf{LA}, \textbf{LR}, \textbf{LT}, \textbf{WD} y \textbf{DH}. Las razones para
+su selección son:
+ 
+\begin{enumerate}
+	\item \textbf{Mejora del rendimiento del modelo}: el subconjunto de \textit{features} elegido
+    demostró una clara mejora en el rendimiento del modelo. Las métricas de evaluación mejoraron
+    en términos de \textit{precision} y \textit{recall}.\\
+
+	\item \textbf{Reducción de la complejidad}: la selección de este subconjunto reduce la
+    complejidad del problema, lo que nos permite simplificar tanto el entrenamiento del modelo
+    como su interpretación. Además, la utilización de un número excesivo de \textit{features}
+    resultaba en la adición de ruido al problema.\\
+
+	\item \textbf{Relevancia de las \textit{features}}: las \textit{features} seleccionadas no
+    solo ofrecen mejores resultados desde el punto de vista cuantitativo, sino que tienen sentido
+    desde nuestra perspectiva práctica. La captura del momento en el que se realiza la
+    contribución, junto al desgranado de los cambios realizados, tienen relevancia en
+    la predicción.\\
+\end{enumerate}
+
 \subsubsection{Cáculo de \textit{features} durante la predicción.} Para comprender bien este
 punto, vamos a diferenciar dos conceptos fundamentales: la \textbf{\textit{build} propuesta} y la
 \textbf{\textit{build} ejecutada}. La \textit{build} propuesta es aquella que se desea predecir,
@@ -446,21 +475,21 @@ mencionadas anteriormente:
 
 \begin{figure}[H]
     \centering
-    \includegraphics[scale=0.9]{images/PS.pdf}
+    \includegraphics[scale=0.8]{images/PS.pdf}
     \caption{Cáculo del \textit{Performance Short}.}
     \label{fig:PS}
 \end{figure}
 
 \begin{figure}[H]
     \centering
-    \includegraphics[scale=0.9]{images/PL.pdf}
+    \includegraphics[scale=0.8]{images/PL.pdf}
     \caption{Cáculo del \textit{Performance Long}.}
     \label{fig:PL}
 \end{figure}
 
 \begin{figure}[H]
     \centering
-    \includegraphics[scale=0.9]{images/FD.pdf}
+    \includegraphics[scale=0.8]{images/FD.pdf}
     \caption{Cáculo del \textit{Failure Distance}.}
     \label{fig:FD}
 \end{figure}
