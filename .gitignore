@@ -175,3 +175,6 @@ project/backend/features
 # Any svg image
 *.svg
 
+# The project PDF
+doc/project.pdf
+

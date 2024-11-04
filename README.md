@@ -18,19 +18,16 @@ This study is framed within modern software development, specifically in the rea
 
 ## Objectives :dart:
 The main objective of this Master's Final Project is to develop a predictive algorithm that utilizes artificial intelligence to predict whether a specific commit will pass the continuous integration phase in a project hosted on GitHub. To achieve this goal, the following sub-objectives are proposed:
-
-- OB-01: Implement a machine learning algorithm that generates a predictive model (a predictor) based on a set of features extracted from commits.
-- OB-02: Utilize the GitHub API to obtain relevant data about the commits, such as their history, associated characteristics, and previous continuous integration results.
-- OB-03: Develop and implement different prediction algorithms with the selection of different features aiming to provide multiple options for predicting the outcome of continuous integration.
-- OB-04: Implement a mechanism to extract human-understandable information from the predictions made by the artificial intelligence algorithms.
-- OB-05: Develop a web application to analyze and present visualizations to the user about the factors influencing the prediction made by the algorithm.
-
-This last objective will help us focus on how to present the results in a way that is understandable and useful for end users, which will be crucial for the success and adoption of the application.
+- **OB-01**: Implement a machine learning algorithm that generates a predictive model (a predictor) based on a set of features extracted from the builds.
+- **OB-02**: Use the GitHub API to retrieve relevant data about the builds, such as their history, associated features, and previous continuous integration results.
+- **OB-03**: Develop and implement different prediction algorithms with the selection of various features, aiming to provide multiple options when predicting the outcome of continuous integration.
+- **OB-04**: Implement a graphical interface that serves as a data input point for the prediction algorithm and allows visualization of the obtained results.
 
 In order to structure and guide the research process, research questions are established that the study aims to answer:
-
-- PI-01: What characteristics of the commits and which prediction algorithm produce the best results in the automatic prediction of the continuous integration outcome?
-- PI-02: What form of presenting the results of automatic predictions of the continuous integration outcome is most valued by users?
+- **PI-01**: Which prediction algorithm produces the best results in the automatic prediction of continuous integration outcomes?
+    - **Metric**: Accuracy, precision, recall, and F1-score of the model.
+- **PI-02**: Which features of the builds are most significant in the prediction?
+    - **Metric**: Importance of each feature through the interpretation of the model coefficients.
 
 ## Installation procedure :wrench:
 ### Tune-up :gear:
@@ -39,13 +36,13 @@ To run the project, you need to have Docker installed on your machine. You can d
 After installing Docker, you must clone the repository to your machine using the following command:
 
 ```bash
-git clone https://github.com/alexespana/TFM.git
+git clone https://github.com/alexespana/JAES24.git
 ```
 
 Then, navigate to the project directory and execute the following command to create the necessary environment files:
 
 ```bash
-cd TFM/project
+cd JAES24/project
 ```
 
 ```bash

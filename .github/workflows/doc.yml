@@ -18,3 +18,9 @@ jobs:
           working_directory: doc/
           root_file: project.tex
           latexmk_shell_escape: true
+
+      - name: Upload PDF Artifact
+        uses: actions/upload-artifact@v4.4.3
+        with:
+          name: LaTeX-Documentation
+          path: doc/project.pdf
