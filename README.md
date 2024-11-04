@@ -1,4 +1,10 @@
 # Automatic prediction of continuous integration outcome in modern software development
+
+<p align="center">
+<a href="https://github.com/alexespana/JAES24/actions/workflows/build.yml"><img src="https://github.com/alexespana/JAES24/actions/workflows/build.yml/badge.svg" alt="Build Images"></a>
+<a href="https://github.com/alexespana/JAES24/actions/workflows/doc.yml"><img src="https://github.com/alexespana/JAES24/actions/workflows/doc.yml/badge.svg" alt="Build LaTeX documentation"></a>
+</p>
+
 ## Motivation :sparkles: and Problem Statement :warning:
 In the context of modern software development, Continuous Integration (CI) is a widely adopted practice that seeks to automate the process of integrating code changes into a project. Despite offering numerous advantages, implementing it entails significant costs that must be addressed to ensure long-term efficiency.
 
