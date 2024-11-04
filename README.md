@@ -3,6 +3,8 @@
 <p align="center">
 <a href="https://github.com/alexespana/JAES24/actions/workflows/build.yml"><img src="https://github.com/alexespana/JAES24/actions/workflows/build.yml/badge.svg" alt="Build Images"></a>
 <a href="https://github.com/alexespana/JAES24/actions/workflows/doc.yml"><img src="https://github.com/alexespana/JAES24/actions/workflows/doc.yml/badge.svg" alt="Build LaTeX documentation"></a>
+<a href="https://www.gnu.org/licenses/gpl-3.0"><img src="https://img.shields.io/badge/License-GPLv3-blue.svg" alt="Build LaTeX documentation"></a>
+<a href="https://creativecommons.org/licenses/by-nc-sa/4.0/"><img src="https://licensebuttons.net/l/by-nc-sa/4.0/80x15.png" alt="Build LaTeX documentation"></a>
 </p>
 
 ## Motivation :sparkles: and Problem Statement :warning:
@@ -84,3 +86,12 @@ To uninstall the project, you can execute the following script:
 ```bash
 sudo ./install.sh uninstall
 ```
+
+## License
+
+This repository contains both code and documentation, each with a different license:
+
+- **Code (in the `project` directory)**: Licensed under the [GNU General Public License v3.0 (GPL-3.0)](./LICENSE_CODE).
+- **Documentation (in the `doc` directory)**: Licensed under the [Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA 4.0)](./LICENSE_DOC).
+
+Please refer to each license file for specific terms and conditions.
