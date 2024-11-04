@@ -1,0 +1,22 @@
+name: Build images
+
+on:
+  push:
+    paths:
+      - '.github/workflows/build.yml'
+      - 'project/*'
+
+jobs:
+  build-images:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4.2.2
+
+      - name: Copy environment files
+        run: |
+          cp project/backend/.env.example project/backend/.env
+          cp project/frontend/.env.example project/frontend/.env
+        
+      - name: Build images
+        run: cd project && docker compose build

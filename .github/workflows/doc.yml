@@ -1,0 +1,20 @@
+name: Build LaTeX documentation
+on:
+  push:
+    paths:
+      - '.github/workflows/doc.yml'
+      - 'doc/**/*.tex'
+
+jobs:
+  build-latex:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4.2.2
+
+      - name: Github Action for LaTeX
+        uses: xu-cheng/latex-action@3.2.0  
+        with:
+          working_directory: doc/
+          root_file: project.tex
+          latexmk_shell_escape: true
